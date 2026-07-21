@@ -1,4 +1,4 @@
-depositor_id,depositor_name,latitude,longitude,average_volume
+collector_id,collector_name,latitude,longitude,average_volume
 DEP001,Penyetor 001,-6.1745,106.8227,145
 DEP002,Penyetor 002,-6.1812,106.8294,210
 DEP003,Penyetor 003,-6.1688,106.8351,175
