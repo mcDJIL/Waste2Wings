@@ -1,9 +1,10 @@
 fastapi
 uvicorn
-pandas
+pydantic
 numpy
+pandas
 scikit-learn
-matplotlib
 joblib
+python-multipart
 pytest
-jupyter
+httpx
