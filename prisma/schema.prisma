@@ -28,6 +28,13 @@ enum SubmissionStatus {
   COMPLETED
 }
 
+enum BatchStatus {
+  SUBMITTED_TO_STAKEHOLDER
+  LAB_REVIEW
+  ACCEPTED_BY_STAKEHOLDER
+  REJECTED_BY_STAKEHOLDER
+}
+
 model User {
   id                String            @id @default(cuid())
   name              String
@@ -68,6 +75,7 @@ model CollectorProfile {
   isActive        Boolean  @default(true)
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   submissions     CommunitySubmission[]
+  batches         CollectorBatch[]
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -91,6 +99,7 @@ model StakeholderSetting {
   longitude               Float
   updatedById             String
   updatedBy               User     @relation(fields: [updatedById], references: [id])
+  batches                 CollectorBatch[]
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 }
@@ -110,6 +119,38 @@ model CommunitySubmission {
   collectorNote      String?
   communityProfile   CommunityProfile @relation(fields: [communityProfileId], references: [id])
   collectorProfile   CollectorProfile @relation(fields: [collectorProfileId], references: [id])
+  batchItems          BatchItem[]
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
+}
+
+model CollectorBatch {
+  id                    String             @id @default(cuid())
+  collectorProfileId    String
+  stakeholderSettingId  String
+  batchCode             String             @unique
+  totalCleanLiter       Float
+  requestedPricePerLiter Float
+  estimatedTotalPrice   Float
+  status                BatchStatus        @default(SUBMITTED_TO_STAKEHOLDER)
+  finalLiter            Float?
+  finalTotalPrice       Float?
+  stakeholderNote       String?
+  collectorProfile      CollectorProfile   @relation(fields: [collectorProfileId], references: [id])
+  stakeholderSetting    StakeholderSetting @relation(fields: [stakeholderSettingId], references: [id])
+  items                 BatchItem[]
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+}
+
+model BatchItem {
+  id                  String              @id @default(cuid())
+  batchId             String
+  submissionId        String
+  cleanLiterAllocated Float
+  batch               CollectorBatch      @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  submission          CommunitySubmission @relation(fields: [submissionId], references: [id])
+  createdAt           DateTime            @default(now())
+
+  @@unique([batchId, submissionId])
 }
