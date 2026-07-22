@@ -1,6 +1,6 @@
 const ApiError = require('../utils/ApiError');
 const prisma = require('../prismaClient');
-const { ROLES, SUBMISSION_STATUS } = require('../utils/status');
+const { BATCH_STATUS, ROLES, SUBMISSION_STATUS } = require('../utils/status');
 
 function generateBatchCode() {
   const date = new Date();
@@ -24,6 +24,7 @@ function getBatchInclude() {
       },
     },
     stakeholderSetting: true,
+    labResult: true,
     items: {
       include: {
         submission: {
@@ -62,6 +63,7 @@ function toBatchResponse(batch) {
     stakeholderNote: batch.stakeholderNote,
     collector: batch.collectorProfile,
     stakeholderSetting: batch.stakeholderSetting,
+    labResult: batch.labResult,
     items: batch.items,
     createdAt: batch.createdAt,
     updatedAt: batch.updatedAt,
@@ -185,4 +187,66 @@ async function getBatchById(req, res, next) {
   }
 }
 
-module.exports = { createBatch, getBatchById, getBatches };
+async function validateBatchByStakeholder(req, res, next) {
+  try {
+    const { body } = req.validated;
+    const batch = await prisma.collectorBatch.findUnique({
+      where: { id: req.params.id },
+      include: {
+        labResult: true,
+        items: true,
+      },
+    });
+
+    if (!batch) {
+      throw new ApiError(404, 'Batch not found');
+    }
+
+    if (![BATCH_STATUS.SUBMITTED_TO_STAKEHOLDER, BATCH_STATUS.LAB_REVIEW].includes(batch.status)) {
+      throw new ApiError(400, 'Only submitted or lab review batches can be validated');
+    }
+
+    if (!batch.labResult) {
+      throw new ApiError(400, 'Lab result is required before stakeholder validation');
+    }
+
+    const isAccepted = body.status === BATCH_STATUS.ACCEPTED_BY_STAKEHOLDER;
+    const finalLiter = isAccepted ? body.finalLiter : null;
+
+    if (isAccepted && finalLiter > batch.totalCleanLiter) {
+      throw new ApiError(400, 'Final liter cannot exceed total clean liter');
+    }
+
+    const updatedBatch = await prisma.$transaction(async (tx) => {
+      const savedBatch = await tx.collectorBatch.update({
+        where: { id: batch.id },
+        data: {
+          status: body.status,
+          finalLiter,
+          finalTotalPrice: isAccepted ? finalLiter * batch.requestedPricePerLiter : null,
+          stakeholderNote: body.stakeholderNote,
+        },
+      });
+
+      if (isAccepted) {
+        await tx.communitySubmission.updateMany({
+          where: {
+            id: { in: batch.items.map((item) => item.submissionId) },
+          },
+          data: { status: SUBMISSION_STATUS.COMPLETED },
+        });
+      }
+
+      return tx.collectorBatch.findUnique({
+        where: { id: savedBatch.id },
+        include: getBatchInclude(),
+      });
+    });
+
+    res.json({ batch: toBatchResponse(updatedBatch) });
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = { createBatch, getBatchById, getBatches, validateBatchByStakeholder };

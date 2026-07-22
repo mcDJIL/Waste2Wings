@@ -35,73 +35,81 @@ enum BatchStatus {
   REJECTED_BY_STAKEHOLDER
 }
 
+enum LabGrade {
+  A
+  B
+  C
+  REJECT
+}
+
 model User {
-  id                String            @id @default(cuid())
-  name              String
-  email             String            @unique
-  passwordHash      String
-  role              Role
-  phone             String?
-  communityProfile  CommunityProfile?
-  collectorProfile  CollectorProfile?
-  stakeholderProfile StakeholderProfile?
+  id                  String               @id @default(cuid())
+  name                String
+  email               String               @unique
+  passwordHash        String
+  role                Role
+  phone               String?
+  communityProfile    CommunityProfile?
+  collectorProfile    CollectorProfile?
+  stakeholderProfile  StakeholderProfile?
   stakeholderSettings StakeholderSetting[]
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  labResults          LabResult[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
 }
 
 model CommunityProfile {
-  id        String            @id @default(cuid())
-  userId    String            @unique
-  category  CommunityCategory
-  address   String
-  latitude  Float
-  longitude Float
-  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String                @id @default(cuid())
+  userId      String                @unique
+  category    CommunityCategory
+  address     String
+  latitude    Float
+  longitude   Float
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   submissions CommunitySubmission[]
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
 }
 
 model CollectorProfile {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  companyName     String
-  address         String
-  latitude        Float
-  longitude       Float
-  capacityLiter   Float
-  buyPricePerLiter Float  @default(0)
-  isActive        Boolean  @default(true)
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  submissions     CommunitySubmission[]
-  batches         CollectorBatch[]
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id               String                @id @default(cuid())
+  userId           String                @unique
+  companyName      String
+  address          String
+  latitude         Float
+  longitude        Float
+  capacityLiter    Float
+  buyPricePerLiter Float                 @default(0)
+  isActive         Boolean               @default(true)
+  user             User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submissions      CommunitySubmission[]
+  batches          CollectorBatch[]
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
 }
 
 model StakeholderProfile {
-  id        String   @id @default(cuid())
-  userId    String   @unique
+  id          String   @id @default(cuid())
+  userId      String   @unique
   companyName String
-  address   String?
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  address     String?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model StakeholderSetting {
-  id                      String   @id @default(cuid())
-  referencePricePerLiter  Float
-  receptionLocationName   String
-  receptionAddress        String
-  latitude                Float
-  longitude               Float
-  updatedById             String
-  updatedBy               User     @relation(fields: [updatedById], references: [id])
-  batches                 CollectorBatch[]
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  id                     String           @id @default(cuid())
+  referencePricePerLiter Float
+  receptionLocationName  String
+  receptionAddress       String
+  latitude               Float
+  longitude              Float
+  updatedById            String
+  updatedBy              User             @relation(fields: [updatedById], references: [id])
+  batches                CollectorBatch[]
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
 }
 
 model CommunitySubmission {
@@ -119,28 +127,29 @@ model CommunitySubmission {
   collectorNote      String?
   communityProfile   CommunityProfile @relation(fields: [communityProfileId], references: [id])
   collectorProfile   CollectorProfile @relation(fields: [collectorProfileId], references: [id])
-  batchItems          BatchItem[]
+  batchItems         BatchItem[]
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
 }
 
 model CollectorBatch {
-  id                    String             @id @default(cuid())
-  collectorProfileId    String
-  stakeholderSettingId  String
-  batchCode             String             @unique
-  totalCleanLiter       Float
+  id                     String             @id @default(cuid())
+  collectorProfileId     String
+  stakeholderSettingId   String
+  batchCode              String             @unique
+  totalCleanLiter        Float
   requestedPricePerLiter Float
-  estimatedTotalPrice   Float
-  status                BatchStatus        @default(SUBMITTED_TO_STAKEHOLDER)
-  finalLiter            Float?
-  finalTotalPrice       Float?
-  stakeholderNote       String?
-  collectorProfile      CollectorProfile   @relation(fields: [collectorProfileId], references: [id])
-  stakeholderSetting    StakeholderSetting @relation(fields: [stakeholderSettingId], references: [id])
-  items                 BatchItem[]
-  createdAt             DateTime           @default(now())
-  updatedAt             DateTime           @updatedAt
+  estimatedTotalPrice    Float
+  status                 BatchStatus        @default(SUBMITTED_TO_STAKEHOLDER)
+  finalLiter             Float?
+  finalTotalPrice        Float?
+  stakeholderNote        String?
+  collectorProfile       CollectorProfile   @relation(fields: [collectorProfileId], references: [id])
+  stakeholderSetting     StakeholderSetting @relation(fields: [stakeholderSettingId], references: [id])
+  items                  BatchItem[]
+  labResult              LabResult?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
 }
 
 model BatchItem {
@@ -153,4 +162,19 @@ model BatchItem {
   createdAt           DateTime            @default(now())
 
   @@unique([batchId, submissionId])
+}
+
+model LabResult {
+  id                  String         @id @default(cuid())
+  batchId             String         @unique
+  waterContentPercent Float
+  ffaPercent          Float
+  impurityPercent     Float
+  grade               LabGrade
+  notes               String?
+  testedById          String
+  batch               CollectorBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  testedBy            User           @relation(fields: [testedById], references: [id])
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
 }

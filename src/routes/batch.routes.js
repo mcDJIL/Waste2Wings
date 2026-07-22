@@ -1,7 +1,12 @@
 const express = require('express');
 const { z } = require('zod');
 
-const { createBatch, getBatchById, getBatches } = require('../controllers/batch.controller');
+const {
+  createBatch,
+  getBatchById,
+  getBatches,
+  validateBatchByStakeholder,
+} = require('../controllers/batch.controller');
 const { authenticate } = require('../middleware/auth');
 const { authorize } = require('../middleware/role');
 const { validate } = require('../middleware/validate');
@@ -34,6 +39,24 @@ const listBatchSchema = z.object({
 
 const paramsSchema = z.object({
   body: z.object({}).optional(),
+  query: z.object({}).optional(),
+  params: z.object({
+    id: z.string().min(1),
+  }),
+});
+
+const stakeholderValidationSchema = z.object({
+  body: z.discriminatedUnion('status', [
+    z.object({
+      status: z.literal(BATCH_STATUS.ACCEPTED_BY_STAKEHOLDER),
+      finalLiter: z.number().positive(),
+      stakeholderNote: z.string().optional(),
+    }),
+    z.object({
+      status: z.literal(BATCH_STATUS.REJECTED_BY_STAKEHOLDER),
+      stakeholderNote: z.string().optional(),
+    }),
+  ]),
   query: z.object({}).optional(),
   params: z.object({
     id: z.string().min(1),
@@ -119,5 +142,77 @@ router.get('/', authenticate, validate(listBatchSchema), getBatches);
  *         description: Batch not found
  */
 router.get('/:id', authenticate, validate(paramsSchema), getBatchById);
+
+/**
+ * @openapi
+ * /batches/{id}/stakeholder-validation:
+ *   patch:
+ *     summary: Accept or reject collector batch by stakeholder
+ *     tags:
+ *       - Batches
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             oneOf:
+ *               - type: object
+ *                 required: [status, finalLiter]
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     enum: [ACCEPTED_BY_STAKEHOLDER]
+ *                   finalLiter:
+ *                     type: number
+ *                     example: 120
+ *                   stakeholderNote:
+ *                     type: string
+ *                     example: Accepted after lab review.
+ *               - type: object
+ *                 required: [status]
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     enum: [REJECTED_BY_STAKEHOLDER]
+ *                   stakeholderNote:
+ *                     type: string
+ *                     example: Rejected due to lab grade.
+ *           examples:
+ *             accept:
+ *               summary: Accept batch
+ *               value:
+ *                 status: ACCEPTED_BY_STAKEHOLDER
+ *                 finalLiter: 120
+ *                 stakeholderNote: Accepted after lab review.
+ *             reject:
+ *               summary: Reject batch
+ *               value:
+ *                 status: REJECTED_BY_STAKEHOLDER
+ *                 stakeholderNote: Rejected due to lab grade.
+ *     responses:
+ *       200:
+ *         description: Validated batch
+ *       400:
+ *         description: Invalid status transition or lab result missing
+ *       403:
+ *         description: Only stakeholder can validate batch
+ *       404:
+ *         description: Batch not found
+ */
+router.patch(
+  '/:id/stakeholder-validation',
+  authenticate,
+  authorize(ROLES.STAKEHOLDER),
+  validate(stakeholderValidationSchema),
+  validateBatchByStakeholder,
+);
 
 module.exports = router;

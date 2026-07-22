@@ -6,6 +6,7 @@ const { notFoundHandler, errorHandler } = require('./middleware/error');
 const authRoutes = require('./routes/auth.routes');
 const batchRoutes = require('./routes/batch.routes');
 const collectorRoutes = require('./routes/collector.routes');
+const labRoutes = require('./routes/lab.routes');
 const profileRoutes = require('./routes/profile.routes');
 const submissionRoutes = require('./routes/submission.routes');
 const stakeholderRoutes = require('./routes/stakeholder.routes');
@@ -40,6 +41,7 @@ app.get('/api/v1/health', (req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/batches', batchRoutes);
 app.use('/api/v1/collectors', collectorRoutes);
+app.use('/api/v1', labRoutes);
 app.use('/api/v1/profiles', profileRoutes);
 app.use('/api/v1/submissions', submissionRoutes);
 app.use('/api/v1/stakeholder', stakeholderRoutes);

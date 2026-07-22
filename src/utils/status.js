@@ -19,4 +19,11 @@ const BATCH_STATUS = Object.freeze({
   REJECTED_BY_STAKEHOLDER: 'REJECTED_BY_STAKEHOLDER',
 });
 
-module.exports = { BATCH_STATUS, ROLES, SUBMISSION_STATUS };
+const LAB_GRADES = Object.freeze({
+  A: 'A',
+  B: 'B',
+  C: 'C',
+  REJECT: 'REJECT',
+});
+
+module.exports = { BATCH_STATUS, LAB_GRADES, ROLES, SUBMISSION_STATUS };
