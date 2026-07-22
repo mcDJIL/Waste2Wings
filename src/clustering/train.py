@@ -89,8 +89,9 @@ def create_centroids_df(raw_centroids, label_mapping):
 
 
 def calculate_cluster_metrics(df, centroids_df):
-    df = df.merge(centroids_df, on="cluster", how="left")
-    df["distance_to_centroid_km"] = df.apply(
+    # Merge df dengan centroids untuk hitung jarak
+    df_merged = df.merge(centroids_df, on="cluster", how="left")
+    df_merged["distance_to_centroid_km"] = df_merged.apply(
         lambda row: haversine_distance(
             row["latitude"],
             row["longitude"],
@@ -100,8 +101,9 @@ def calculate_cluster_metrics(df, centroids_df):
         axis=1,
     )
 
+    # Group by cluster untuk summary metrics
     cluster_summary = (
-        df.groupby("cluster", as_index=False)
+        df_merged.groupby("cluster", as_index=False)
         .agg(
             collector_count=("collector_id", "count"),
             potential_volume=("average_volume", "sum"),
@@ -110,8 +112,9 @@ def calculate_cluster_metrics(df, centroids_df):
                 "distance_to_centroid_km",
                 lambda distances: np.percentile(distances, 90),
             ),
+            collector_latitude=("collector_latitude", "first"),
+            collector_longitude=("collector_longitude", "first"),
         )
-        .merge(centroids_df, on="cluster", how="left")
         .sort_values("cluster")
         .reset_index(drop=True)
     )
@@ -129,7 +132,7 @@ def calculate_cluster_metrics(df, centroids_df):
         .astype(int)
     )
 
-    return df, cluster_summary
+    return df_merged, cluster_summary
 
 
 def generate_cluster_output(cluster_summary):
@@ -137,11 +140,10 @@ def generate_cluster_output(cluster_summary):
 
     for _, row in cluster_summary.iterrows():
         cluster_outputs.append({
-            "recommended_location": {
-                "latitude": round(float(row["collector_latitude"]), 6),
-                "longitude": round(float(row["collector_longitude"]), 6),
-            },
+            "latitude": round(float(row["collector_latitude"]), 6),
+            "longitude": round(float(row["collector_longitude"]), 6),
             "radius_km": round(float(row["radius_km"]), 2),
+            "total_contributors": int(row["collector_count"]),
             "potential_volume": int(row["potential_volume"]),
             "is_most_strategic": bool(row["strategic_rank"] == 1),
         })
@@ -150,7 +152,7 @@ def generate_cluster_output(cluster_summary):
     return cluster_outputs
 
 
-def save_clustering_model(kmeans, label_mapping, centroids_df, df, project_root):
+def save_clustering_model(kmeans, label_mapping, centroids_df, cluster_summary, project_root):
     models_directory = project_root / "models"
     models_directory.mkdir(parents=True, exist_ok=True)
 
@@ -159,15 +161,13 @@ def save_clustering_model(kmeans, label_mapping, centroids_df, df, project_root)
         "coordinate_columns": ["latitude", "longitude"],
         "label_mapping": label_mapping,
         "collector_locations": centroids_df,
+        "cluster_summary": cluster_summary,
     }
 
     model_path = models_directory / "collector_clustering_model.joblib"
     joblib.dump(model_package, model_path)
 
-    cluster_output_path = project_root / "data" / "collector_cluster_results.csv"
-    df.to_csv(cluster_output_path, index=False)
-
-    return model_path, cluster_output_path
+    return model_path
 
 
 def train_collector_clustering(data_path, project_root, number_of_clusters=3):
@@ -179,18 +179,17 @@ def train_collector_clustering(data_path, project_root, number_of_clusters=3):
 
     centroids_df = create_centroids_df(raw_centroids, label_mapping)
 
-    df, cluster_summary = calculate_cluster_metrics(df, centroids_df)
+    df_with_metrics, cluster_summary = calculate_cluster_metrics(df, centroids_df)
 
     cluster_outputs = generate_cluster_output(cluster_summary)
 
     silhouette = silhouette_score(df[["latitude", "longitude"]], raw_labels)
 
-    model_path, results_path = save_clustering_model(kmeans, label_mapping, centroids_df, df, project_root)
+    model_path = save_clustering_model(kmeans, label_mapping, centroids_df, cluster_summary, project_root)
 
     return {
         "cluster_outputs": cluster_outputs,
         "cluster_summary": cluster_summary,
         "silhouette_score": silhouette,
         "model_path": model_path,
-        "results_path": results_path,
     }
