@@ -29,22 +29,6 @@ def load_clustering_model(model_path):
 
 
 def recommend_collector_area(latitude, longitude, collector_locations):
-    """
-    Merekomendasikan area cluster terdekat untuk lokasi yang diberikan.
-
-    Menggunakan Haversine formula untuk menghitung jarak geografis.
-
-    Args:
-        latitude: Latitude lokasi calon collector
-        longitude: Longitude lokasi calon collector
-        collector_locations: DataFrame centroid cluster
-
-    Return:
-        recommended_cluster: Nama cluster
-        latitude: Latitude centroid cluster
-        longitude: Longitude centroid cluster
-        distance_km: Jarak dari lokasi ke centroid
-    """
     recommendations = collector_locations.copy()
     recommendations["distance_km"] = recommendations.apply(
         lambda row: haversine_distance(

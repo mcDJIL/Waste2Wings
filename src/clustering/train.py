@@ -89,7 +89,6 @@ def create_centroids_df(raw_centroids, label_mapping):
 
 
 def calculate_cluster_metrics(df, centroids_df):
-    # Merge df dengan centroids untuk hitung jarak
     df_merged = df.merge(centroids_df, on="cluster", how="left")
     df_merged["distance_to_centroid_km"] = df_merged.apply(
         lambda row: haversine_distance(
@@ -101,7 +100,6 @@ def calculate_cluster_metrics(df, centroids_df):
         axis=1,
     )
 
-    # Group by cluster untuk summary metrics
     cluster_summary = (
         df_merged.groupby("cluster", as_index=False)
         .agg(
