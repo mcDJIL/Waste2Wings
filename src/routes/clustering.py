@@ -2,17 +2,16 @@ from fastapi import APIRouter, HTTPException
 from pathlib import Path
 
 from src.clustering.train import train_collector_clustering
-from src.clustering.cluster import recommend_collector_area, predict_cluster_for_coordinates, load_clustering_model
+from src.clustering.cluster import load_clustering_model, haversine_distance
 from src.schemas import (
     TrainClusteringRequest,
     TrainClusteringResponse,
     ClusterArea,
-    RecommendedLocation,
-    RecommendCollectorRequest,
-    RecommendCollectorResponse,
-    PredictClusterRequest,
-    PredictClusterResponse,
+    RecommendRequest,
+    RecommendResponse,
 )
+import pandas as pd
+import numpy as np
 
 router = APIRouter()
 
@@ -20,167 +19,67 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 MODEL_PATH = PROJECT_ROOT / "models" / "collector_clustering_model.joblib"
 
 
-@router.post("/train", response_model=TrainClusteringResponse)
+@router.post("/train", response_model=TrainClusteringResponse, summary="Train Clustering Model")
 def train_clustering_model(request: TrainClusteringRequest):
-    """
-    Train clustering model untuk menentukan area rekomendasi collector.
-    
-    Returns:
-    - cluster_areas: 3 area rekomendasi dengan pusat, radius, dan potensi volume
-    - silhouette_score: Skor kualitas clustering (0-1)
-    - model_path: Path ke file model yang disimpan
-    - results_path: Path ke file hasil cluster
-    """
     try:
         data_path = Path(request.data_path)
-        
+
         if not data_path.exists():
             raise HTTPException(
                 status_code=404,
                 detail=f"File tidak ditemukan: {request.data_path}"
             )
-        
+
         result = train_collector_clustering(data_path, PROJECT_ROOT)
-        
-        cluster_areas = [
-            ClusterArea(
-                recommended_location=RecommendedLocation(
-                    latitude=area["recommended_location"]["latitude"],
-                    longitude=area["recommended_location"]["longitude"],
-                ),
-                radius_km=area["radius_km"],
-                potential_volume=area["potential_volume"],
-                is_most_strategic=area["is_most_strategic"],
-            )
-            for area in result["cluster_outputs"]
-        ]
-        
+
         return TrainClusteringResponse(
-            cluster_areas=cluster_areas,
-            silhouette_score=result["silhouette_score"],
+            message="Model clustering berhasil dilatih",
             model_path=str(result["model_path"]),
-            results_path=str(result["results_path"]),
+            silhouette_score=result["silhouette_score"],
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/recommend", response_model=RecommendCollectorResponse)
-def recommend_collector(request: RecommendCollectorRequest):
-    """
-    Rekomendasi area terdekat untuk lokasi calon collector.
-    
-    Parameters:
-    - latitude: Latitude lokasi calon collector
-    - longitude: Longitude lokasi calon collector
-    
-    Returns:
-    - recommended_cluster: Cluster/area yang direkomendasikan
-    - collector_latitude: Latitude pusat area
-    - collector_longitude: Longitude pusat area
-    - distance_km: Jarak dari lokasi ke pusat area
-    """
+@router.post("/recommend", response_model=RecommendResponse, summary="Get Top 3 Nearest Cluster Areas")
+def recommend_areas(request: RecommendRequest):
     try:
         if not MODEL_PATH.exists():
             raise HTTPException(
                 status_code=404,
-                detail="Model clustering belum dilatih. Jalankan /api/clustering/train terlebih dahulu.",
+                detail="Model belum dilatih. Jalankan POST /train terlebih dahulu.",
             )
-        
+
         model_package = load_clustering_model(str(MODEL_PATH))
-        collector_locations = model_package.get("collector_locations")
-        
-        result = recommend_collector_area(
-            request.latitude,
-            request.longitude,
-            collector_locations
-        )
-        
-        return RecommendCollectorResponse(
-            recommended_cluster=result["recommended_cluster"],
-            collector_latitude=result["collector_latitude"],
-            collector_longitude=result["collector_longitude"],
-            distance_km=result["distance_km"],
-        )
-    except FileNotFoundError:
-        raise HTTPException(
-            status_code=404,
-            detail="Model file tidak ditemukan"
-        )
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
 
+        # Load cluster summary dari model
+        from src.clustering.train import generate_cluster_output
 
-@router.post("/predict", response_model=PredictClusterResponse)
-def predict_cluster(request: PredictClusterRequest):
-    """
-    Prediksi cluster untuk koordinat yang diberikan.
-    
-    Parameters:
-    - latitude: Latitude lokasi
-    - longitude: Longitude lokasi
-    
-    Returns:
-    - predicted_cluster: Cluster yang diprediksi untuk lokasi tersebut
-    """
-    try:
-        if not MODEL_PATH.exists():
-            raise HTTPException(
-                status_code=404,
-                detail="Model clustering belum dilatih. Jalankan /api/clustering/train terlebih dahulu.",
+        cluster_summary = model_package.get("cluster_summary")
+        cluster_outputs = generate_cluster_output(cluster_summary)
+
+        # Hitung jarak ke setiap cluster dan sort
+        recommendations = []
+        for area in cluster_outputs:
+            distance_km = haversine_distance(
+                request.latitude,
+                request.longitude,
+                area["latitude"],
+                area["longitude"]
             )
-        
-        result = predict_cluster_for_coordinates(
-            str(MODEL_PATH),
-            request.latitude,
-            request.longitude
-        )
-        
-        return PredictClusterResponse(
-            predicted_cluster=result["predicted_cluster"]
-        )
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+            recommendations.append({
+                "latitude": area["latitude"],
+                "longitude": area["longitude"],
+                "radius_km": area["radius_km"],
+                "total_contributors": area["total_contributors"],
+                "potential_volume": area["potential_volume"],
+                "is_most_strategic": area["is_most_strategic"],
+                "distance_km": round(distance_km, 2),
+            })
 
+        # Sort by distance
+        recommendations = sorted(recommendations, key=lambda x: x["distance_km"])
 
-@router.get("/model-info")
-def get_clustering_model_info():
-    """
-    Dapatkan informasi model clustering yang sedang digunakan.
-    """
-    try:
-        if not MODEL_PATH.exists():
-            return {"status": "not_trained", "message": "Model belum dilatih"}
-        
-        import joblib
-        model_package = joblib.load(str(MODEL_PATH))
-        
-        return {
-            "status": "ready",
-            "number_of_clusters": model_package.get("model").n_clusters,
-            "model_path": str(MODEL_PATH),
-        }
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@router.get("/areas")
-def get_all_cluster_areas():
-    """
-    Dapatkan semua area rekomendasi clustering.
-    """
-    try:
-        if not MODEL_PATH.exists():
-            raise HTTPException(
-                status_code=404,
-                detail="Model clustering belum dilatih. Jalankan /api/clustering/train terlebih dahulu.",
-            )
-        
-        model_package = load_clustering_model(str(MODEL_PATH))
-        collector_locations = model_package.get("collector_locations")
-        
-        return {
-            "areas": collector_locations.to_dict(orient="records")
-        }
+        return RecommendResponse(recommendations=recommendations)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
