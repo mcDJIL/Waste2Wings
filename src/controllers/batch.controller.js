@@ -7,7 +7,7 @@ const {
   ROLES,
   SUBMISSION_STATUS,
 } = require("../utils/status");
-const { writeAuditLog } = require("./audit.controller");
+const { writeAuditLog } = require("../utils/audit");
 
 function generateBatchCode() {
   const date = new Date();
