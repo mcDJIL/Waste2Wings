@@ -27,8 +27,21 @@ function toCollectorResponse(collector, distanceKm) {
 
 async function getCollectors(req, res, next) {
   try {
+    const { query } = req.validated;
+    const search = query.q?.trim();
     const collectors = await prisma.collectorProfile.findMany({
-      where: { isActive: true },
+      where: {
+        isActive: true,
+        ...(search
+          ? {
+              OR: [
+                { companyName: { contains: search, mode: 'insensitive' } },
+                { address: { contains: search, mode: 'insensitive' } },
+                { user: { name: { contains: search, mode: 'insensitive' } } },
+              ],
+            }
+          : {}),
+      },
       include: {
         user: {
           select: {
@@ -42,7 +55,11 @@ async function getCollectors(req, res, next) {
       orderBy: { createdAt: 'desc' },
     });
 
-    res.json({ collectors: collectors.map((collector) => toCollectorResponse(collector)) });
+    res.json({
+      query: search || null,
+      total: collectors.length,
+      collectors: collectors.map((collector) => toCollectorResponse(collector)),
+    });
   } catch (error) {
     next(error);
   }

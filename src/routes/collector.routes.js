@@ -13,6 +13,14 @@ const { ROLES } = require('../utils/status');
 
 const router = express.Router();
 
+const listCollectorsSchema = z.object({
+  body: z.object({}).optional(),
+  params: z.object({}).optional(),
+  query: z.object({
+    q: z.string().trim().min(1).optional(),
+  }),
+});
+
 const nearbySchema = z.object({
   body: z.object({}).optional(),
   params: z.object({}).optional(),
@@ -38,11 +46,19 @@ const updatePriceSchema = z.object({
  *     summary: List active collectors
  *     tags:
  *       - Collectors
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: false
+ *         description: Search by collector company name, address, or user name
+ *         schema:
+ *           type: string
+ *         example: Tebet
  *     responses:
  *       200:
  *         description: Active collectors with price and location data
  */
-router.get('/', getCollectors);
+router.get('/', validate(listCollectorsSchema), getCollectors);
 
 /**
  * @openapi
