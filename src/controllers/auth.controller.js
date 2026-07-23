@@ -127,4 +127,10 @@ async function me(req, res) {
   res.json({ user: req.user });
 }
 
-module.exports = { login, me, register };
+async function logout(req, res) {
+  res.json({
+    message: 'Logout successful. Please remove the token from client storage.',
+  })
+}
+
+module.exports = { login, me, register, logout };

@@ -1,7 +1,7 @@
 const express = require('express');
 const { z } = require('zod');
 
-const { login, me, register } = require('../controllers/auth.controller');
+const { login, me, register, logout } = require('../controllers/auth.controller');
 const { authenticate } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');
 const { ROLES } = require('../utils/status');
@@ -391,5 +391,40 @@ router.post('/login', validate(loginSchema), login);
  *                     statusCode: 401
  */
 router.get('/me', authenticate, me);
+
+/**
+ * @openapi
+ * /auth/logout:
+ *   post:
+ *     summary: Logout current user
+ *     description: JWT is stateless, so logout is handled by removing the token from client storage.
+ *     tags:
+ *       - Auth
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logout instruction for client
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *             example:
+ *               message: Logout successful. Please remove the token from client storage.
+ *       401:
+ *         description: Missing or invalid JWT token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               error:
+ *                 message: Authentication token is required
+ *                 statusCode: 401
+ */
+router.post('/logout', authenticate, logout);
 
 module.exports = router;
