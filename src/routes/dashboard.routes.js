@@ -2,6 +2,7 @@ const express = require('express');
 
 const {
   getCommunityDashboard,
+  getCollectorDashboard,
   getDashboardMap,
   getDashboardSummary,
   getDashboardTrends,
@@ -28,6 +29,23 @@ const router = express.Router();
  *         description: Only community can access this dashboard
  */
 router.get('/community', authenticate, authorize(ROLES.COMMUNITY), getCommunityDashboard);
+
+/**
+ * @openapi
+ * /dashboard/collector:
+ *   get:
+ *     summary: Get collector dashboard data
+ *     tags:
+ *       - Dashboard
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Collector dashboard summary, latest submissions, and volume trends
+ *       403:
+ *         description: Only collector can access this dashboard
+ */
+router.get('/collector', authenticate, authorize(ROLES.COLLECTOR), getCollectorDashboard);
 
 /**
  * @openapi

@@ -3,6 +3,8 @@ const { z } = require('zod');
 
 const {
   getCollectors,
+  getMyCollectorHistory,
+  getMyCollectorMap,
   getNearbyCollectors,
   updateMyCollectorPrice,
 } = require('../controllers/collector.controller');
@@ -37,6 +39,25 @@ const updatePriceSchema = z.object({
   }),
   query: z.object({}).optional(),
   params: z.object({}).optional(),
+});
+
+const historySchema = z.object({
+  body: z.object({}).optional(),
+  params: z.object({}).optional(),
+  query: z.object({
+    status: z
+      .enum([
+        'SUBMITTED',
+        'ACCEPTED_BY_COLLECTOR',
+        'REJECTED_BY_COLLECTOR',
+        'IN_BATCH',
+        'COMPLETED',
+      ])
+      .optional(),
+    q: z.string().trim().min(1).optional(),
+    from: z.string().datetime().optional(),
+    to: z.string().datetime().optional(),
+  }),
 });
 
 /**
@@ -94,6 +115,67 @@ router.get('/', validate(listCollectorsSchema), getCollectors);
  *         description: Invalid query parameter
  */
 router.get('/nearby', validate(nearbySchema), getNearbyCollectors);
+
+/**
+ * @openapi
+ * /collectors/me/history:
+ *   get:
+ *     summary: Get current collector submission history with summary
+ *     tags:
+ *       - Collectors
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [SUBMITTED, ACCEPTED_BY_COLLECTOR, REJECTED_BY_COLLECTOR, IN_BATCH, COMPLETED]
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Search by community name or address
+ *       - in: query
+ *         name: from
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *       - in: query
+ *         name: to
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *     responses:
+ *       200:
+ *         description: Collector submission history and summary
+ *       403:
+ *         description: Only collector can access this endpoint
+ */
+router.get(
+  '/me/history',
+  authenticate,
+  authorize(ROLES.COLLECTOR),
+  validate(historySchema),
+  getMyCollectorHistory,
+);
+
+/**
+ * @openapi
+ * /collectors/me/map:
+ *   get:
+ *     summary: Get current collector map data
+ *     tags:
+ *       - Collectors
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Collector location, HEN reception location, and related community markers
+ *       403:
+ *         description: Only collector can access this endpoint
+ */
+router.get('/me/map', authenticate, authorize(ROLES.COLLECTOR), getMyCollectorMap);
 
 /**
  * @openapi

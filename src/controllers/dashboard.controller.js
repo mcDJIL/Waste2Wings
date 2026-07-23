@@ -5,6 +5,11 @@ function getMonthKey(date) {
   return date.toISOString().slice(0, 7);
 }
 
+function getStartOfCurrentMonth() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1);
+}
+
 function getCommunityActivity(submission) {
   const collectorName = submission.collectorProfile.companyName;
 
@@ -304,8 +309,157 @@ async function getCommunityDashboard(req, res, next) {
   }
 }
 
+async function getCollectorDashboard(req, res, next) {
+  try {
+    const collectorProfile = await prisma.collectorProfile.findUnique({
+      where: { userId: req.user.id },
+    });
+
+    if (!collectorProfile) {
+      return res.json({
+        summary: {
+          totalIncomingLiter: 0,
+          pendingValidationCount: 0,
+          henSubmissionCount: 0,
+          monthlyRevenueFromHen: 0,
+          monthlyPaidToCommunity: 0,
+          monthlyGrossMargin: 0,
+        },
+        latestSubmissions: [],
+        volumeTrends: [],
+      });
+    }
+
+    const collectorWhere = { collectorProfileId: collectorProfile.id };
+    const monthStart = getStartOfCurrentMonth();
+    const [incomingAggregate, pendingValidationCount, henSubmissionCount, monthlyRevenueAggregate, monthlyPaidAggregate, latestSubmissions, trendSubmissions] = await Promise.all([
+      prisma.communitySubmission.aggregate({
+        where: {
+          ...collectorWhere,
+          status: {
+            in: [
+              SUBMISSION_STATUS.ACCEPTED_BY_COLLECTOR,
+              SUBMISSION_STATUS.IN_BATCH,
+              SUBMISSION_STATUS.COMPLETED,
+            ],
+          },
+        },
+        _sum: { cleanLiter: true },
+      }),
+      prisma.communitySubmission.count({
+        where: { ...collectorWhere, status: SUBMISSION_STATUS.SUBMITTED },
+      }),
+      prisma.collectorBatch.count({ where: { collectorProfileId: collectorProfile.id } }),
+      prisma.collectorBatch.aggregate({
+        where: {
+          collectorProfileId: collectorProfile.id,
+          status: BATCH_STATUS.ACCEPTED_BY_STAKEHOLDER,
+          createdAt: { gte: monthStart },
+        },
+        _sum: { finalTotalPrice: true },
+      }),
+      prisma.communitySubmission.aggregate({
+        where: {
+          ...collectorWhere,
+          createdAt: { gte: monthStart },
+          status: {
+            in: [
+              SUBMISSION_STATUS.ACCEPTED_BY_COLLECTOR,
+              SUBMISSION_STATUS.IN_BATCH,
+              SUBMISSION_STATUS.COMPLETED,
+            ],
+          },
+        },
+        _sum: { totalPaid: true },
+      }),
+      prisma.communitySubmission.findMany({
+        where: collectorWhere,
+        include: {
+          communityProfile: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  phone: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: { updatedAt: 'desc' },
+        take: 5,
+      }),
+      prisma.communitySubmission.findMany({
+        where: {
+          ...collectorWhere,
+          status: {
+            in: [
+              SUBMISSION_STATUS.ACCEPTED_BY_COLLECTOR,
+              SUBMISSION_STATUS.IN_BATCH,
+              SUBMISSION_STATUS.COMPLETED,
+            ],
+          },
+        },
+        select: {
+          createdAt: true,
+          cleanLiter: true,
+        },
+        orderBy: { createdAt: 'asc' },
+      }),
+    ]);
+
+    const volumeTrendsByMonth = trendSubmissions.reduce((accumulator, submission) => {
+      const month = getMonthKey(submission.createdAt);
+
+      if (!accumulator[month]) {
+        accumulator[month] = {
+          month,
+          totalCleanLiter: 0,
+          submissionCount: 0,
+        };
+      }
+
+      accumulator[month].totalCleanLiter += submission.cleanLiter || 0;
+      accumulator[month].submissionCount += 1;
+
+      return accumulator;
+    }, {});
+
+    const monthlyRevenueFromHen = monthlyRevenueAggregate._sum.finalTotalPrice || 0;
+    const monthlyPaidToCommunity = monthlyPaidAggregate._sum.totalPaid || 0;
+
+    res.json({
+      summary: {
+        totalIncomingLiter: incomingAggregate._sum.cleanLiter || 0,
+        pendingValidationCount,
+        henSubmissionCount,
+        monthlyRevenueFromHen,
+        monthlyPaidToCommunity,
+        monthlyGrossMargin: monthlyRevenueFromHen - monthlyPaidToCommunity,
+      },
+      latestSubmissions: latestSubmissions.map((submission) => ({
+        id: submission.id,
+        status: submission.status,
+        estimatedLiter: submission.estimatedLiter,
+        cleanLiter: submission.cleanLiter,
+        totalPaid: submission.totalPaid,
+        communityName: submission.communityProfile.user.name,
+        communityAddress: submission.communityProfile.address,
+        createdAt: submission.createdAt,
+        updatedAt: submission.updatedAt,
+      })),
+      volumeTrends: Object.values(volumeTrendsByMonth),
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getCommunityDashboard,
+  getCollectorDashboard,
   getDashboardMap,
   getDashboardSummary,
   getDashboardTrends,
