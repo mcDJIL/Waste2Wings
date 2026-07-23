@@ -1,0 +1,17 @@
+services:
+  ml-service:
+    build: .
+    image: henwasteoil-ml:latest
+    container_name: henwasteoil-ml
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data:ro
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
