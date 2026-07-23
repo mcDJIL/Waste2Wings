@@ -1,6 +1,7 @@
 const express = require('express');
 
 const {
+  getCommunityDashboard,
   getDashboardMap,
   getDashboardSummary,
   getDashboardTrends,
@@ -10,6 +11,23 @@ const { authorize } = require('../middleware/role');
 const { ROLES } = require('../utils/status');
 
 const router = express.Router();
+
+/**
+ * @openapi
+ * /dashboard/community:
+ *   get:
+ *     summary: Get community dashboard data
+ *     tags:
+ *       - Dashboard
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Community dashboard summary, recent activities, and contribution trends
+ *       403:
+ *         description: Only community can access this dashboard
+ */
+router.get('/community', authenticate, authorize(ROLES.COMMUNITY), getCommunityDashboard);
 
 /**
  * @openapi
