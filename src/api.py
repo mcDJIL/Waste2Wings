@@ -1,13 +1,31 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 from pathlib import Path
 
 from src.routes import prediction, clustering
 
 app = FastAPI(
-    title="Waste Oil ML API",
-    description="API untuk prediksi dana dan clustering lokasi penyetor",
+    title="Waste Oil ML Service API",
     version="1.0.0",
+    contact={
+        "name": "Waste Oil System",
+        "url": "http://localhost:3001",
+    },
+    openapi_tags=[
+        {
+            "name": "Health",
+            "description": "Health check endpoint"
+        },
+        {
+            "name": "Prediction",
+            "description": "Fund prediction using ML models"
+        },
+        {
+            "name": "Clustering",
+            "description": "Collector location clustering with K-Means"
+        }
+    ]
 )
 
 app.add_middleware(
@@ -22,7 +40,7 @@ app.include_router(prediction.router, prefix="/api/prediction", tags=["Predictio
 app.include_router(clustering.router, prefix="/api/clustering", tags=["Clustering"])
 
 
-@app.get("/health")
+@app.get("/health", tags=["Health"])
 def health_check():
     return {"status": "healthy"}
 
