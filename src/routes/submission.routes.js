@@ -18,7 +18,6 @@ const createSubmissionSchema = z.object({
   body: z.object({
     collectorId: z.string().min(1),
     estimatedLiter: z.number().positive(),
-    scheduledDate: z.string().datetime(),
   }),
   query: z.object({}).optional(),
   params: z.object({}).optional(),
@@ -82,7 +81,7 @@ const collectorValidationSchema = z.object({
  *         application/json:
  *           schema:
  *             type: object
- *             required: [collectorId, estimatedLiter, scheduledDate]
+ *             required: [collectorId, estimatedLiter]
  *             properties:
  *               collectorId:
  *                 type: string
@@ -90,10 +89,6 @@ const collectorValidationSchema = z.object({
  *               estimatedLiter:
  *                 type: number
  *                 example: 25
- *               scheduledDate:
- *                 type: string
- *                 format: date-time
- *                 example: '2026-06-23T09:00:00.000Z'
  *     responses:
  *       201:
  *         description: Created submission

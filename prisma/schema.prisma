@@ -130,7 +130,6 @@ model CommunitySubmission {
   communityProfileId String
   collectorProfileId String
   estimatedLiter     Float
-  scheduledDate      DateTime
   status             SubmissionStatus @default(SUBMITTED)
   actualLiter        Float?
   sedimentLiter      Float?

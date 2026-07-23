@@ -13,7 +13,6 @@ function toSubmissionResponse(submission) {
     communityProfileId: submission.communityProfileId,
     collectorProfileId: submission.collectorProfileId,
     estimatedLiter: submission.estimatedLiter,
-    scheduledDate: submission.scheduledDate,
     status: submission.status,
     actualLiter: submission.actualLiter,
     sedimentLiter: submission.sedimentLiter,
@@ -103,7 +102,6 @@ async function createSubmission(req, res, next) {
         communityProfileId: communityProfile.id,
         collectorProfileId: collector.id,
         estimatedLiter: body.estimatedLiter,
-        scheduledDate: new Date(body.scheduledDate),
       },
       include: getSubmissionInclude(),
     });
