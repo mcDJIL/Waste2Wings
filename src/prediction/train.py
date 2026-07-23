@@ -18,10 +18,12 @@ def train_linear_regression_model(df, target_column="total_accepted_application_
         raise ValueError("Target column mengandung missing values")
 
     model = LinearRegression()
-    model.fit(df[["time_index"]], df[target_column])
+    X = df[["time_index"]].to_numpy()
+    y = df[target_column].to_numpy()
+    model.fit(X, y)
 
     next_time_index = int(df["time_index"].iloc[-1] + 1)
-    predicted_volume = model.predict([[next_time_index]])[0]
+    predicted_volume = model.predict(np.array([[next_time_index]]))[0]
     predicted_volume = max(0, int(round(predicted_volume)))
 
     return model, predicted_volume, next_time_index

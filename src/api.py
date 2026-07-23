@@ -36,8 +36,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(prediction.router, prefix="/api/prediction", tags=["Prediction"])
-app.include_router(clustering.router, prefix="/api/clustering", tags=["Clustering"])
+app.include_router(prediction.router, prefix="/api/v1/prediction", tags=["Prediction"])
+app.include_router(clustering.router, prefix="/api/v1/clustering", tags=["Clustering"])
 
 
 @app.get("/health", tags=["Health"])

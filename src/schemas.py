@@ -6,13 +6,14 @@ class PredictionRequest(BaseModel):
     reference_price: int = Field(..., description="Harga acuan per unit volume (dalam Rp)")
     historical_volumes: list[int] = Field(..., description="Data historis volume dari database (minimal 12 data)")
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "reference_price": 13000,
                 "historical_volumes": [1200, 1280, 1350, 1420, 1390, 1500, 1550, 1600, 1650, 1700, 1750, 1800]
             }
         }
+    }
 
 
 class PredictionResponse(BaseModel):
@@ -51,26 +52,27 @@ class TrainClusteringResponse(BaseModel):
 
 
 class RecommendRequest(BaseModel):
-    latitude: float = Field(..., description="Latitude lokasi (-90 hingga 90)", example=-6.220)
-    longitude: float = Field(..., description="Longitude lokasi (-180 hingga 180)", example=106.890)
+    latitude: float = Field(..., description="Latitude lokasi (-90 hingga 90)")
+    longitude: float = Field(..., description="Longitude lokasi (-180 hingga 180)")
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "latitude": -6.220,
                 "longitude": 106.890
             }
         }
+    }
 
 
 class RecommendationArea(BaseModel):
-    latitude: float = Field(..., description="Latitude pusat cluster", example=-6.225947)
-    longitude: float = Field(..., description="Longitude pusat cluster", example=106.88978)
-    radius_km: float = Field(..., description="Radius layanan dalam km", example=3.2)
-    total_contributors: int = Field(..., description="Jumlah penyetor dalam cluster", example=15)
-    potential_volume: int = Field(..., description="Potensi volume minyak dalam liter", example=3215)
-    is_most_strategic: bool = Field(..., description="Apakah area ini paling strategis", example=False)
-    distance_km: float = Field(..., description="Jarak dari lokasi input ke cluster", example=0.66)
+    latitude: float = Field(..., description="Latitude pusat cluster")
+    longitude: float = Field(..., description="Longitude pusat cluster")
+    radius_km: float = Field(..., description="Radius layanan dalam km")
+    total_contributors: int = Field(..., description="Jumlah penyetor dalam cluster")
+    potential_volume: int = Field(..., description="Potensi volume minyak dalam liter")
+    is_most_strategic: bool = Field(..., description="Apakah area ini paling strategis")
+    distance_km: float = Field(..., description="Jarak dari lokasi input ke cluster")
 
 
 class RecommendResponse(BaseModel):

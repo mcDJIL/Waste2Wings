@@ -1,5 +1,8 @@
 from pathlib import Path
 import json
+import os
+
+os.environ.setdefault("OMP_NUM_THREADS", "1")
 
 import joblib
 import numpy as np

@@ -1,2 +1,4 @@
 .vscode
 *.joblib
+__pycache__
+*.pyc
