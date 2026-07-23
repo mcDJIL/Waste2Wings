@@ -47,7 +47,9 @@ const batchParamsSchema = z.object({
 });
 
 const labParamsSchema = z.object({
-  body: z.object({}).optional(),
+  body: z.object({
+    reason: z.string().optional(),
+  }).optional(),
   query: z.object({}).optional(),
   params: z.object({
     id: z.string().min(1),

@@ -3,6 +3,7 @@ const express = require('express');
 const helmet = require('helmet');
 
 const { notFoundHandler, errorHandler } = require('./middleware/error');
+const auditRoutes = require('./routes/audit.routes');
 const authRoutes = require('./routes/auth.routes');
 const batchRoutes = require('./routes/batch.routes');
 const collectorRoutes = require('./routes/collector.routes');
@@ -39,6 +40,7 @@ app.get('/api/v1/health', (req, res) => {
   });
 });
 
+app.use('/api/v1/audit-logs', auditRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/batches', batchRoutes);
 app.use('/api/v1/collectors', collectorRoutes);

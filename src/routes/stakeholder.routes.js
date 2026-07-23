@@ -19,6 +19,7 @@ const settingSchema = z.object({
     receptionAddress: z.string().min(3),
     latitude: z.number().min(-90).max(90),
     longitude: z.number().min(-180).max(180),
+    reason: z.string().optional(),
   }),
   query: z.object({}).optional(),
   params: z.object({}).optional(),

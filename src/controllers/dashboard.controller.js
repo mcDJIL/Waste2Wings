@@ -5,6 +5,7 @@ function getMonthKey(date) {
   return date.toISOString().slice(0, 7);
 }
 
+// get data for dashboard page
 async function getDashboardSummary(req, res, next) {
   try {
     const [communityCount, collectorCount, acceptedSubmissionAggregate, completedBatchAggregate, pendingBatchCount, acceptedBatchCount] =

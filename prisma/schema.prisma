@@ -20,6 +20,7 @@ enum CommunityCategory {
   INDUSTRY
 }
 
+// community -> collector
 enum SubmissionStatus {
   SUBMITTED
   ACCEPTED_BY_COLLECTOR
@@ -28,6 +29,7 @@ enum SubmissionStatus {
   COMPLETED
 }
 
+// collector -> stakeholder
 enum BatchStatus {
   SUBMITTED_TO_STAKEHOLDER
   LAB_REVIEW
@@ -42,6 +44,16 @@ enum LabGrade {
   REJECT
 }
 
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  ACCEPT
+  REJECT
+  FINAL_VALIDATE
+  CORRECTION
+}
+
 model User {
   id                  String               @id @default(cuid())
   name                String
@@ -54,6 +66,7 @@ model User {
   stakeholderProfile  StakeholderProfile?
   stakeholderSettings StakeholderSetting[]
   labResults          LabResult[]
+  auditLogs           AuditLog[]
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 }
@@ -177,4 +190,20 @@ model LabResult {
   testedBy            User           @relation(fields: [testedById], references: [id])
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  actorId    String?
+  entityType String?
+  entityId   String
+  action     AuditAction
+  before     Json?
+  after      Json?
+  reason     String?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime    @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
 }

@@ -17,6 +17,7 @@ const router = express.Router();
 const createBatchSchema = z.object({
   body: z.object({
     submissionIds: z.array(z.string().min(1)).min(1),
+    reason: z.string().optional(),
   }),
   query: z.object({}).optional(),
   params: z.object({}).optional(),

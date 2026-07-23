@@ -1,6 +1,11 @@
-const ApiError = require('../utils/ApiError');
-const prisma = require('../prismaClient');
-const { ROLES, SUBMISSION_STATUS } = require('../utils/status');
+const ApiError = require("../utils/ApiError");
+const prisma = require("../prismaClient");
+const {
+  AUDIT_ACTIONS,
+  AUDIT_ENTITY_TYPES,
+  ROLES,
+  SUBMISSION_STATUS,
+} = require("../utils/status");
 
 function toSubmissionResponse(submission) {
   return {
@@ -82,7 +87,7 @@ async function createSubmission(req, res, next) {
     });
 
     if (!collector) {
-      throw new ApiError(404, 'Active collector not found');
+      throw new ApiError(404, "Active collector not found");
     }
 
     const communityProfile = await prisma.communityProfile.findUnique({
@@ -90,7 +95,7 @@ async function createSubmission(req, res, next) {
     });
 
     if (!communityProfile) {
-      throw new ApiError(400, 'Community profile is not configured');
+      throw new ApiError(400, "Community profile is not configured");
     }
 
     const submission = await prisma.communitySubmission.create({
@@ -117,12 +122,16 @@ async function getSubmissions(req, res, next) {
       const communityProfile = await prisma.communityProfile.findUnique({
         where: { userId: req.user.id },
       });
-      where.communityProfileId = communityProfile ? communityProfile.id : '__not_found__';
+      where.communityProfileId = communityProfile
+        ? communityProfile.id
+        : "__not_found__";
     }
 
     if (req.user.role === ROLES.COLLECTOR) {
-      const collector = await prisma.collectorProfile.findUnique({ where: { userId: req.user.id } });
-      where.collectorProfileId = collector ? collector.id : '__not_found__';
+      const collector = await prisma.collectorProfile.findUnique({
+        where: { userId: req.user.id },
+      });
+      where.collectorProfileId = collector ? collector.id : "__not_found__";
     }
 
     if (req.query.status) {
@@ -132,7 +141,7 @@ async function getSubmissions(req, res, next) {
     const submissions = await prisma.communitySubmission.findMany({
       where,
       include: getSubmissionInclude(),
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     res.json({ submissions: submissions.map(toSubmissionResponse) });
@@ -149,15 +158,27 @@ async function getSubmissionById(req, res, next) {
     });
 
     if (!submission) {
-      throw new ApiError(404, 'Submission not found');
+      throw new ApiError(404, "Submission not found");
     }
 
-    if (req.user.role === ROLES.COMMUNITY && submission.communityProfile.userId !== req.user.id) {
-      throw new ApiError(403, 'You do not have permission to access this submission');
+    if (
+      req.user.role === ROLES.COMMUNITY &&
+      submission.communityProfile.userId !== req.user.id
+    ) {
+      throw new ApiError(
+        403,
+        "You do not have permission to access this submission",
+      );
     }
 
-    if (req.user.role === ROLES.COLLECTOR && submission.collectorProfile.userId !== req.user.id) {
-      throw new ApiError(403, 'You do not have permission to access this submission');
+    if (
+      req.user.role === ROLES.COLLECTOR &&
+      submission.collectorProfile.userId !== req.user.id
+    ) {
+      throw new ApiError(
+        403,
+        "You do not have permission to access this submission",
+      );
     }
 
     res.json({ submission: toSubmissionResponse(submission) });
@@ -175,36 +196,66 @@ async function validateSubmissionByCollector(req, res, next) {
     });
 
     if (!submission) {
-      throw new ApiError(404, 'Submission not found');
+      throw new ApiError(404, "Submission not found");
     }
 
     if (submission.collectorProfile.userId !== req.user.id) {
-      throw new ApiError(403, 'You do not have permission to validate this submission');
+      throw new ApiError(
+        403,
+        "You do not have permission to validate this submission",
+      );
     }
 
     if (submission.status !== SUBMISSION_STATUS.SUBMITTED) {
-      throw new ApiError(400, 'Only submitted requests can be validated by collector');
+      throw new ApiError(
+        400,
+        "Only submitted requests can be validated by collector",
+      );
     }
 
     const isAccepted = body.status === SUBMISSION_STATUS.ACCEPTED_BY_COLLECTOR;
-    const cleanLiter = isAccepted ? body.actualLiter - body.sedimentLiter : null;
+    const cleanLiter = isAccepted
+      ? body.actualLiter - body.sedimentLiter
+      : null;
 
     if (isAccepted && cleanLiter < 0) {
-      throw new ApiError(400, 'Sediment liter cannot be greater than actual liter');
+      throw new ApiError(
+        400,
+        "Sediment liter cannot be greater than actual liter",
+      );
     }
 
-    const updatedSubmission = await prisma.communitySubmission.update({
-      where: { id: submission.id },
-      data: {
-        status: body.status,
-        actualLiter: isAccepted ? body.actualLiter : null,
-        sedimentLiter: isAccepted ? body.sedimentLiter : null,
-        cleanLiter,
-        pricePerLiter: isAccepted ? submission.collectorProfile.buyPricePerLiter : null,
-        totalPaid: isAccepted ? cleanLiter * submission.collectorProfile.buyPricePerLiter : null,
-        collectorNote: body.collectorNote,
-      },
-      include: getSubmissionInclude(),
+    const updatedSubmission = await prisma.$transaction(async (tx) => {
+      const savedSubmission = await tx.communitySubmission.update({
+        where: { id: submission.id },
+        data: {
+          status: body.status,
+          actualLiter: isAccepted ? body.actualLiter : null,
+          sedimentLiter: isAccepted ? body.sedimentLiter : null,
+          cleanLiter,
+          pricePerLiter: isAccepted
+            ? submission.collectorProfile.buyPricePerLiter
+            : null,
+          totalPaid: isAccepted
+            ? cleanLiter * submission.collectorProfile.buyPricePerLiter
+            : null,
+          collectorNote: body.collectorNote,
+        },
+        include: getSubmissionInclude(),
+      });
+
+      await tx.auditLog.create({
+        req,
+        actorId: req.user.id,
+        entityType: AUDIT_ENTITY_TYPES.COMMUNITY_SUBMISSION,
+        entityId: submission.id,
+        action: body.status === SUBMISSION_STATUS.ACCEPTED_BY_COLLECTOR ? AUDIT_ACTIONS.ACCEPT : AUDIT_ACTIONS.REJECT,
+        before: submission,
+        after: savedSubmission,
+        reason: body.collectorNote,
+      });
+
+      return savedSubmission;
     });
 
     res.json({ submission: toSubmissionResponse(updatedSubmission) });
