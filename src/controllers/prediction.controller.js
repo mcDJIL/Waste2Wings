@@ -64,15 +64,17 @@ async function predictFunding(req, res, next) {
   try {
     const { body } = req.validated;
     const referencePrice = await getReferencePrice(body.reference_price);
+    const mlPayload = {
+      ...body,
+      reference_price: referencePrice,
+    };
     const prediction = await requestMlService('/api/prediction/predict', {
       method: 'POST',
-      body: { reference_price: referencePrice },
+      body: mlPayload,
     });
 
     res.json({
-      input: {
-        reference_price: referencePrice,
-      },
+      input: mlPayload,
       prediction,
     });
   } catch (error) {

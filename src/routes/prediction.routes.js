@@ -27,9 +27,14 @@ const optionalDataPathSchema = z.object({
 });
 
 const fundingPredictionSchema = z.object({
-  body: z.object({
-    reference_price: z.number().positive().optional(),
-  }).optional().default({}),
+  body: z
+    .object({
+      reference_price: z.number().positive().optional(),
+      historical_volumes: z.array(z.number().nonnegative()).optional(),
+    })
+    .passthrough()
+    .optional()
+    .default({}),
   query: z.object({}).optional(),
   params: z.object({}).optional(),
 });
@@ -93,6 +98,11 @@ router.post(
  *               reference_price:
  *                 type: number
  *                 example: 13000
+ *               historical_volumes:
+ *                 type: array
+ *                 items:
+ *                   type: number
+ *                 example: [1200, 1280, 1350, 1420, 1390, 1500]
  *     responses:
  *       200:
  *         description: ML prediction result
