@@ -243,18 +243,6 @@ async function validateBatchByStakeholder(req, res, next) {
       throw new ApiError(404, "Batch not found");
     }
 
-    if (
-      ![
-        BATCH_STATUS.SUBMITTED_TO_STAKEHOLDER,
-        BATCH_STATUS.LAB_REVIEW,
-      ].includes(batch.status)
-    ) {
-      throw new ApiError(
-        400,
-        "Only submitted or lab review batches can be validated",
-      );
-    }
-
     if (!batch.labResult) {
       throw new ApiError(
         400,
@@ -282,14 +270,14 @@ async function validateBatchByStakeholder(req, res, next) {
         },
       });
 
-      if (isAccepted) {
-        await tx.communitySubmission.updateMany({
-          where: {
-            id: { in: batch.items.map((item) => item.submissionId) },
-          },
-          data: { status: SUBMISSION_STATUS.COMPLETED },
-        });
-      }
+      await tx.communitySubmission.updateMany({
+        where: {
+          id: { in: batch.items.map((item) => item.submissionId) },
+        },
+        data: {
+          status: isAccepted ? SUBMISSION_STATUS.COMPLETED : SUBMISSION_STATUS.IN_BATCH,
+        },
+      });
 
       await writeAuditLog(tx, {
         req,
@@ -299,7 +287,7 @@ async function validateBatchByStakeholder(req, res, next) {
         action: AUDIT_ACTIONS.FINAL_VALIDATE,
         before: batch,
         after: savedBatch,
-        reason: body.stakeholderNote,
+        reason: body.reason || body.stakeholderNote,
       });
 
       return tx.collectorBatch.findUnique({

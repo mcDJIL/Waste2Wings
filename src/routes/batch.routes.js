@@ -52,10 +52,12 @@ const stakeholderValidationSchema = z.object({
       status: z.literal(BATCH_STATUS.ACCEPTED_BY_STAKEHOLDER),
       finalLiter: z.number().positive(),
       stakeholderNote: z.string().optional(),
+      reason: z.string().optional(),
     }),
     z.object({
       status: z.literal(BATCH_STATUS.REJECTED_BY_STAKEHOLDER),
       stakeholderNote: z.string().optional(),
+      reason: z.string().optional(),
     }),
   ]),
   query: z.object({}).optional(),
@@ -148,7 +150,7 @@ router.get('/:id', authenticate, validate(paramsSchema), getBatchById);
  * @openapi
  * /batches/{id}/stakeholder-validation:
  *   patch:
- *     summary: Accept or reject collector batch by stakeholder
+ *     summary: Accept, reject, or correct final collector batch decision
  *     tags:
  *       - Batches
  *     security:
@@ -177,6 +179,9 @@ router.get('/:id', authenticate, validate(paramsSchema), getBatchById);
  *                   stakeholderNote:
  *                     type: string
  *                     example: Accepted after lab review.
+ *                   reason:
+ *                     type: string
+ *                     example: Correction after final weighing review.
  *               - type: object
  *                 required: [status]
  *                 properties:
@@ -186,6 +191,9 @@ router.get('/:id', authenticate, validate(paramsSchema), getBatchById);
  *                   stakeholderNote:
  *                     type: string
  *                     example: Rejected due to lab grade.
+ *                   reason:
+ *                     type: string
+ *                     example: Correction after lab retest.
  *           examples:
  *             accept:
  *               summary: Accept batch
@@ -193,11 +201,13 @@ router.get('/:id', authenticate, validate(paramsSchema), getBatchById);
  *                 status: ACCEPTED_BY_STAKEHOLDER
  *                 finalLiter: 120
  *                 stakeholderNote: Accepted after lab review.
+ *                 reason: Final decision based on lab result.
  *             reject:
  *               summary: Reject batch
  *               value:
  *                 status: REJECTED_BY_STAKEHOLDER
  *                 stakeholderNote: Rejected due to lab grade.
+ *                 reason: Final decision based on lab result.
  *     responses:
  *       200:
  *         description: Validated batch

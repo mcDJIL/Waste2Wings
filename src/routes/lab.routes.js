@@ -20,6 +20,7 @@ const labBodySchema = z.object({
   impurityPercent: z.number().min(0).max(100),
   grade: z.enum([LAB_GRADES.A, LAB_GRADES.B, LAB_GRADES.C, LAB_GRADES.REJECT]),
   notes: z.string().optional(),
+  reason: z.string().optional(),
 });
 
 const createLabSchema = z.object({
@@ -99,7 +100,7 @@ const labParamsSchema = z.object({
  *       201:
  *         description: Created lab result
  *       400:
- *         description: Invalid payload or batch already final
+ *         description: Invalid payload
  *       403:
  *         description: Only stakeholder can create lab result
  *       404:
@@ -140,7 +141,7 @@ router.get('/batches/:batchId/lab-results', authenticate, validate(batchParamsSc
  * @openapi
  * /lab-results/{id}:
  *   patch:
- *     summary: Update lab result before final batch validation
+ *     summary: Update lab result and track the change in audit log
  *     tags:
  *       - Lab Results
  *     security:

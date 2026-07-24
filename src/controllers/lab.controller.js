@@ -1,12 +1,13 @@
 const ApiError = require("../utils/ApiError");
 const prisma = require("../prismaClient");
+const { writeAuditLog } = require("../utils/audit");
 const {
   AUDIT_ACTIONS,
   AUDIT_ENTITY_TYPES,
   BATCH_STATUS,
 } = require("../utils/status");
 
-async function ensureEditableBatch(batchId) {
+async function ensureBatchExists(batchId) {
   const batch = await prisma.collectorBatch.findUnique({
     where: { id: batchId },
   });
@@ -15,25 +16,13 @@ async function ensureEditableBatch(batchId) {
     throw new ApiError(404, "Batch not found");
   }
 
-  if (
-    [
-      BATCH_STATUS.ACCEPTED_BY_STAKEHOLDER,
-      BATCH_STATUS.REJECTED_BY_STAKEHOLDER,
-    ].includes(batch.status)
-  ) {
-    throw new ApiError(
-      400,
-      "Lab result cannot be changed after final stakeholder validation",
-    );
-  }
-
   return batch;
 }
 
 async function createLabResult(req, res, next) {
   try {
     const { body } = req.validated;
-    const batch = await ensureEditableBatch(req.params.batchId);
+    const batch = await ensureBatchExists(req.params.batchId);
     const existingLabResult = await prisma.labResult.findUnique({
       where: { batchId: batch.id },
     });
@@ -68,7 +57,7 @@ async function createLabResult(req, res, next) {
         action: AUDIT_ACTIONS.CREATE,
         before: null,
         after: createdLabResult,
-        reason: body.notes,
+        reason: body.reason || body.notes,
       });
 
       return createdLabResult;
@@ -112,7 +101,7 @@ async function updateLabResult(req, res, next) {
       throw new ApiError(404, "Lab result not found");
     }
 
-    await ensureEditableBatch(labResult.batchId);
+    await ensureBatchExists(labResult.batchId);
 
     const updatedLabResult = await prisma.$transaction(async (tx) => {
       const savedLabResult = await tx.labResult.update({
@@ -135,8 +124,10 @@ async function updateLabResult(req, res, next) {
         action: AUDIT_ACTIONS.UPDATE,
         before: labResult,
         after: savedLabResult,
-        reason: body.notes,
+        reason: body.reason || body.notes,
       });
+
+      return savedLabResult;
     });
 
     res.json({ labResult: updatedLabResult });
@@ -155,7 +146,7 @@ async function deleteLabResult(req, res, next) {
       throw new ApiError(404, "Lab result not found");
     }
 
-    await ensureEditableBatch(labResult.batchId);
+    await ensureBatchExists(labResult.batchId);
     await prisma.$transaction(async (tx) => {
       await tx.labResult.delete({ where: { id: labResult.id } });
 
