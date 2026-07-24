@@ -207,6 +207,107 @@ Test files:
 
 ---
 
+## 🐳 Deploy ke VPS dengan Docker
+
+Panduan ini menjalankan service FastAPI di port `3001` menggunakan Docker Compose.
+
+### 1. Persiapan VPS
+
+Install Docker dan plugin Compose di VPS Ubuntu/Debian:
+
+```bash
+sudo apt update
+sudo apt install -y docker.io docker-compose-plugin git
+sudo systemctl enable --now docker
+```
+
+Opsional, agar user saat ini bisa menjalankan Docker tanpa `sudo`:
+
+```bash
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+### 2. Upload atau Clone Project
+
+Clone repository ke VPS:
+
+```bash
+git clone <url-repository> henwasteoil-ml
+cd henwasteoil-ml
+```
+
+Jika project dikirim manual, pastikan folder `data/`, `src/`, `requirements.txt`, `Dockerfile`, dan `docker-compose.yml` ikut ter-upload.
+
+### 3. Build dan Jalankan Container
+
+```bash
+docker compose up -d --build
+```
+
+Service akan berjalan di:
+
+```text
+http://<ip-vps>:3001
+```
+
+Cek status dan log:
+
+```bash
+docker compose ps
+docker compose logs -f ml-service
+```
+
+### 4. Test Health Check
+
+```bash
+curl http://localhost:3001/health
+```
+
+Jika diakses dari komputer lokal:
+
+```bash
+curl http://<ip-vps>:3001/health
+```
+
+### 5. Training Model di Container
+
+Endpoint training tetap menggunakan path relatif project karena `data/` di-mount ke `/app/data`:
+
+```bash
+curl -X POST http://localhost:3001/api/v1/prediction/train \
+  -H "Content-Type: application/json" \
+  -d '{"data_path": "data/waste_oil_dummy.csv"}'
+
+curl -X POST http://localhost:3001/api/v1/clustering/train \
+  -H "Content-Type: application/json" \
+  -d '{"data_path": "data/collector_locations_dummy.csv"}'
+```
+
+File model hasil training tersimpan di folder `models/` pada host VPS melalui volume `./models:/app/models`, sehingga tidak hilang saat container restart.
+
+### 6. Update Aplikasi
+
+Saat ada perubahan kode:
+
+```bash
+git pull
+docker compose up -d --build
+```
+
+### 7. Stop Service
+
+```bash
+docker compose down
+```
+
+Catatan produksi:
+- Buka port `3001` di firewall VPS jika service perlu diakses langsung dari internet.
+- Untuk domain dan HTTPS, gunakan reverse proxy seperti Nginx atau Caddy di depan service ini.
+- API saat ini mengizinkan CORS dari semua origin. Batasi `allow_origins` di `src/api.py` jika sudah tahu domain frontend produksi.
+
+---
+
 ## 📈 Model Details
 
 ### Prediction Model
