@@ -1,0 +1,68 @@
+services:
+  traefik:
+    image: traefik:v3.1
+    container_name: henwasteoil-traefik
+    restart: unless-stopped
+    command:
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - web
+
+  db:
+    image: postgres:16-alpine
+    container_name: henwasteoil-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-henwasteoil}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  api:
+    build: .
+    container_name: henwasteoil-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-henwasteoil}?schema=public
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.henwasteoil-api.rule=Host(`${API_DOMAIN:?API_DOMAIN is required}`)
+      - traefik.http.routers.henwasteoil-api.entrypoints=web
+      - traefik.http.services.henwasteoil-api.loadbalancer.server.port=3000
+    networks:
+      - web
+      - internal
+
+networks:
+  web:
+    name: henwasteoil-web
+  internal:
+    name: henwasteoil-internal
+    internal: true
+
+volumes:
+  postgres_data:
+    name: henwasteoil-postgres-data
