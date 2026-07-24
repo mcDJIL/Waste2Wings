@@ -10,6 +10,8 @@ jobs:
   build:
     name: Build Check
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/henwasteoil?schema=public
 
     steps:
       - name: Checkout
@@ -31,7 +33,7 @@ jobs:
         run: npx prisma validate
 
       - name: Build Docker image
-        run: docker build -t henwasteoil-be:ci .
+        run: docker build --build-arg DATABASE_URL=$DATABASE_URL -t henwasteoil-be:ci .
 
   deploy:
     name: Deploy To VPS
