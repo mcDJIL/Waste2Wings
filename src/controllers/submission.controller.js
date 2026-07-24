@@ -1,5 +1,6 @@
 const ApiError = require("../utils/ApiError");
 const prisma = require("../prismaClient");
+const { writeAuditLog } = require("../utils/audit");
 const {
   AUDIT_ACTIONS,
   AUDIT_ENTITY_TYPES,
@@ -242,12 +243,15 @@ async function validateSubmissionByCollector(req, res, next) {
         include: getSubmissionInclude(),
       });
 
-      await tx.auditLog.create({
+      await writeAuditLog(tx, {
         req,
         actorId: req.user.id,
         entityType: AUDIT_ENTITY_TYPES.COMMUNITY_SUBMISSION,
         entityId: submission.id,
-        action: body.status === SUBMISSION_STATUS.ACCEPTED_BY_COLLECTOR ? AUDIT_ACTIONS.ACCEPT : AUDIT_ACTIONS.REJECT,
+        action:
+          body.status === SUBMISSION_STATUS.ACCEPTED_BY_COLLECTOR
+            ? AUDIT_ACTIONS.ACCEPT
+            : AUDIT_ACTIONS.REJECT,
         before: submission,
         after: savedSubmission,
         reason: body.collectorNote,
