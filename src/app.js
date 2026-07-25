@@ -3,6 +3,16 @@ const express = require('express');
 const helmet = require('helmet');
 
 const { notFoundHandler, errorHandler } = require('./middleware/error');
+const auditRoutes = require('./routes/audit.routes');
+const authRoutes = require('./routes/auth.routes');
+const batchRoutes = require('./routes/batch.routes');
+const collectorRoutes = require('./routes/collector.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
+const labRoutes = require('./routes/lab.routes');
+const predictionRoutes = require('./routes/prediction.routes');
+const profileRoutes = require('./routes/profile.routes');
+const submissionRoutes = require('./routes/submission.routes');
+const stakeholderRoutes = require('./routes/stakeholder.routes');
 const { setupSwagger } = require('./swagger');
 
 const app = express();
@@ -30,6 +40,17 @@ app.get('/api/v1/health', (req, res) => {
     service: 'henwasteoil-be',
   });
 });
+
+app.use('/api/v1/audit-logs', auditRoutes);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/batches', batchRoutes);
+app.use('/api/v1/collectors', collectorRoutes);
+app.use('/api/v1/dashboard', dashboardRoutes);
+app.use('/api/v1', labRoutes);
+app.use('/api/v1/predictions', predictionRoutes);
+app.use('/api/v1/profiles', profileRoutes);
+app.use('/api/v1/submissions', submissionRoutes);
+app.use('/api/v1/stakeholder', stakeholderRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

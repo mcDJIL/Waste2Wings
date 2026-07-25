@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: henwasteoil-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-henwasteoil}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  api:
+    build: .
+    container_name: henwasteoil-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-henwasteoil}?schema=public
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      ML_SERVICE_BASE_URL: ${ML_SERVICE_BASE_URL:-http://host.docker.internal:3001}
+    ports:
+      - "127.0.0.1:3000:3000"
+    networks:
+      - internal
+
+networks:
+  internal:
+    name: henwasteoil-internal
+
+volumes:
+  postgres_data:
+    name: henwasteoil-postgres-data
