@@ -1,20 +1,4 @@
 services:
-  traefik:
-    image: traefik:v2.1
-    container_name: henwasteoil-traefik
-    restart: unless-stopped
-    command:
-      - --api.dashboard=true
-      - --providers.docker=true
-      - --providers.docker.exposedbydefault=false
-      - --entrypoints.web.address=:80
-    ports:
-      - "80:80"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - web
-
   db:
     image: postgres:16-alpine
     container_name: henwasteoil-db
@@ -47,21 +31,15 @@ services:
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.henwasteoil-api.rule=Host(`${API_DOMAIN:?API_DOMAIN is required}`)
-      - traefik.http.routers.henwasteoil-api.entrypoints=web
-      - traefik.http.services.henwasteoil-api.loadbalancer.server.port=3000
+      ML_SERVICE_BASE_URL: ${ML_SERVICE_BASE_URL:-http://host.docker.internal:3001}
+    ports:
+      - "127.0.0.1:3000:3000"
     networks:
-      - web
       - internal
 
 networks:
-  web:
-    name: henwasteoil-web
   internal:
     name: henwasteoil-internal
-    internal: true
 
 volumes:
   postgres_data:
