@@ -1,1 +1,350 @@
 @import "tailwindcss";
+
+@theme {
+  --color-brand-darkest: #002D22;
+  --color-brand-dark: #004536;
+  --color-brand-medium: #004736;
+  --color-brand-green: #006C49;
+  --color-brand-light-green: #00734E;
+  --color-brand-mint: #81F9C1;
+  --color-brand-gold: #C9A96E;
+  --color-brand-text: #3F4945;
+  --color-brand-muted: #BFC9C3;
+  --color-brand-blue-pale: #D5E3FF;
+  --breakpoint-xs: 400px;
+}
+
+* {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  box-sizing: border-box;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeSlideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.animate-fade-slide-up {
+  animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-slide-left {
+  animation: fadeSlideLeft 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease both;
+}
+
+.login-btn-gradient {
+  background: linear-gradient(99deg, #0B5E4B 0%, #C9A96E 100%);
+  background-size: 200% 100%;
+  transition: background-position 0.4s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-btn-gradient:hover {
+  background-position: right center;
+  transform: translateY(-1px);
+  box-shadow: 0 20px 40px -8px rgba(11, 94, 75, 0.45);
+}
+
+.login-btn-gradient:active {
+  transform: translateY(0);
+}
+
+.input-glass {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.input-glass:focus-within {
+  background: rgba(11, 94, 75, 0.04);
+  border-color: rgba(11, 94, 75, 0.4);
+  box-shadow: 0 0 0 3px rgba(11, 94, 75, 0.12);
+}
+
+.auth-card-viewport {
+  position: relative;
+  max-width: 400px;
+  min-height: 520px;
+  margin: 0 auto;
+}
+
+.auth-card-container {
+  position: relative;
+  width: 100%;
+  min-height: 520px;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-card-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  backface-visibility: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-card-face > * {
+  width: 100%;
+  max-width: 400px;
+}
+
+@media (max-width: 640px) {
+  .auth-card-viewport {
+    min-height: auto;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .auth-card-container {
+    min-height: auto;
+  }
+}
+
+.face-front {
+  transform: rotateY(0deg);
+}
+
+.face-back {
+  transform: rotateY(180deg);
+}
+
+.flip-front {
+  transform: rotateY(0deg);
+}
+
+.flip-back {
+  transform: rotateY(-180deg);
+}
+
+/* ── Leaflet overrides ─────────────────────────────────── */
+
+.leaflet-container {
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-content {
+  margin: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.leaflet-popup-tip {
+  background: white;
+}
+
+/* ── Dashboard ─────────────────────────────────────────── */
+
+@keyframes dashboardCardIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes progressBarFill {
+  from { width: 0; }
+}
+
+@keyframes statusPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 108, 73, 0.5); }
+  50%       { box-shadow: 0 0 0 6px rgba(0, 108, 73, 0); }
+}
+
+.dashboard-card-enter {
+  animation: dashboardCardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.status-pulse {
+  animation: statusPulse 2.5s ease-in-out infinite;
+}
+
+/* ── Collector dashboard ───────────────────────────────── */
+
+.font-poppins {
+  font-family: "Poppins", sans-serif;
+}
+
+@keyframes chartDraw {
+  from { stroke-dashoffset: 1200; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes kpiCountUp {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.chart-line-draw {
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 0;
+  animation: chartDraw 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.collector-card-enter {
+  animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.kpi-value-enter {
+  animation: kpiCountUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ── Lab page ──────────────────────────────────────────── */
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.55; transform: scale(1.3); }
+}
+
+@keyframes radarDraw {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.live-dot-pulse {
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+.radar-chart-enter {
+  animation: radarDraw 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Map page ──────────────────────────────────────────── */
+
+@keyframes mapPanelIn {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes mapMarkerPop {
+  0%   { transform: scale(0) translateY(10px); opacity: 0; }
+  70%  { transform: scale(1.15) translateY(-4px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.map-panel-enter {
+  animation: mapPanelIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.map-marker-pop {
+  animation: mapMarkerPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ── Distribution map page ─────────────────────────────── */
+
+@keyframes truckDrive {
+  0%   { transform: translateX(0px); }
+  30%  { transform: translateX(14px); }
+  60%  { transform: translateX(6px); }
+  100% { transform: translateX(0px); }
+}
+
+@keyframes markerFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+@keyframes feedItemIn {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes intelligencePanelIn {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes statsBarIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes legendIn {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes tooltipPop {
+  0%   { opacity: 0; transform: scale(0.85) translateY(6px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes hubPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201, 169, 110, 0.5); }
+  50%       { box-shadow: 0 0 0 12px rgba(201, 169, 110, 0); }
+}
+
+.animate-truck-drive {
+  animation: truckDrive 2.5s ease-in-out infinite;
+}
+
+.animate-marker-float {
+  animation: markerFloat 3s ease-in-out infinite;
+}
+
+.animate-feed-item-in {
+  animation: feedItemIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-intelligence-panel-in {
+  animation: intelligencePanelIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-stats-bar-in {
+  animation: statsBarIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-legend-in {
+  animation: legendIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-tooltip-pop {
+  animation: tooltipPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-hub-pulse {
+  animation: hubPulse 2.5s ease-in-out infinite;
+}
