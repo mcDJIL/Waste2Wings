@@ -7,12 +7,17 @@ import LabHeader from '../../components/stakeholder/lab/LabHeader'
 import LabKpiCards from '../../components/stakeholder/lab/LabKpiCards'
 import BatchTableSection from '../../sections/stakeholder/lab/BatchTableSection'
 import BatchDetailSection from '../../sections/stakeholder/lab/BatchDetailSection'
+import { exportLabReportToPDF } from '../../utils/labPdfExport'
 
 export default function LabPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [batches, setBatches] = useState([])
   const [selectedBatchId, setSelectedBatchId] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+
+  const handleExportReport = () => {
+    exportLabReportToPDF(batches)
+  }
 
   useEffect(() => {
     const fetchBatches = async () => {
@@ -48,7 +53,7 @@ export default function LabPage() {
         <main className="flex-1 flex flex-col px-4 sm:px-6 md:px-10 py-8 gap-8 overflow-y-auto">
           {/* Page header */}
           <section className="animate-fade-slide-up" style={{ animationDelay: '0ms' }}>
-            <LabHeader />
+            <LabHeader onExport={handleExportReport} />
           </section>
 
           {/* KPI cards */}
