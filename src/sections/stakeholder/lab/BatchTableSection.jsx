@@ -61,7 +61,7 @@ function getStatusColor(batch) {
   return '#64748B'
 }
 
-export default function BatchTableSection({ batches = [], selectedBatchId, onSelectBatch, isLoading = false }) {
+export default function BatchTableSection({ batches = [], selectedBatchId, onSelectBatch, isLoading = false, onRefresh }) {
   const [activeFilter, setActiveFilter] = useState('All')
   const [inputModalOpen, setInputModalOpen] = useState(false)
   const [resultsModalOpen, setResultsModalOpen] = useState(false)
@@ -78,7 +78,15 @@ export default function BatchTableSection({ batches = [], selectedBatchId, onSel
   }
 
   const handleSuccess = () => {
-    window.location.reload()
+    setInputModalOpen(false)
+    setResultsModalOpen(false)
+    onRefresh?.()
+  }
+
+  const handleModalClose = () => {
+    setInputModalOpen(false)
+    setResultsModalOpen(false)
+    onRefresh?.()
   }
 
   const filtered = useMemo(() => {
@@ -339,14 +347,14 @@ export default function BatchTableSection({ batches = [], selectedBatchId, onSel
       <LabInputModal
         isOpen={inputModalOpen}
         batchId={selectedBatchForModal?.id}
-        onClose={() => setInputModalOpen(false)}
+        onClose={handleModalClose}
         onSuccess={handleSuccess}
       />
       <LabResultsModal
         isOpen={resultsModalOpen}
         batchId={selectedBatchForModal?.id}
         batch={selectedBatchForModal}
-        onClose={() => setResultsModalOpen(false)}
+        onClose={handleModalClose}
         onSuccess={handleSuccess}
       />
     </div>

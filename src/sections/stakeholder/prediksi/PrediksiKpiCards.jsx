@@ -1,35 +1,9 @@
-const kpiCards = [
-  {
-    label: 'PENDAPATAN DIPREDIKSI',
-    value: '$4.28M',
-    badge: { text: '+12.4% vs siklus seb.', color: '#00734E', arrowUp: true },
-    icon: (
-      <svg width="20" height="12" viewBox="0 0 20 12" fill="none">
-        <path d="M1.4 12L0 10.6L7.4 3.15L11.4 7.15L16.6 2H14V0H20V6H18V3.4L11.4 10L7.4 6L1.4 12Z" fill="#C9A96E" />
-      </svg>
-    ),
-  },
-  {
-    label: 'BIAYA OPERASIONAL',
-    value: '$1.15M',
-    badge: { text: '+4.2% Lonjakan Logistik', color: '#BA1A1A', arrowUp: true },
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <path d="M4 14H6V9H4V14ZM12 14H14V4H12V14ZM8 14H10V11H8V14ZM8 9H10V7H8V9ZM2 18C1.45 18 0.979167 17.8042 0.5875 17.4125C0.195833 17.0208 0 16.55 0 16V2C0 1.45 0.195833 0.979167 0.5875 0.5875C0.979167 0.195833 1.45 0 2 0H16C16.55 0 17.0208 0.195833 17.4125 0.5875C17.8042 0.979167 18 1.45 18 2V16C18 16.55 17.8042 17.0208 17.4125 17.4125C17.0208 17.8042 16.55 18 16 18H2ZM2 16H16V2H2V16Z" fill="#BA1A1A" />
-      </svg>
-    ),
-  },
-  {
-    label: 'PROYEKSI LABA BERSIH',
-    value: '$3.13M',
-    badge: { text: 'Proyeksi Rekor Baru', color: '#00734E', star: true },
-    icon: (
-      <svg width="22" height="16" viewBox="0 0 22 16" fill="none">
-        <path d="M13 9C12.1667 9 11.4583 8.70833 10.875 8.125C10.2917 7.54167 10 6.83333 10 6C10 5.16667 10.2917 4.45833 10.875 3.875C11.4583 3.29167 12.1667 3 13 3C13.8333 3 14.5417 3.29167 15.125 3.875C15.7083 4.45833 16 5.16667 16 6C16 6.83333 15.7083 7.54167 15.125 8.125C14.5417 8.70833 13.8333 9 13 9ZM6 12C5.45 12 4.97917 11.8042 4.5875 11.4125C4.19583 11.0208 4 10.55 4 10V2C4 1.45 4.19583 0.979167 4.5875 0.5875C4.97917 0.195833 5.45 0 6 0H20C20.55 0 21.0208 0.195833 21.4125 0.5875C21.8042 0.979167 22 1.45 22 2V10C22 10.55 21.8042 11.0208 21.4125 11.4125C21.0208 11.8042 20.55 12 20 12H6ZM8 10H18C18 9.45 18.1958 8.97917 18.5875 8.5875C18.9792 8.19583 19.45 8 20 8V4C19.45 4 18.9792 3.80417 18.5875 3.4125C18.1958 3.02083 18 2.55 18 2H8C8 2.55 7.80417 3.02083 7.4125 3.4125C7.02083 3.80417 6.55 4 6 4V8C6.55 8 7.02083 8.19583 7.4125 8.5875C7.80417 8.97917 8 9.45 8 10ZM19 16H2C1.45 16 0.979167 15.8042 0.5875 15.4125C0.195833 15.0208 0 14.55 0 14V3H2V14H19V16Z" fill="#004536" />
-      </svg>
-    ),
-  },
-]
+function getMoneyFormat(amount) {
+  if (!amount) return '$0'
+  if (amount >= 1000000) return `$${(amount / 1000000).toFixed(2)}M`
+  if (amount >= 1000) return `$${(amount / 1000).toFixed(0)}K`
+  return `$${amount}`
+}
 
 function ArrowUpIcon({ color }) {
   return (
@@ -78,14 +52,55 @@ function AiTrustCard() {
   )
 }
 
-export default function PrediksiKpiCards() {
+export default function PrediksiKpiCards({ trends = [], settings, isLoading }) {
+  const historical_volumes = trends.map(trend => trend.totalFinalLiter || 0)
+  const totalHistoricalVolume = historical_volumes.reduce((sum, vol) => sum + vol, 0)
+  const referencePricePerLiter = settings?.referencePricePerLiter || 0
+  
+  const predictedRevenue = totalHistoricalVolume * referencePricePerLiter
+  const operationalCost = predictedRevenue * 0.27
+  const netProfit = predictedRevenue - operationalCost
+
+  const kpiCards = [
+    {
+      label: 'PENDAPATAN DIPREDIKSI',
+      value: isLoading ? '...' : getMoneyFormat(predictedRevenue),
+      badge: { text: `dari ${historical_volumes.length} periode`, color: '#00734E', arrowUp: false },
+      icon: (
+        <svg width="20" height="12" viewBox="0 0 20 12" fill="none">
+          <path d="M1.4 12L0 10.6L7.4 3.15L11.4 7.15L16.6 2H14V0H20V6H18V3.4L11.4 10L7.4 6L1.4 12Z" fill="#C9A96E" />
+        </svg>
+      ),
+    },
+    {
+      label: 'BIAYA OPERASIONAL',
+      value: isLoading ? '...' : getMoneyFormat(operationalCost),
+      badge: { text: '27% dari pendapatan', color: '#BA1A1A', arrowUp: false },
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M4 14H6V9H4V14ZM12 14H14V4H12V14ZM8 14H10V11H8V14ZM8 9H10V7H8V9ZM2 18C1.45 18 0.979167 17.8042 0.5875 17.4125C0.195833 17.0208 0 16.55 0 16V2C0 1.45 0.195833 0.979167 0.5875 0.5875C0.979167 0.195833 1.45 0 2 0H16C16.55 0 17.0208 0.195833 17.4125 0.5875C17.8042 0.979167 18 1.45 18 2V16C18 16.55 17.8042 17.0208 17.4125 17.4125C17.0208 17.8042 16.55 18 16 18H2ZM2 16H16V2H2V16Z" fill="#BA1A1A" />
+        </svg>
+      ),
+    },
+    {
+      label: 'PROYEKSI LABA BERSIH',
+      value: isLoading ? '...' : getMoneyFormat(netProfit),
+      badge: { text: 'Dari analisis tren', color: '#00734E', star: true },
+      icon: (
+        <svg width="22" height="16" viewBox="0 0 22 16" fill="none">
+          <path d="M13 9C12.1667 9 11.4583 8.70833 10.875 8.125C10.2917 7.54167 10 6.83333 10 6C10 5.16667 10.2917 4.45833 10.875 3.875C11.4583 3.29167 12.1667 3 13 3C13.8333 3 14.5417 3.29167 15.125 3.875C15.7083 4.45833 16 5.16667 16 6C16 6.83333 15.7083 7.54167 15.125 8.125C14.5417 8.70833 13.8333 9 13 9ZM6 12C5.45 12 4.97917 11.8042 4.5875 11.4125C4.19583 11.0208 4 10.55 4 10V2C4 1.45 4.19583 0.979167 4.5875 0.5875C4.97917 0.195833 5.45 0 6 0H20C20.55 0 21.0208 0.195833 21.4125 0.5875C21.8042 0.979167 22 1.45 22 2V10C22 10.55 21.8042 11.0208 21.4125 11.4125C21.0208 11.8042 20.55 12 20 12H6ZM8 10H18C18 9.45 18.1958 8.97917 18.5875 8.5875C18.9792 8.19583 19.45 8 20 8V4C19.45 4 18.9792 3.80417 18.5875 3.4125C18.1958 3.02083 18 2.55 18 2H8C8 2.55 7.80417 3.02083 7.4125 3.4125C7.02083 3.80417 6.55 4 6 4V8C6.55 8 7.02083 8.19583 7.4125 8.5875C7.80417 8.97917 8 9.45 8 10ZM19 16H2C1.45 16 0.979167 15.8042 0.5875 15.4125C0.195833 15.0208 0 14.55 0 14V3H2V14H19V16Z" fill="#004536" />
+        </svg>
+      ),
+    },
+  ]
+
   return (
     <div className="grid grid-cols-2 xl:grid-cols-4 gap-6">
       {kpiCards.map((card) => (
         <div
           key={card.label}
-          className="flex flex-col gap-2 p-6 rounded-xl border-t-[3px] border-x border-b bg-white/70 backdrop-blur-[10px]"
-          style={{ borderColor: '#C9A96E' }}
+          className="flex flex-col gap-2 p-6 rounded-xl border-t-[3px] border-x border-b bg-white/70 backdrop-blur-[10px] transition-all duration-300"
+          style={{ borderColor: '#C9A96E', opacity: isLoading ? 0.6 : 1 }}
         >
           <div className="flex items-start justify-between">
             <span className="text-[#6F7975] text-base font-extrabold leading-6 tracking-[1.6px] uppercase">

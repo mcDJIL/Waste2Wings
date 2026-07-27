@@ -1,9 +1,11 @@
-const topRegions = [
-  { name: 'Jabodetabek', volume: '142,000L' },
-  { name: 'Jawa Tengah', volume: '89,200L' },
-]
+export default function MapWidget({ markers = [], isLoading }) {
+  const communityMarkers = markers.filter(m => m.type === 'COMMUNITY')
+  const collectorMarkers = markers.filter(m => m.type === 'COLLECTOR')
 
-export default function MapWidget() {
+  const topRegions = communityMarkers.slice(0, 2).map((m, idx) => ({
+    name: m.name,
+    count: communityMarkers.length,
+  }))
   return (
     <div className="flex flex-col gap-4 p-6 rounded-2xl border border-white/30 bg-white/70 backdrop-blur-[10px] shadow-sm h-full">
       {/* Header */}
@@ -26,10 +28,10 @@ export default function MapWidget() {
 
         {/* Cluster markers */}
         <div className="absolute top-[28%] left-[33%] w-8 h-6 flex items-center justify-center rounded-full border-2 border-white bg-[rgba(0,69,54,0.80)] text-white text-[10px] font-bold shadow-lg">
-          24
+          {communityMarkers.length}
         </div>
         <div className="absolute top-[62%] left-[62%] w-10 h-8 flex items-center justify-center rounded-full border-2 border-white bg-[rgba(0,108,73,0.80)] text-white text-[10px] font-bold shadow-lg">
-          156
+          {collectorMarkers.length}
         </div>
 
         {/* Legend overlay */}
@@ -46,15 +48,17 @@ export default function MapWidget() {
         </div>
       </div>
 
-      {/* Top regions */}
+      {/* Stats */}
       <div className="flex flex-col gap-3">
-        <p className="text-[#3F4945] text-xs font-bold uppercase tracking-[0.8px] leading-5">TOP REGION</p>
-        {topRegions.map((r) => (
-          <div key={r.name} className="flex justify-between items-center">
-            <span className="text-[#051C37] text-sm leading-6">{r.name}</span>
-            <span className="text-[#051C37] text-sm font-bold leading-6">{r.volume}</span>
-          </div>
-        ))}
+        <p className="text-[#3F4945] text-xs font-bold uppercase tracking-[0.8px] leading-5">MARKER DATA</p>
+        <div className="flex justify-between items-center">
+          <span className="text-[#051C37] text-sm leading-6">Komunitas</span>
+          <span className="text-[#051C37] text-sm font-bold leading-6">{isLoading ? '...' : communityMarkers.length}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-[#051C37] text-sm leading-6">Pengepul</span>
+          <span className="text-[#051C37] text-sm font-bold leading-6">{isLoading ? '...' : collectorMarkers.length}</span>
+        </div>
       </div>
     </div>
   )

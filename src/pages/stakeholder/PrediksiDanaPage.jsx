@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import api from '../../services/api'
 import Sidebar from '../../components/stakeholder/Sidebar'
 import TopNav from '../../components/stakeholder/TopNav'
 import DashboardFooter from '../../components/stakeholder/DashboardFooter'
@@ -9,6 +10,30 @@ import BudgetScenarioSection from '../../sections/stakeholder/prediksi/BudgetSce
 
 export default function PrediksiDanaPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [predictionData, setPredictionData] = useState(null)
+  const [trends, setTrends] = useState([])
+  const [settings, setSettings] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchPredictionData = async () => {
+      try {
+        setIsLoading(true)
+        const [trendsRes, settingsRes] = await Promise.all([
+          api.get('/dashboard/trends'),
+          api.get('/stakeholder/settings'),
+        ])
+        setTrends(trendsRes.data?.trends || [])
+        setSettings(settingsRes.data?.setting)
+      } catch (error) {
+        console.error('Failed to fetch prediction data:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchPredictionData()
+  }, [])
 
   return (
     <div className="flex min-h-screen bg-[#F5F7F6]">
@@ -23,15 +48,15 @@ export default function PrediksiDanaPage() {
           </section>
 
           <section className="animate-fade-slide-up" style={{ animationDelay: '60ms' }}>
-            <PrediksiKpiCards />
+            <PrediksiKpiCards trends={trends} settings={settings} isLoading={isLoading} />
           </section>
 
           <section className="animate-fade-slide-up" style={{ animationDelay: '120ms' }}>
-            <ForecastChartSection />
+            <ForecastChartSection trends={trends} isLoading={isLoading} />
           </section>
 
           <section className="animate-fade-slide-up" style={{ animationDelay: '180ms' }}>
-            <BudgetScenarioSection />
+            <BudgetScenarioSection trends={trends} settings={settings} isLoading={isLoading} />
           </section>
         </main>
 

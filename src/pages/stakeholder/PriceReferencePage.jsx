@@ -1,15 +1,45 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import api from '../../services/api'
+import { useToast } from '../../contexts/ToastContext'
 import Sidebar from '../../components/stakeholder/Sidebar'
 import TopNav from '../../components/stakeholder/TopNav'
 import DashboardFooter from '../../components/stakeholder/DashboardFooter'
 import PriceReferenceHeader from '../../sections/stakeholder/referenceprice/PriceReferenceHeader'
-import KpiSection from '../../sections/stakeholder/referenceprice/KpiSection'
-import PriceChartSection from '../../sections/stakeholder/referenceprice/PriceChartSection'
-import CorrelationSection from '../../sections/stakeholder/referenceprice/CorrelationSection'
-import RegionalAnalysisSection from '../../sections/stakeholder/referenceprice/RegionalAnalysisSection'
+import PriceSettingsSection from '../../sections/stakeholder/referenceprice/PriceSettingsSection'
 
 export default function PriceReferencePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [settings, setSettings] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const { showToast } = useToast()
+
+  useEffect(() => {
+    fetchSettings()
+  }, [])
+
+  const fetchSettings = async () => {
+    try {
+      setIsLoading(true)
+      const response = await api.get('/stakeholder/settings')
+      setSettings(response.data?.setting)
+    } catch (error) {
+      console.error('Failed to fetch settings:', error)
+      showToast('Gagal memuat pengaturan', 'error', 3000, 'Error')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleUpdateSettings = async (newSettings) => {
+    try {
+      await api.put('/stakeholder/settings', newSettings)
+      setSettings(newSettings)
+      showToast('Pengaturan berhasil diperbarui', 'success', 3000, 'Sukses')
+    } catch (error) {
+      console.error('Failed to update settings:', error)
+      showToast('Gagal memperbarui pengaturan', 'error', 3000, 'Error')
+    }
+  }
 
   return (
     <div className="flex min-h-screen bg-[#F5F7F6]">
@@ -24,19 +54,11 @@ export default function PriceReferencePage() {
           </section>
 
           <section className="animate-fade-slide-up" style={{ animationDelay: '60ms' }}>
-            <KpiSection />
-          </section>
-
-          <section className="animate-fade-slide-up" style={{ animationDelay: '120ms' }}>
-            <PriceChartSection />
-          </section>
-
-          <section className="animate-fade-slide-up" style={{ animationDelay: '180ms' }}>
-            <CorrelationSection />
-          </section>
-
-          <section className="animate-fade-slide-up" style={{ animationDelay: '240ms' }}>
-            <RegionalAnalysisSection />
+            <PriceSettingsSection
+              settings={settings}
+              isLoading={isLoading}
+              onUpdate={handleUpdateSettings}
+            />
           </section>
         </main>
 

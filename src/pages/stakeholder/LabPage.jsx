@@ -19,6 +19,21 @@ export default function LabPage() {
     exportLabReportToPDF(batches)
   }
 
+  const handleRefreshBatches = async () => {
+    try {
+      setIsLoading(true)
+      const response = await api.get('/batches')
+      const data = response.data?.batches || response.data
+      if (Array.isArray(data) && data.length > 0) {
+        setBatches(data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch batches:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   useEffect(() => {
     const fetchBatches = async () => {
       try {
@@ -68,6 +83,7 @@ export default function LabPage() {
               selectedBatchId={selectedBatchId}
               onSelectBatch={setSelectedBatchId}
               isLoading={isLoading}
+              onRefresh={handleRefreshBatches}
             />
           </section>
 

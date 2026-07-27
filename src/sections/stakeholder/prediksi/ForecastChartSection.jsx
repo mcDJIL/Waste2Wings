@@ -18,9 +18,9 @@ const aiInsights = [
   },
 ]
 
-function ForecastChart() {
+function ForecastChart({ trends = [], isLoading }) {
   return (
-    <div className="flex flex-col gap-6 flex-1 p-8 rounded-xl border border-white/30 bg-white/70 shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] backdrop-blur-[10px] overflow-hidden">
+    <div className="flex flex-col gap-6 flex-1 p-8 rounded-xl border border-white/30 bg-white/70 shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] backdrop-blur-[10px] overflow-hidden" style={{ opacity: isLoading ? 0.6 : 1 }}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
@@ -106,11 +106,11 @@ function AiInsightsPanel() {
   )
 }
 
-export default function ForecastChartSection() {
+export default function ForecastChartSection({ trends = [], isLoading }) {
   return (
     <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
       <div className="xl:col-span-2 flex">
-        <ForecastChart />
+        <ForecastChart trends={trends} isLoading={isLoading} />
       </div>
       <div className="xl:col-span-1">
         <AiInsightsPanel />
