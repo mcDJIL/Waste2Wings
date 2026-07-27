@@ -31,9 +31,12 @@ function BudgetAllocationCard() {
   )
 }
 
-function ScenarioSimulatorCard() {
-  const [volume, setVolume] = useState(12500)
-  const [price, setPrice] = useState(1.85)
+function ScenarioSimulatorCard({ trends = [], settings }) {
+  const historical_volumes = trends.map(trend => trend.totalFinalLiter || 0)
+  const avgVolume = historical_volumes.length > 0 ? historical_volumes.reduce((a, b) => a + b, 0) / historical_volumes.length : 12500
+
+  const [volume, setVolume] = useState(avgVolume)
+  const [price, setPrice] = useState(settings?.referencePricePerLiter || 1.85)
 
   const netProfit = ((volume * price * 0.0000135)).toFixed(2)
 
@@ -116,14 +119,14 @@ function ScenarioSimulatorCard() {
   )
 }
 
-export default function BudgetScenarioSection() {
+export default function BudgetScenarioSection({ trends = [], settings, isLoading }) {
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6" style={{ opacity: isLoading ? 0.6 : 1 }}>
       <div className="xl:col-span-1">
         <BudgetAllocationCard />
       </div>
       <div className="xl:col-span-2">
-        <ScenarioSimulatorCard />
+        <ScenarioSimulatorCard trends={trends} settings={settings} />
       </div>
     </div>
   )

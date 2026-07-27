@@ -12,12 +12,13 @@ const CloseIcon = () => (
 export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuccess }) {
   const { showToast } = useToast()
   const [labResult, setLabResult] = useState(null)
+  const [batchData, setBatchData] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [actionLoading, setActionLoading] = useState(null)
   const [error, setError] = useState('')
   const [note, setNote] = useState('')
 
-  const cleanLiterValue = batch?.cleanLiter || 0
+  const cleanLiterValue = batchData?.cleanLiter || batch?.cleanLiter || 0
 
   useEffect(() => {
     if (isOpen && batchId) {
@@ -29,9 +30,22 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
     try {
       setIsLoading(true)
       setError('')
-      const response = await api.get(`/batches/${batchId}/lab-results`)
-      setLabResult(response.data?.labResult)
-      if (!response.data?.labResult) {
+      const [resultsRes, batchRes] = await Promise.all([
+        api.get(`/batches/${batchId}/lab-results`),
+        api.get(`/batches/${batchId}`),
+      ])
+      const labResultData = resultsRes.data?.labResult
+      const batchDataResponse = batchRes.data?.batch || batchRes.data
+      setLabResult(labResultData)
+      setBatchData(batchDataResponse)
+
+      if (labResultData?.stakeholderNote) {
+        setNote(labResultData.stakeholderNote)
+      } else if (batchDataResponse?.stakeholderNote) {
+        setNote(batchDataResponse.stakeholderNote)
+      }
+
+      if (!resultsRes.data?.labResult) {
         setError('Belum ada hasil lab untuk batch ini')
       }
     } catch (err) {
@@ -52,12 +66,12 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
       setActionLoading('accept')
       await api.patch(`/batches/${batchId}/stakeholder-validation`, {
         status: 'ACCEPTED_BY_STAKEHOLDER',
-        cleanLiter: cleanLiterValue,
+        finalLiter: cleanLiterValue || labResult?.totalCleanLiter || 0,
         stakeholderNote: note,
       })
       showToast('Hasil lab berhasil diterima', 'success', 3000, 'Sukses')
+      await loadLabResults()
       onSuccess?.()
-      onClose()
     } catch (err) {
       console.error('Failed to accept batch:', err)
       setError(err.response?.data?.message || 'Gagal menerima hasil lab')
@@ -80,8 +94,8 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
         stakeholderNote: note,
       })
       showToast('Hasil lab berhasil ditolak', 'success', 3000, 'Sukses')
+      await loadLabResults()
       onSuccess?.()
-      onClose()
     } catch (err) {
       console.error('Failed to reject batch:', err)
       setError(err.response?.data?.message || 'Gagal menolak hasil lab')
@@ -91,6 +105,18 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
     }
   }
 
+  const getStatusDisplay = () => {
+    if (!batchData) return null
+    const status = batchData.status
+    if (status === 'ACCEPTED_BY_STAKEHOLDER') {
+      return { label: 'Sudah Diterima', color: 'bg-[#D1FAE5] text-[#065F46]' }
+    }
+    if (status === 'REJECTED_BY_STAKEHOLDER') {
+      return { label: 'Sudah Ditolak', color: 'bg-[#FEE2E2] text-[#991B1B]' }
+    }
+    return null
+  }
+
   if (!isOpen) return null
 
   const modalContent = (
@@ -98,7 +124,14 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
       <div className="bg-white rounded-3xl w-full max-w-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.35)] animate-fade-slide-up max-h-[85vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-[#004536] to-[#006C49] px-6 sm:px-8 py-5 flex items-center justify-between shrink-0 rounded-t-3xl">
-          <h2 className="text-lg sm:text-xl font-bold text-white">Hasil Uji Lab</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg sm:text-xl font-bold text-white">Hasil Uji Lab</h2>
+            {getStatusDisplay() && (
+              <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusDisplay().color}`}>
+                {getStatusDisplay().label}
+              </span>
+            )}
+          </div>
           <button
             onClick={onClose}
             className="p-2 text-white hover:bg-white/20 rounded-lg transition-all duration-200"
@@ -153,7 +186,7 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
               {/* Notes */}
               {labResult.notes && (
                 <div className="border-t border-[#BEC9C3]/20 pt-6">
-                  <h3 className="text-sm font-bold uppercase text-[#3F4945] tracking-wide mb-3">Catatan</h3>
+                  <h3 className="text-sm font-bold uppercase text-[#3F4945] tracking-wide mb-3">Catatan Input Uji Lab</h3>
                   <p className="text-sm text-[#3F4945] bg-[#FEF3C7]/50 p-4 rounded-lg border border-[#E4C285]/30 leading-relaxed">
                     {labResult.notes}
                   </p>
@@ -163,17 +196,19 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
               {/* Stakeholder Note */}
               <div className="border-t border-[#BEC9C3]/20 pt-6">
                 <label className="block text-sm font-bold text-[#051C37] mb-2">
-                  Catatan/Alasan *
+                  Catatan/Alasan {!batchData?.status || !['ACCEPTED_BY_STAKEHOLDER', 'REJECTED_BY_STAKEHOLDER'].includes(batchData.status) ? '*' : ''}
                 </label>
                 <textarea
                   value={note}
                   onChange={(e) => {
-                    setNote(e.target.value)
-                    if (error && e.target.value.trim()) setError('')
+                    const newNote = e.target.value
+                    setNote(newNote)
+                    if (error && newNote.trim()) setError('')
                   }}
                   placeholder="Jelaskan alasan penerimaan atau penolakan hasil lab ini..."
                   rows="3"
-                  className="w-full px-4 py-2.5 rounded-lg border border-[rgba(190,201,195,0.30)] bg-white text-[#051C37] outline-none focus:border-[#004536] focus:ring-2 focus:ring-[#004536]/20 transition-all duration-200 resize-none"
+                  disabled={batchData?.status && ['ACCEPTED_BY_STAKEHOLDER', 'REJECTED_BY_STAKEHOLDER'].includes(batchData.status) && actionLoading === null}
+                  className="w-full px-4 py-2.5 rounded-lg border border-[rgba(190,201,195,0.30)] bg-white text-[#051C37] outline-none focus:border-[#004536] focus:ring-2 focus:ring-[#004536]/20 transition-all duration-200 resize-none disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -184,16 +219,26 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
                   disabled={actionLoading || !note.trim()}
                   className="flex-1 px-4 py-2.5 rounded-lg bg-[#FEE2E2] text-[#991B1B] font-bold text-sm transition-all duration-200 hover:bg-[#FECACA] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
                 >
-                  {actionLoading === 'reject' ? 'Menolak...' : 'Tolak'}
+                  {actionLoading === 'reject' ? 'Menolak...' : batchData?.status === 'REJECTED_BY_STAKEHOLDER' ? 'Ubah ke Tolak' : 'Tolak'}
                 </button>
                 <button
                   onClick={handleAccept}
                   disabled={actionLoading || !note.trim()}
                   className="flex-1 px-4 py-2.5 rounded-lg bg-[#D1FAE5] text-[#065F46] font-bold text-sm transition-all duration-200 hover:bg-[#A7F3D0] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
                 >
-                  {actionLoading === 'accept' ? 'Menerima...' : 'Terima'}
+                  {actionLoading === 'accept' ? 'Menerima...' : batchData?.status === 'ACCEPTED_BY_STAKEHOLDER' ? 'Ubah ke Terima' : 'Terima'}
                 </button>
               </div>
+
+              {/* Saved Note Display */}
+              {batchData?.status && ['ACCEPTED_BY_STAKEHOLDER', 'REJECTED_BY_STAKEHOLDER'].includes(batchData.status) && (
+                <div className="border-t border-[#BEC9C3]/20 pt-4 mt-4">
+                  <p className="text-[#3F4945] text-xs font-bold uppercase tracking-wide mb-2">Alasan Diterima atau Ditolak</p>
+                  <p className="text-sm text-[#051C37] bg-[#F0F3FF]/50 p-3 rounded-lg leading-5">
+                    {note || '—'}
+                  </p>
+                </div>
+              )}
             </div>
           ) : null}
         </div>
