@@ -14,6 +14,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Upload files to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          target: ${{ secrets.VPS_APP_DIR || '/home/developer/henwasteoil-fe' }}
+          rm: true
+          source: >-
+            .dockerignore,
+            Dockerfile,
+            docker-compose.yml,
+            eslint.config.js,
+            index.html,
+            package-lock.json,
+            package.json,
+            public,
+            src,
+            vite.config.js
+
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -26,9 +50,6 @@ jobs:
             set -e
 
             APP_DIR="${{ secrets.VPS_APP_DIR || '/home/developer/henwasteoil-fe' }}"
-            REPO_URL="https://github.com/${{ github.repository }}.git"
-            BRANCH="${{ github.ref_name }}"
-            GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
             APP_PORT="${{ vars.APP_PORT || '8080' }}"
             VITE_API_URL="${{ vars.VITE_API_URL || 'http://api.eepis.web.id/api/v1' }}"
             SUDO_PASSWORD="${{ secrets.VPS_SUDO_PASSWORD }}"
@@ -49,16 +70,7 @@ jobs:
               fi
             }
 
-            if [ ! -d "$APP_DIR/.git" ]; then
-              mkdir -p "$APP_DIR"
-              git -c http.extraHeader="AUTHORIZATION: bearer $GITHUB_TOKEN" clone --branch "$BRANCH" "$REPO_URL" "$APP_DIR"
-            fi
-
             cd "$APP_DIR"
-            git -c http.extraHeader="AUTHORIZATION: bearer $GITHUB_TOKEN" fetch origin "$BRANCH"
-            git checkout "$BRANCH"
-            git reset --hard "origin/$BRANCH"
-
             printf 'APP_PORT=%s\nVITE_API_URL=%s\n' "$APP_PORT" "$VITE_API_URL" > .env
 
             docker_cmd compose up -d --build
