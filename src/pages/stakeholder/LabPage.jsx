@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import api from '../../services/api'
 import Sidebar from '../../components/stakeholder/Sidebar'
 import TopNav from '../../components/stakeholder/TopNav'
 import DashboardFooter from '../../components/stakeholder/DashboardFooter'
@@ -9,7 +10,29 @@ import BatchDetailSection from '../../sections/stakeholder/lab/BatchDetailSectio
 
 export default function LabPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [selectedBatchId, setSelectedBatchId] = useState('BAT-9895')
+  const [batches, setBatches] = useState([])
+  const [selectedBatchId, setSelectedBatchId] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchBatches = async () => {
+      try {
+        setIsLoading(true)
+        const response = await api.get('/batches')
+        const data = response.data?.batches || response.data
+        if (Array.isArray(data) && data.length > 0) {
+          setBatches(data)
+          setSelectedBatchId(data[0].id)
+        }
+      } catch (error) {
+        console.error('Failed to fetch batches:', error)
+        setBatches([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchBatches()
+  }, [])
 
   return (
     <div className="flex min-h-screen bg-[#F5F7F6]">
@@ -30,21 +53,25 @@ export default function LabPage() {
 
           {/* KPI cards */}
           <section className="animate-fade-slide-up" style={{ animationDelay: '60ms' }}>
-            <LabKpiCards />
+            <LabKpiCards batches={batches} />
           </section>
 
           {/* Batch analysis table */}
           <section className="animate-fade-slide-up" style={{ animationDelay: '120ms' }}>
             <BatchTableSection
+              batches={batches}
               selectedBatchId={selectedBatchId}
               onSelectBatch={setSelectedBatchId}
+              isLoading={isLoading}
             />
           </section>
 
           {/* Batch detail + spectrometry */}
-          <section className="animate-fade-slide-up" style={{ animationDelay: '180ms' }}>
-            <BatchDetailSection selectedBatchId={selectedBatchId} />
-          </section>
+          {selectedBatchId && (
+            <section className="animate-fade-slide-up" style={{ animationDelay: '180ms' }}>
+              <BatchDetailSection selectedBatchId={selectedBatchId} batches={batches} />
+            </section>
+          )}
         </main>
 
         <DashboardFooter />

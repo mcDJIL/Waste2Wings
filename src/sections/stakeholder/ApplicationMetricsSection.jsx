@@ -59,21 +59,30 @@ function BadgeIcon() {
   )
 }
 
-export default function ApplicationMetricsSection() {
+export default function ApplicationMetricsSection({ batches = [], isLoading = false }) {
+  const stats = {
+    total: batches.length,
+    pending: batches.filter(b => b.status === 'SUBMITTED_TO_STAKEHOLDER').length,
+    approved: batches.filter(b => b.status === 'ACCEPTED_BY_STAKEHOLDER').length,
+    rejected: batches.filter(b => b.status === 'REJECTED_BY_STAKEHOLDER').length,
+  }
+
+  const totalLiters = batches.reduce((sum, b) => sum + (b.totalCleanLiter || 0), 0)
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
       <MetricCard
         icon={<TaskIcon />}
         badge={
           <p className="text-sm font-bold text-[#3F4945] text-right leading-5">
-            +12% from<br />last week
+            {stats.pending} Pending
           </p>
         }
-        label="Total Pengajuan Baru"
+        label="Total Pengajuan Batch"
         value={
           <span>
-            <span className="text-[#051C37]">24</span>{' '}
-            <span className="text-[#3F4945]">Pending</span>
+            <span className="text-[#051C37]">{stats.total}</span>{' '}
+            <span className="text-[#3F4945]">Batch</span>
           </span>
         }
         enterDelay={0}
@@ -83,14 +92,14 @@ export default function ApplicationMetricsSection() {
         icon={<ClockIcon />}
         badge={
           <span className="inline-block px-2 py-0.5 rounded bg-[rgba(0,115,78,0.10)] text-[#81F9C1] text-sm font-bold">
-            -0.5 Days
+            {stats.approved} Diterima
           </span>
         }
-        label="Rata-rata Waktu Review"
+        label="Total Liter Diterima"
         value={
           <span>
-            <span className="text-[#051C37]">2.5</span>{' '}
-            <span className="text-[#3F4945]">Hari</span>
+            <span className="text-[#051C37]">{batches.filter(b => b.status === 'ACCEPTED_BY_STAKEHOLDER').reduce((sum, b) => sum + (b.finalLiter || 0), 0)}</span>{' '}
+            <span className="text-[#3F4945]">Liter</span>
           </span>
         }
         enterDelay={100}
@@ -100,14 +109,14 @@ export default function ApplicationMetricsSection() {
         icon={<BadgeIcon />}
         badge={
           <p className="text-sm font-bold text-[#3F4945] text-right leading-5">
-            High<br />Precision
+            {stats.total > 0 ? `${Math.round((stats.approved / stats.total) * 100)}%` : '0%'}<br />Accepted
           </p>
         }
-        label="Tingkat Kelulusan"
+        label="Tingkat Penerimaan"
         value={
           <span>
-            <span className="text-[#051C37]">88%</span>{' '}
-            <span className="text-[#3F4945]">Global</span>
+            <span className="text-[#051C37]">{stats.approved}</span>{' '}
+            <span className="text-[#3F4945]">dari {stats.total}</span>
           </span>
         }
         enterDelay={200}

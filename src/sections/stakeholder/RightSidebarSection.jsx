@@ -1,42 +1,7 @@
-const regions = [
-  { name: 'Jawa Timur', pct: 42, color: '#004536', width: '84px' },
-  { name: 'Banten', pct: 28, color: '#006C49', width: '56px' },
-  { name: 'Jawa Barat', pct: 15, color: '#A8F1D8', width: '30px' },
-  { name: 'Sumatera Utara', pct: 10, color: '#C9A96E', width: '20px' },
-]
+import { useState, useEffect, useMemo } from 'react'
+import api from '../../services/api'
 
-const upcomingReviews = [
-  {
-    priority: 'SLA CRITICAL',
-    priorityColor: 'text-[#BA1A1A]',
-    borderColor: 'border-[rgba(186,26,26,0.20)]',
-    bgColor: 'bg-[rgba(255,218,214,0.10)]',
-    accentColor: '#BA1A1A',
-    due: 'Due in 4h',
-    company: 'PT Petro Kimia Sejahtera',
-    location: 'Gresik • APP-88200',
-  },
-  {
-    priority: 'HIGH PRIORITY',
-    priorityColor: 'text-[#004536]',
-    borderColor: 'border-[rgba(0,69,54,0.20)]',
-    bgColor: 'bg-[rgba(11,94,75,0.05)]',
-    accentColor: '#004536',
-    due: 'Due Tomorrow',
-    company: 'UD Berdikari Oil',
-    location: 'Malang • APP-88215',
-  },
-  {
-    priority: 'STANDARD',
-    priorityColor: 'text-[#3F4945]',
-    borderColor: 'border-[rgba(190,201,195,0.30)]',
-    bgColor: 'bg-white',
-    accentColor: '#6F7975',
-    due: '15 Oct',
-    company: 'CV Trans Logistik',
-    location: 'Jakarta • APP-88222',
-  },
-]
+const REGION_COLORS = ['#004536', '#006C49', '#81F9C1', '#A8F1D8', '#BEC9C3', '#C9A96E']
 
 function RegionBar({ name, pct, color, width }) {
   return (
@@ -84,6 +49,98 @@ function ReviewCard({ review }) {
 }
 
 export default function RightSidebarSection() {
+  const [batches, setBatches] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchBatches = async () => {
+      try {
+        setIsLoading(true)
+        const response = await api.get('/batches')
+        const data = response.data?.batches || response.data
+        setBatches(Array.isArray(data) ? data : [])
+      } catch (error) {
+        console.error('Failed to fetch batches:', error)
+        setBatches([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchBatches()
+  }, [])
+
+  // Calculate region distribution from collector addresses
+  const regionData = useMemo(() => {
+    const regionMap = {}
+    batches.forEach((batch) => {
+      const address = batch.collector?.address || ''
+      const region = address.split(',').pop()?.trim() || 'Other'
+      regionMap[region] = (regionMap[region] || 0) + 1
+    })
+
+    const total = Object.values(regionMap).reduce((a, b) => a + b, 0)
+    const regions = Object.entries(regionMap)
+      .map(([name, count], idx) => ({
+        name,
+        pct: total > 0 ? Math.round((count / total) * 100) : 0,
+        color: REGION_COLORS[idx % REGION_COLORS.length],
+        width: total > 0 ? `${(count / total) * 100 * 2}px` : '0px',
+      }))
+      .sort((a, b) => b.pct - a.pct)
+
+    return regions
+  }, [batches])
+
+  // Get upcoming reviews (pending batches)
+  const upcomingReviews = useMemo(() => {
+    return batches
+      .filter((b) => b.status === 'SUBMITTED_TO_STAKEHOLDER')
+      .slice(0, 3)
+      .map((batch, idx) => {
+        const createdDate = new Date(batch.createdAt)
+        const now = new Date()
+        const hoursAgo = Math.floor((now - createdDate) / (1000 * 60 * 60))
+        const daysAgo = Math.floor(hoursAgo / 24)
+
+        let due, priority, priorityColor, borderColor, bgColor, accentColor
+
+        if (hoursAgo < 4) {
+          due = `Due in ${4 - hoursAgo}h`
+          priority = 'SLA CRITICAL'
+          priorityColor = 'text-[#BA1A1A]'
+          borderColor = 'border-[rgba(186,26,26,0.20)]'
+          bgColor = 'bg-[rgba(255,218,214,0.10)]'
+          accentColor = '#BA1A1A'
+        } else if (daysAgo < 1) {
+          due = 'Due Today'
+          priority = 'HIGH PRIORITY'
+          priorityColor = 'text-[#004536]'
+          borderColor = 'border-[rgba(0,69,54,0.20)]'
+          bgColor = 'bg-[rgba(11,94,75,0.05)]'
+          accentColor = '#004536'
+        } else {
+          due = `${daysAgo}d ago`
+          priority = 'STANDARD'
+          priorityColor = 'text-[#3F4945]'
+          borderColor = 'border-[rgba(190,201,195,0.30)]'
+          bgColor = 'bg-white'
+          accentColor = '#6F7975'
+        }
+
+        return {
+          priority,
+          priorityColor,
+          borderColor,
+          bgColor,
+          accentColor,
+          due,
+          company: batch.collector?.companyName || 'Unknown',
+          location: `${batch.collector?.address?.split(',')[0] || 'N/A'} • ${batch.batchCode}`,
+          batchId: batch.id,
+        }
+      })
+  }, [batches])
+
   return (
     <div className="flex flex-col gap-8 p-6">
       {/* Region Distribution */}
@@ -96,9 +153,19 @@ export default function RightSidebarSection() {
         </div>
 
         <div className="flex flex-col gap-4">
-          {regions.map((r) => (
-            <RegionBar key={r.name} {...r} />
-          ))}
+          {isLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-8 bg-[#F1F5F9] rounded animate-pulse" />
+              ))}
+            </div>
+          ) : regionData.length > 0 ? (
+            regionData.map((r) => (
+              <RegionBar key={r.name} {...r} />
+            ))
+          ) : (
+            <p className="text-[#94A3B8] text-xs">No data available</p>
+          )}
         </div>
       </section>
 
@@ -112,9 +179,19 @@ export default function RightSidebarSection() {
         </div>
 
         <div className="flex flex-col gap-3 pb-3">
-          {upcomingReviews.map((r) => (
-            <ReviewCard key={r.location} review={r} />
-          ))}
+          {isLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-16 bg-[#F1F5F9] rounded animate-pulse" />
+              ))}
+            </div>
+          ) : upcomingReviews.length > 0 ? (
+            upcomingReviews.map((r) => (
+              <ReviewCard key={r.batchId} review={r} />
+            ))
+          ) : (
+            <p className="text-[#94A3B8] text-xs">No pending reviews</p>
+          )}
         </div>
 
         <button className="w-full flex items-center justify-center py-3 rounded-xl border border-[rgba(0,69,54,0.20)] text-[#004536] text-sm font-bold transition-all duration-200 hover:bg-[rgba(0,69,54,0.06)] hover:shadow-sm active:scale-[0.98]">

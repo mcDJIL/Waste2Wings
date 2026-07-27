@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react'
 import {
   Radar,
   RadarChart,
@@ -5,59 +6,17 @@ import {
   PolarAngleAxis,
   ResponsiveContainer,
 } from 'recharts'
+import LabEditModal from '../../../components/modals/LabEditModal'
 
-const BATCH_DATA = {
-  'BAT-9901': {
-    ffa: { value: '2.1%', limit: '4.0%', status: 'OPTIMAL', statusColor: '#10B981' },
-    moisture: { value: '0.45%', limit: '2.0%', status: 'OPTIMAL', statusColor: '#10B981' },
-    recommendation: null,
-    density: '0.88 g/cm³',
-    viscosity: '28.1 cSt',
-    flashPoint: '215°C',
-    radarData: [
-      { subject: 'MOISTURE', A: 90 },
-      { subject: 'FFA', A: 47 },
-      { subject: 'IMPURITIES', A: 80 },
-      { subject: 'DENSITY', A: 85 },
-      { subject: 'VISCOSITY', A: 75 },
-      { subject: 'FLASH POINT', A: 88 },
-    ],
-  },
-  'BAT-9895': {
-    ffa: { value: '3.5%', limit: '4.0%', status: 'CRITICAL', statusColor: '#EF4444' },
-    moisture: { value: '1.12%', limit: '2.0%', status: 'OPTIMAL', statusColor: '#10B981' },
-    recommendation: {
-      text: 'Kadar FFA mendekati ambang batas. Perlu blending dengan Grade A untuk menjaga efisiensi katalis SAF.',
-      link: 'Unduh Protokol Blending',
-    },
-    density: '0.91 g/cm³',
-    viscosity: '32.4 cSt',
-    flashPoint: '210°C',
-    radarData: [
-      { subject: 'MOISTURE', A: 75 },
-      { subject: 'FFA', A: 62 },
-      { subject: 'IMPURITIES', A: 70 },
-      { subject: 'DENSITY', A: 78 },
-      { subject: 'VISCOSITY', A: 65 },
-      { subject: 'FLASH POINT', A: 72 },
-    ],
-  },
-  'BAT-9882': {
-    ffa: { value: '1.8%', limit: '4.0%', status: 'OPTIMAL', statusColor: '#10B981' },
-    moisture: { value: '0.32%', limit: '2.0%', status: 'OPTIMAL', statusColor: '#10B981' },
-    recommendation: null,
-    density: '0.89 g/cm³',
-    viscosity: '29.6 cSt',
-    flashPoint: '218°C',
-    radarData: [
-      { subject: 'MOISTURE', A: 95 },
-      { subject: 'FFA', A: 55 },
-      { subject: 'IMPURITIES', A: 90 },
-      { subject: 'DENSITY', A: 88 },
-      { subject: 'VISCOSITY', A: 80 },
-      { subject: 'FLASH POINT', A: 92 },
-    ],
-  },
+const getStatusColor = (value, limit) => {
+  if (value > limit) return { status: 'CRITICAL', color: '#EF4444' }
+  if (value > limit * 0.85) return { status: 'WARNING', color: '#F59E0B' }
+  return { status: 'OPTIMAL', color: '#10B981' }
+}
+
+const computeRadarScore = (value, limit, maxValue = 100) => {
+  if (!value || !limit) return 0
+  return Math.max(0, Math.min(maxValue, (1 - value / limit) * maxValue))
 }
 
 function ExternalLinkIcon() {
@@ -82,9 +41,77 @@ function WarningIcon() {
   )
 }
 
-export default function BatchDetailSection({ selectedBatchId }) {
-  const batch = BATCH_DATA[selectedBatchId] ?? BATCH_DATA['BAT-9895']
-  const isCritical = batch.ffa.status === 'CRITICAL'
+export default function BatchDetailSection({ selectedBatchId, batches = [] }) {
+  const [editModalOpen, setEditModalOpen] = useState(false)
+
+  const selectedBatch = useMemo(() => {
+    return batches.find((b) => b.id === selectedBatchId)
+  }, [selectedBatchId, batches])
+
+  const batchData = useMemo(() => {
+    if (!selectedBatch?.labResult) {
+      return null
+    }
+
+    const labResult = selectedBatch.labResult
+    const ffaLimit = 4.0
+    const moistureLimit = 2.0
+    const impurityLimit = 1.0
+
+    const ffaStatus = getStatusColor(labResult.ffaPercent, ffaLimit)
+    const moistureStatus = getStatusColor(labResult.waterContentPercent, moistureLimit)
+    const impurityStatus = getStatusColor(labResult.impurityPercent, impurityLimit)
+
+    const radarData = [
+      { subject: 'MOISTURE', A: computeRadarScore(labResult.waterContentPercent, moistureLimit) },
+      { subject: 'FFA', A: computeRadarScore(labResult.ffaPercent, ffaLimit) },
+      { subject: 'IMPURITIES', A: computeRadarScore(labResult.impurityPercent, impurityLimit) },
+    ]
+
+    return {
+      batchCode: selectedBatch.batchCode,
+      ffa: {
+        value: `${labResult.ffaPercent.toFixed(2)}%`,
+        limit: `${ffaLimit.toFixed(1)}%`,
+        status: ffaStatus.status,
+        statusColor: ffaStatus.color,
+      },
+      moisture: {
+        value: `${labResult.waterContentPercent.toFixed(2)}%`,
+        limit: `${moistureLimit.toFixed(1)}%`,
+        status: moistureStatus.status,
+        statusColor: moistureStatus.color,
+      },
+      impurity: {
+        value: `${labResult.impurityPercent.toFixed(2)}%`,
+        limit: `${impurityLimit.toFixed(1)}%`,
+        status: impurityStatus.status,
+        statusColor: impurityStatus.color,
+      },
+      grade: labResult.grade,
+      notes: labResult.notes,
+      radarData,
+      recommendation: labResult.ffaPercent > ffaLimit * 0.85 ? {
+        text: 'Kadar FFA mendekati ambang batas. Perlu blending dengan Grade A untuk menjaga efisiensi katalis SAF.',
+        link: 'Protokol Blending',
+      } : null,
+    }
+  }, [selectedBatch])
+
+  if (!batchData) {
+    return (
+      <div className="rounded-3xl border border-[#E2E8F0] bg-white shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.03)] overflow-hidden p-8">
+        <div className="flex items-center justify-center h-64 text-center">
+          <div className="flex flex-col gap-2">
+            <p className="text-[#64748B] text-sm">Belum ada hasil lab untuk batch ini</p>
+            <p className="text-[#94A3B8] text-xs">Klik tombol "Input Hasil Lab" untuk menambahkan data</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const isCritical = batchData.ffa.status === 'CRITICAL'
 
   return (
     <div className="rounded-3xl border border-[#E2E8F0] bg-white shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.03)] overflow-hidden animate-fade-slide-up">
@@ -98,12 +125,12 @@ export default function BatchDetailSection({ selectedBatchId }) {
                 SELECTED BATCH
               </span>
               <span className="text-[#94A3B8] text-xs font-bold leading-4 tracking-[1.2px] uppercase">
-                {selectedBatchId}
+                {batchData.batchCode}
               </span>
             </div>
             <h2 className="text-[#004B3C] text-2xl font-extrabold leading-8">Detail Analisis Batch</h2>
             <p className="text-[#64748B] text-sm font-normal leading-5">
-              Chemical composition snapshot and quality metrics for SAF production readiness.
+              Hasil analisis lab dengan grade {batchData.grade}
             </p>
           </div>
 
@@ -120,9 +147,9 @@ export default function BatchDetailSection({ selectedBatchId }) {
                 <span className="text-[#94A3B8] text-[10px] font-bold uppercase tracking-[0.6px]">FREE FATTY ACID</span>
                 <span
                   className="text-[10px] font-bold leading-[15px] transition-colors duration-300"
-                  style={{ color: batch.ffa.statusColor }}
+                  style={{ color: batchData.ffa.statusColor }}
                 >
-                  {batch.ffa.status}
+                  {batchData.ffa.status}
                 </span>
               </div>
               <div className="flex items-baseline gap-2">
@@ -130,9 +157,9 @@ export default function BatchDetailSection({ selectedBatchId }) {
                   className="text-xl font-extrabold leading-7 transition-colors duration-300"
                   style={{ color: isCritical ? '#EF4444' : '#1E293B' }}
                 >
-                  {batch.ffa.value}
+                  {batchData.ffa.value}
                 </span>
-                <span className="text-[#94A3B8] text-xs font-medium leading-4">Limit: {batch.ffa.limit}</span>
+                <span className="text-[#94A3B8] text-xs font-medium leading-4">Limit: {batchData.ffa.limit}</span>
               </div>
             </div>
 
@@ -140,19 +167,33 @@ export default function BatchDetailSection({ selectedBatchId }) {
             <div className="flex flex-col gap-1 p-4 rounded-2xl border border-[#E2E8F0] bg-white shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]">
               <div className="flex items-center justify-between">
                 <span className="text-[#94A3B8] text-[10px] font-bold uppercase tracking-[0.6px]">MOISTURE CONTENT</span>
-                <span className="text-[10px] font-bold leading-[15px]" style={{ color: batch.moisture.statusColor }}>
-                  {batch.moisture.status}
+                <span className="text-[10px] font-bold leading-[15px]" style={{ color: batchData.moisture.statusColor }}>
+                  {batchData.moisture.status}
                 </span>
               </div>
               <div className="flex items-baseline gap-2">
-                <span className="text-[#1E293B] text-xl font-extrabold leading-7">{batch.moisture.value}</span>
-                <span className="text-[#94A3B8] text-xs font-medium leading-4">Limit: {batch.moisture.limit}</span>
+                <span className="text-[#1E293B] text-xl font-extrabold leading-7">{batchData.moisture.value}</span>
+                <span className="text-[#94A3B8] text-xs font-medium leading-4">Limit: {batchData.moisture.limit}</span>
+              </div>
+            </div>
+
+            {/* Impurity */}
+            <div className="flex flex-col gap-1 p-4 rounded-2xl border border-[#E2E8F0] bg-white shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]">
+              <div className="flex items-center justify-between">
+                <span className="text-[#94A3B8] text-[10px] font-bold uppercase tracking-[0.6px]">IMPURITY</span>
+                <span className="text-[10px] font-bold leading-[15px]" style={{ color: batchData.impurity.statusColor }}>
+                  {batchData.impurity.status}
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-[#1E293B] text-xl font-extrabold leading-7">{batchData.impurity.value}</span>
+                <span className="text-[#94A3B8] text-xs font-medium leading-4">Limit: {batchData.impurity.limit}</span>
               </div>
             </div>
           </div>
 
           {/* Recommendation */}
-          {batch.recommendation && (
+          {batchData.recommendation && (
             <div className="flex flex-col pt-6 border-t border-[#E2E8F0]">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-[rgba(245,158,11,0.10)]">
@@ -160,9 +201,9 @@ export default function BatchDetailSection({ selectedBatchId }) {
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="text-[#1E293B] text-sm font-bold leading-5">Rekomendasi Ahli</span>
-                  <p className="text-[#64748B] text-xs font-normal leading-4">{batch.recommendation.text}</p>
+                  <p className="text-[#64748B] text-xs font-normal leading-4">{batchData.recommendation.text}</p>
                   <button className="flex items-center gap-1.5 pt-2 text-[#004B3C] text-xs font-bold leading-4 hover:underline transition-all duration-200 group">
-                    <span>{batch.recommendation.link}</span>
+                    <span>{batchData.recommendation.link}</span>
                     <span className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
                       <ExternalLinkIcon />
                     </span>
@@ -183,7 +224,7 @@ export default function BatchDetailSection({ selectedBatchId }) {
           <div className="w-full max-w-[500px] mx-auto">
             <ResponsiveContainer width="100%" aspect={1.1}>
               <RadarChart
-                data={batch.radarData}
+                data={batchData.radarData}
                 margin={{ top: 24, right: 48, bottom: 24, left: 48 }}
               >
                 <PolarGrid
@@ -210,25 +251,39 @@ export default function BatchDetailSection({ selectedBatchId }) {
             </ResponsiveContainer>
           </div>
 
-          {/* Bottom metrics */}
-          <div className="flex flex-wrap justify-center gap-6 sm:gap-12 w-full max-w-[500px]">
-            {[
-              { label: 'DENSITY INDEX', value: batch.density },
-              { label: 'VISCOSITY @40°C', value: batch.viscosity },
-              { label: 'FLASH POINT', value: batch.flashPoint },
-            ].map((metric) => (
-              <div key={metric.label} className="flex flex-col items-center gap-1">
-                <span className="text-[#94A3B8] text-[10px] font-bold uppercase tracking-[0.6px] text-center">
-                  {metric.label}
-                </span>
-                <span className="text-[#1E293B] text-lg font-extrabold leading-7 text-center transition-all duration-500">
-                  {metric.value}
-                </span>
+          {/* Notes section */}
+          {batchData.notes && (
+            <div className="w-full max-w-[500px] mx-auto pt-4 border-t border-[#E2E8F0]">
+              <div className="flex flex-col gap-2">
+                <span className="text-[#94A3B8] text-[10px] font-bold uppercase tracking-[0.6px]">CATATAN LAB</span>
+                <p className="text-[#64748B] text-xs leading-4">{batchData.notes}</p>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
+
+          {/* Edit button for accepted/rejected batches */}
+          {selectedBatch && (selectedBatch.status === 'ACCEPTED_BY_STAKEHOLDER' || selectedBatch.status === 'REJECTED_BY_STAKEHOLDER') && (
+            <div className="w-full max-w-[500px] mx-auto pt-4 border-t border-[#E2E8F0]">
+              <button
+                onClick={() => setEditModalOpen(true)}
+                className="w-full px-4 py-2.5 rounded-lg bg-[#F3F4F6] text-[#051C37] font-bold text-sm transition-all duration-200 hover:bg-[#E5E7EB] active:scale-95"
+              >
+                Edit Hasil Lab
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      <LabEditModal
+        isOpen={editModalOpen}
+        labResult={selectedBatch?.labResult}
+        onClose={() => setEditModalOpen(false)}
+        onSuccess={() => {
+          setEditModalOpen(false)
+          window.location.reload()
+        }}
+      />
     </div>
   )
 }

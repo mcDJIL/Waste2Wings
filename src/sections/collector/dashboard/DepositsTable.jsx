@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import SubmissionDetailModal from '../../../components/modals/SubmissionDetailModal'
 
 const FilterIcon = () => (
   <svg width="9" height="8" viewBox="0 0 9 8" fill="none">
@@ -56,7 +57,7 @@ function StatusBadge({ status }) {
   )
 }
 
-function ActionCell({ status, name }) {
+function ActionCell({ status, name, submissionId, onViewDetail }) {
   if (status === 'validasi') {
     return (
       <button className="px-4 py-2 rounded-xl bg-[#5A4199] text-white text-sm font-medium font-poppins
@@ -67,6 +68,7 @@ function ActionCell({ status, name }) {
   }
   return (
     <button
+      onClick={() => onViewDetail(submissionId)}
       aria-label={`Lihat detail ${name}`}
       className="p-2 rounded-lg hover:bg-[#F1EBFD] active:scale-95 transition-all duration-200"
     >
@@ -75,7 +77,7 @@ function ActionCell({ status, name }) {
   )
 }
 
-function DepositRow({ row, index }) {
+function DepositRow({ row, index, onViewDetail }) {
   return (
     <tr
       className="border-t border-[#E0DBDF] hover:bg-[#FAF9F6] transition-colors duration-150
@@ -119,7 +121,7 @@ function DepositRow({ row, index }) {
 
       {/* Aksi */}
       <td className="px-6 py-4 text-right">
-        <ActionCell status={row.status} name={row.name} />
+        <ActionCell status={row.status} name={row.name} submissionId={row.submissionId} onViewDetail={onViewDetail} />
       </td>
     </tr>
   )
@@ -129,6 +131,13 @@ export default function DepositsTable({ submissions, isLoading }) {
   const [selectedStatus, setSelectedStatus] = useState('Semua Status')
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
+  const [selectedSubmissionId, setSelectedSubmissionId] = useState(null)
+
+  const handleViewDetail = (submissionId) => {
+    setSelectedSubmissionId(submissionId)
+    setDetailModalOpen(true)
+  }
 
   const depositRows = (submissions || []).map((sub) => {
     const sedimentPercent = sub.sedimentLiter && sub.actualLiter ? ((sub.sedimentLiter / sub.actualLiter) * 100).toFixed(1) : '0'
@@ -136,6 +145,7 @@ export default function DepositsTable({ submissions, isLoading }) {
 
     return {
       id: sub.id,
+      submissionId: sub.id,
       initials: sub.communityName?.split(' ').slice(0, 2).map(w => w[0]).join('') || 'N/A',
       name: sub.communityName || 'Unknown',
       liters: `${sub.actualLiter?.toFixed(1) || 0} L`,
@@ -242,7 +252,7 @@ export default function DepositsTable({ submissions, isLoading }) {
               ))
             ) : filteredRows.length > 0 ? (
               filteredRows.map((row, index) => (
-                <DepositRow key={row.id} row={row} index={index} />
+                <DepositRow key={row.id} row={row} index={index} onViewDetail={handleViewDetail} />
               ))
             ) : (
               <tr>
@@ -299,6 +309,13 @@ export default function DepositsTable({ submissions, isLoading }) {
           </button>
         </div>
       </div>
+
+      {/* Detail Modal */}
+      <SubmissionDetailModal
+        isOpen={detailModalOpen}
+        submissionId={selectedSubmissionId}
+        onClose={() => setDetailModalOpen(false)}
+      />
     </div>
   )
 }

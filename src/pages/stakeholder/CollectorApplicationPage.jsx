@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import api from '../../services/api'
+import { exportBatchesToPDF } from '../../utils/pdfExport'
 import Sidebar from '../../components/stakeholder/Sidebar'
 import TopNav from '../../components/stakeholder/TopNav'
 import ApplicationMetricsSection from '../../sections/stakeholder/ApplicationMetricsSection'
 import ApplicationTableSection from '../../sections/stakeholder/ApplicationTableSection'
 import RightSidebarSection from '../../sections/stakeholder/RightSidebarSection'
 
-function PageHeader() {
+function PageHeader({ batches = [], isExporting = false, onExportPDF }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-3">
       {/* Breadcrumb + title */}
@@ -20,18 +22,15 @@ function PageHeader() {
 
       {/* Action buttons */}
       <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#BEC9C3] bg-[#F9F9FF] text-[#051C37] text-sm font-bold transition-all duration-200 hover:border-[#004536] hover:bg-[rgba(0,69,54,0.04)] active:scale-95">
+        <button
+          onClick={onExportPDF}
+          disabled={isExporting || batches.length === 0}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#BEC9C3] bg-[#F9F9FF] text-[#051C37] text-sm font-bold transition-all duration-200 hover:border-[#004536] hover:bg-[rgba(0,69,54,0.04)] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+        >
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
             <path d="M6 9L2.25 5.25L3.3 4.1625L5.25 6.1125V0H6.75V6.1125L8.7 4.1625L9.75 5.25L6 9ZM1.5 12C1.0875 12 0.734375 11.8531 0.440625 11.5594C0.146875 11.2656 0 10.9125 0 10.5V8.25H1.5V10.5H10.5V8.25H12V10.5C12 10.9125 11.8531 11.2656 11.5594 11.5594C11.2656 11.8531 10.9125 12 10.5 12H1.5Z" fill="currentColor" />
           </svg>
-          Export CSV
-        </button>
-
-        <button className="relative flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#004536] text-white text-sm font-bold transition-all duration-200 hover:bg-[#005f4a] hover:shadow-lg active:scale-95">
-          <svg width="15" height="14" viewBox="0 0 15 14" fill="none">
-            <path d="M1.5 13.5C1.0875 13.5 0.734375 13.3531 0.440625 13.0594C0.146875 12.7656 0 12.4125 0 12V1.5C0 1.0875 0.146875 0.734375 0.440625 0.440625C0.734375 0.146875 1.0875 0 1.5 0H13.5C13.9125 0 14.2656 0.146875 14.5594 0.440625C14.8531 0.734375 15 1.0875 15 1.5V12C15 12.4125 14.8531 12.7656 14.5594 13.0594C14.2656 13.3531 13.9125 13.5 13.5 13.5H1.5ZM1.5 12H13.5V1.5H1.5V12ZM2.25 10.5H6V9H2.25V10.5ZM9.4125 9L13.125 5.2875L12.0562 4.21875L9.4125 6.88125L8.34375 5.8125L7.29375 6.88125L9.4125 9ZM2.25 7.5H6V6H2.25V7.5ZM2.25 4.5H6V3H2.25V4.5Z" fill="white" />
-          </svg>
-          Approve Application
+          {isExporting ? 'Memproses...' : 'Export PDF'}
         </button>
       </div>
     </div>
@@ -99,6 +98,38 @@ function RightSidebarDrawer({ open, onClose }) {
 export default function CollectorApplicationPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [rightPanelOpen, setRightPanelOpen] = useState(false)
+  const [batches, setBatches] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isExporting, setIsExporting] = useState(false)
+
+  useEffect(() => {
+    const fetchBatches = async () => {
+      try {
+        setIsLoading(true)
+        const response = await api.get('/batches')
+        const data = response.data?.batches || response.data
+        setBatches(Array.isArray(data) ? data : [])
+      } catch (error) {
+        console.error('Failed to fetch batches:', error)
+        setBatches([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchBatches()
+  }, [])
+
+  const handleExportPDF = async () => {
+    try {
+      setIsExporting(true)
+      await exportBatchesToPDF(batches, 'Pengajuan-Kemitraan-Pengepul.pdf')
+    } catch (error) {
+      console.error('Export failed:', error)
+      alert('Gagal mengekspor PDF')
+    } finally {
+      setIsExporting(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#F9F9FF] flex">
@@ -128,9 +159,9 @@ export default function CollectorApplicationPage() {
                 </button>
               </div>
 
-              <PageHeader />
-              <ApplicationMetricsSection />
-              <ApplicationTableSection />
+              <PageHeader batches={batches} isExporting={isExporting} onExportPDF={handleExportPDF} />
+              <ApplicationMetricsSection batches={batches} isLoading={isLoading} />
+              <ApplicationTableSection batches={batches} isLoading={isLoading} />
             </div>
           </main>
 

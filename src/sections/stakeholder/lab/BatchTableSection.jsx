@@ -1,45 +1,8 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import LabInputModal from '../../../components/modals/LabInputModal'
+import LabResultsModal from '../../../components/modals/LabResultsModal'
 
-const ALL_BATCHES = [
-  {
-    id: 'BAT-9901',
-    date: '24 Okt 2023',
-    source: 'Sumatra Agri-Link',
-    grade: 'PREMIUM GRADE A',
-    gradeVariant: 'premium',
-    moisture: '0.45%',
-    ffa: '2.1%',
-    ffaAlert: false,
-    status: 'verified',
-    statusColor: '#10B981',
-  },
-  {
-    id: 'BAT-9895',
-    date: '23 Okt 2023',
-    source: 'EcoOil Collect',
-    grade: 'GRADE B',
-    gradeVariant: 'grade-b',
-    moisture: '1.12%',
-    ffa: '3.5%',
-    ffaAlert: true,
-    status: 'pending',
-    statusColor: '#F59E0B',
-  },
-  {
-    id: 'BAT-9882',
-    date: '22 Okt 2023',
-    source: 'Java Bio-Resources',
-    grade: 'PREMIUM GRADE A',
-    gradeVariant: 'premium',
-    moisture: '0.32%',
-    ffa: '1.8%',
-    ffaAlert: false,
-    status: 'verified',
-    statusColor: '#10B981',
-  },
-]
-
-const FILTER_TABS = ['All', 'Pending', 'Verified']
+const FILTER_TABS = ['All', 'LAB_REVIEW', 'ACCEPTED_BY_STAKEHOLDER']
 
 const GRADE_STYLES = {
   premium: 'bg-[#004B3C] text-white',
@@ -84,15 +47,46 @@ function ArrowRightIcon() {
   )
 }
 
-export default function BatchTableSection({ selectedBatchId, onSelectBatch }) {
-  const [activeFilter, setActiveFilter] = useState('All')
+function getGradeLabel(batch) {
+  if (batch.labResult?.grade === 'A') return 'GRADE A'
+  if (batch.labResult?.grade === 'B') return 'GRADE B'
+  if (batch.labResult?.grade === 'REJECT') return 'REJECTED'
+  return batch.status.replace(/_/g, ' ')
+}
 
-  const filtered = ALL_BATCHES.filter((b) => {
-    if (activeFilter === 'All') return true
-    if (activeFilter === 'Pending') return b.status === 'pending'
-    if (activeFilter === 'Verified') return b.status === 'verified'
-    return true
-  })
+function getStatusColor(batch) {
+  if (batch.labResult?.grade === 'A') return '#10B981'
+  if (batch.labResult?.grade === 'B') return '#F59E0B'
+  if (batch.labResult?.grade === 'REJECT') return '#EF4444'
+  return '#64748B'
+}
+
+export default function BatchTableSection({ batches = [], selectedBatchId, onSelectBatch, isLoading = false }) {
+  const [activeFilter, setActiveFilter] = useState('All')
+  const [inputModalOpen, setInputModalOpen] = useState(false)
+  const [resultsModalOpen, setResultsModalOpen] = useState(false)
+  const [selectedBatchForModal, setSelectedBatchForModal] = useState(null)
+
+  const handleActionClick = (e, batch) => {
+    e.stopPropagation()
+    setSelectedBatchForModal(batch)
+    if (batch.labResult) {
+      setResultsModalOpen(true)
+    } else {
+      setInputModalOpen(true)
+    }
+  }
+
+  const handleSuccess = () => {
+    window.location.reload()
+  }
+
+  const filtered = useMemo(() => {
+    return (batches || []).filter((b) => {
+      if (activeFilter === 'All') return true
+      return b.status === activeFilter
+    })
+  }, [batches, activeFilter])
 
   return (
     <div className="rounded-3xl border border-[#E2E8F0] bg-white shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.03)] overflow-hidden animate-fade-slide-up">
@@ -153,133 +147,182 @@ export default function BatchTableSection({ selectedBatchId, onSelectBatch }) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((batch, idx) => {
-              const isSelected = selectedBatchId === batch.id
-              return (
-                <tr
-                  key={batch.id}
-                  onClick={() => onSelectBatch(batch.id)}
-                  className={[
-                    'border-t border-[#F1F5F9] transition-colors duration-200 cursor-pointer group',
-                    isSelected
-                      ? 'bg-[rgba(45,212,191,0.05)]'
-                      : 'hover:bg-[#F8FAFC]',
-                    'animate-fade-slide-up',
-                  ].join(' ')}
-                  style={{ animationDelay: `${idx * 60}ms` }}
-                >
-                  {/* ID */}
-                  <td className="px-6 py-6">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="w-2 h-2 rounded-full flex-shrink-0"
-                        style={{ background: batch.statusColor }}
-                      />
-                      <span className="text-[#1E293B] text-base font-bold leading-6">{batch.id}</span>
-                    </div>
-                  </td>
-
-                  {/* Date */}
-                  <td className="px-6 py-6 text-[#475569] text-sm font-medium leading-5">{batch.date}</td>
-
-                  {/* Source */}
-                  <td className="px-6 py-6 text-[#475569] text-sm font-medium leading-5">{batch.source}</td>
-
-                  {/* Grade */}
-                  <td className="px-6 py-6">
-                    <span
-                      className={[
-                        'inline-flex items-center px-3 py-1 rounded-full text-[9px] font-extrabold leading-[15px] tracking-[-0.5px] whitespace-nowrap transition-transform duration-200 group-hover:scale-105',
-                        GRADE_STYLES[batch.gradeVariant],
-                      ].join(' ')}
-                    >
-                      {batch.grade}
-                    </span>
-                  </td>
-
-                  {/* Moisture */}
-                  <td className="px-6 py-6 text-[#1E293B] text-sm font-bold leading-5">{batch.moisture}</td>
-
-                  {/* FFA */}
-                  <td className="px-6 py-6">
-                    <span
-                      className={[
-                        'text-sm font-extrabold leading-5',
-                        batch.ffaAlert ? 'text-[#EF4444]' : 'text-[#1E293B]',
-                      ].join(' ')}
-                    >
-                      {batch.ffa}
-                    </span>
-                  </td>
-
-                  {/* Action */}
-                  <td className="px-6 py-6 text-right">
-                    <button className="inline-flex items-center justify-center p-2 rounded-xl hover:bg-[#F1F5F9] transition-all duration-200 hover:scale-110 active:scale-95">
-                      {batch.status === 'pending' ? <BarChartIcon /> : <ChevronIcon />}
-                    </button>
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <tr key={i} className="border-t border-[#F1F5F9] animate-pulse">
+                  <td colSpan={7} className="px-6 py-6">
+                    <div className="h-6 bg-[#F1F5F9] rounded" />
                   </td>
                 </tr>
-              )
-            })}
+              ))
+            ) : filtered.length > 0 ? (
+              filtered.map((batch, idx) => {
+                const isSelected = selectedBatchId === batch.id
+                const hasLabResult = batch.labResult !== null
+                const moisture = batch.labResult?.waterContentPercent ?? 0
+                const ffa = batch.labResult?.ffaPercent ?? 0
+                const ffaAlert = ffa > 3.5
+
+                return (
+                  <tr
+                    key={batch.id}
+                    onClick={() => onSelectBatch(batch.id)}
+                    className={[
+                      'border-t border-[#F1F5F9] transition-colors duration-200 cursor-pointer group',
+                      isSelected
+                        ? 'bg-[rgba(45,212,191,0.05)]'
+                        : 'hover:bg-[#F8FAFC]',
+                      'animate-fade-slide-up',
+                    ].join(' ')}
+                    style={{ animationDelay: `${idx * 60}ms` }}
+                  >
+                    {/* ID */}
+                    <td className="px-6 py-6">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="w-2 h-2 rounded-full flex-shrink-0"
+                          style={{ background: getStatusColor(batch) }}
+                        />
+                        <span className="text-[#1E293B] text-base font-bold leading-6">{batch.batchCode}</span>
+                      </div>
+                    </td>
+
+                    {/* Date */}
+                    <td className="px-6 py-6 text-[#475569] text-sm font-medium leading-5">
+                      {new Date(batch.createdAt).toLocaleDateString('id-ID')}
+                    </td>
+
+                    {/* Source */}
+                    <td className="px-6 py-6 text-[#475569] text-sm font-medium leading-5">{batch.collector?.companyName}</td>
+
+                    {/* Grade */}
+                    <td className="px-6 py-6">
+                      {hasLabResult ? (
+                        <span
+                          className={[
+                            'inline-flex items-center px-3 py-1 rounded-full text-[9px] font-extrabold leading-[15px] tracking-[-0.5px] whitespace-nowrap transition-transform duration-200 group-hover:scale-105',
+                            batch.labResult?.grade === 'A' ? 'bg-[#004B3C] text-white' : batch.labResult?.grade === 'B' ? 'bg-[#F59E0B] text-white' : 'bg-[#EF4444] text-white',
+                          ].join(' ')}
+                        >
+                          {getGradeLabel(batch)}
+                        </span>
+                      ) : (
+                        <span className="text-[#94A3B8] text-xs">No result</span>
+                      )}
+                    </td>
+
+                    {/* Moisture */}
+                    <td className="px-6 py-6 text-[#1E293B] text-sm font-bold leading-5">
+                      {hasLabResult ? `${moisture.toFixed(2)}%` : '-'}
+                    </td>
+
+                    {/* FFA */}
+                    <td className="px-6 py-6">
+                      <span
+                        className={[
+                          'text-sm font-extrabold leading-5',
+                          ffaAlert && hasLabResult ? 'text-[#EF4444]' : 'text-[#1E293B]',
+                        ].join(' ')}
+                      >
+                        {hasLabResult ? `${ffa.toFixed(2)}%` : '-'}
+                      </span>
+                    </td>
+
+                    {/* Action */}
+                    <td className="px-6 py-6 text-right">
+                      <button
+                        onClick={(e) => handleActionClick(e, batch)}
+                        className="inline-flex items-center justify-center p-2 rounded-xl hover:bg-[#F1F5F9] transition-all duration-200 hover:scale-110 active:scale-95"
+                      >
+                        {!hasLabResult ? <BarChartIcon /> : <ChevronIcon />}
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })
+            ) : (
+              <tr>
+                <td colSpan={7} className="px-6 py-10 text-center text-[#94A3B8] text-sm">
+                  Tidak ada batch yang sesuai.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
       {/* Card list – mobile */}
       <div className="md:hidden flex flex-col divide-y divide-[#F1F5F9]">
-        {filtered.map((batch, idx) => {
-          const isSelected = selectedBatchId === batch.id
-          return (
-            <div
-              key={batch.id}
-              onClick={() => onSelectBatch(batch.id)}
-              className={[
-                'flex flex-col gap-3 p-4 cursor-pointer transition-colors duration-200 animate-fade-slide-up',
-                isSelected ? 'bg-[rgba(45,212,191,0.05)]' : 'hover:bg-[#F8FAFC]',
-              ].join(' ')}
-              style={{ animationDelay: `${idx * 60}ms` }}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: batch.statusColor }} />
-                  <span className="text-[#1E293B] text-base font-bold">{batch.id}</span>
-                </div>
-                <span
-                  className={[
-                    'inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold tracking-[-0.5px] whitespace-nowrap',
-                    GRADE_STYLES[batch.gradeVariant],
-                  ].join(' ')}
-                >
-                  {batch.grade}
-                </span>
-              </div>
-
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#475569]">
-                <span>{batch.date}</span>
-                <span>{batch.source}</span>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div>
-                  <span className="text-[#94A3B8] text-[10px] font-bold uppercase tracking-[1px]">Moisture</span>
-                  <p className="text-[#1E293B] text-sm font-bold">{batch.moisture}</p>
-                </div>
-                <div>
-                  <span className="text-[#94A3B8] text-[10px] font-bold uppercase tracking-[1px]">FFA</span>
-                  <p className={['text-sm font-extrabold', batch.ffaAlert ? 'text-[#EF4444]' : 'text-[#1E293B]'].join(' ')}>
-                    {batch.ffa}
-                  </p>
-                </div>
-                <button
-                  className="ml-auto flex items-center justify-center p-2 rounded-xl border border-[#E2E8F0] hover:bg-[#F1F5F9] transition-all duration-200"
-                  onClick={(e) => { e.stopPropagation(); onSelectBatch(batch.id) }}
-                >
-                  {batch.status === 'pending' ? <BarChartIcon /> : <ChevronIcon />}
-                </button>
-              </div>
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="p-4 animate-pulse">
+              <div className="h-20 bg-[#F1F5F9] rounded" />
             </div>
-          )
-        })}
+          ))
+        ) : filtered.length > 0 ? (
+          filtered.map((batch, idx) => {
+            const isSelected = selectedBatchId === batch.id
+            const hasLabResult = batch.labResult !== null
+            const moisture = batch.labResult?.waterContentPercent ?? 0
+            const ffa = batch.labResult?.ffaPercent ?? 0
+            const ffaAlert = ffa > 3.5
+
+            return (
+              <div
+                key={batch.id}
+                onClick={() => onSelectBatch(batch.id)}
+                className={[
+                  'flex flex-col gap-3 p-4 cursor-pointer transition-colors duration-200 animate-fade-slide-up',
+                  isSelected ? 'bg-[rgba(45,212,191,0.05)]' : 'hover:bg-[#F8FAFC]',
+                ].join(' ')}
+                style={{ animationDelay: `${idx * 60}ms` }}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: getStatusColor(batch) }} />
+                    <span className="text-[#1E293B] text-base font-bold">{batch.batchCode}</span>
+                  </div>
+                  {hasLabResult && (
+                    <span
+                      className={[
+                        'inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-extrabold tracking-[-0.5px] whitespace-nowrap',
+                        batch.labResult?.grade === 'A' ? 'bg-[#004B3C] text-white' : batch.labResult?.grade === 'B' ? 'bg-[#F59E0B] text-white' : 'bg-[#EF4444] text-white',
+                      ].join(' ')}
+                    >
+                      {getGradeLabel(batch)}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#475569]">
+                  <span>{new Date(batch.createdAt).toLocaleDateString('id-ID')}</span>
+                  <span>{batch.collector?.companyName}</span>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div>
+                    <span className="text-[#94A3B8] text-[10px] font-bold uppercase tracking-[1px]">Moisture</span>
+                    <p className="text-[#1E293B] text-sm font-bold">{hasLabResult ? `${moisture.toFixed(2)}%` : '-'}</p>
+                  </div>
+                  <div>
+                    <span className="text-[#94A3B8] text-[10px] font-bold uppercase tracking-[1px]">FFA</span>
+                    <p className={['text-sm font-extrabold', ffaAlert && hasLabResult ? 'text-[#EF4444]' : 'text-[#1E293B]'].join(' ')}>
+                      {hasLabResult ? `${ffa.toFixed(2)}%` : '-'}
+                    </p>
+                  </div>
+                  <button
+                    className="ml-auto flex items-center justify-center p-2 rounded-xl border border-[#E2E8F0] hover:bg-[#F1F5F9] transition-all duration-200"
+                    onClick={(e) => handleActionClick(e, batch)}
+                  >
+                    {!hasLabResult ? <BarChartIcon /> : <ChevronIcon />}
+                  </button>
+                </div>
+              </div>
+            )
+          })
+        ) : (
+          <div className="p-4 text-center text-[#94A3B8] text-sm">Tidak ada batch yang sesuai.</div>
+        )}
       </div>
 
       {/* Footer */}
@@ -291,6 +334,21 @@ export default function BatchTableSection({ selectedBatchId, onSelectBatch }) {
           </span>
         </button>
       </div>
+
+      {/* Modals */}
+      <LabInputModal
+        isOpen={inputModalOpen}
+        batchId={selectedBatchForModal?.id}
+        onClose={() => setInputModalOpen(false)}
+        onSuccess={handleSuccess}
+      />
+      <LabResultsModal
+        isOpen={resultsModalOpen}
+        batchId={selectedBatchForModal?.id}
+        batch={selectedBatchForModal}
+        onClose={() => setResultsModalOpen(false)}
+        onSuccess={handleSuccess}
+      />
     </div>
   )
 }

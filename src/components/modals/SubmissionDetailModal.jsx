@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import api from '../../services/api'
 
 const CloseIcon = () => (
@@ -57,7 +58,7 @@ export default function SubmissionDetailModal({ isOpen, submissionId, onClose })
 
   if (!isOpen) return null
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
       <div className="bg-white rounded-3xl w-full max-w-xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.35)] animate-fade-slide-up max-h-[85vh] overflow-hidden flex flex-col">
         {/* Header */}
@@ -221,4 +222,6 @@ export default function SubmissionDetailModal({ isOpen, submissionId, onClose })
       </div>
     </div>
   )
+
+  return createPortal(modalContent, document.body)
 }

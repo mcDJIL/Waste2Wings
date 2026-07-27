@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import api from '../../../services/api'
+import { useToast } from '../../../contexts/ToastContext'
 
 const SearchIcon = () => (
   <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
@@ -26,6 +28,46 @@ const HamburgerIcon = () => (
 
 export default function CollectorTopBar({ onMenuToggle }) {
   const [searchFocused, setSearchFocused] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [notifications, setNotifications] = useState([])
+  const [hasUnread, setHasUnread] = useState(false)
+  const { showToast } = useToast()
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await api.get('/collectors/me/notifications')
+        const data = response.data?.data || response.data
+        if (data && Array.isArray(data)) {
+          setNotifications(data)
+          const unread = data.some(n => !n.isRead)
+          setHasUnread(unread)
+        }
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error)
+      }
+    }
+
+    fetchNotifications()
+    const interval = setInterval(fetchNotifications, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const handleNotificationClick = (notif) => {
+    showToast(notif.message, notif.type || 'info', 5000, notif.title)
+    setNotificationsOpen(false)
+  }
+
+  const handleClickOutside = () => {
+    setNotificationsOpen(false)
+  }
+
+  useEffect(() => {
+    if (notificationsOpen) {
+      document.addEventListener('click', handleClickOutside)
+      return () => document.removeEventListener('click', handleClickOutside)
+    }
+  }, [notificationsOpen])
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between px-6 sm:px-12 h-16 gap-4
@@ -65,11 +107,60 @@ export default function CollectorTopBar({ onMenuToggle }) {
 
       {/* Right actions */}
       <div className="flex items-center gap-3 shrink-0">
-        {/* Bell with notification dot */}
-        <button className="relative p-2 rounded-full hover:bg-[#E0DBDF]/40 transition-colors">
-          <BellIcon />
-          <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#BA1A1A] border-2 border-[#FAF9F6]" />
-        </button>
+        {/* Bell with notification dropdown */}
+        <div className="relative" onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={() => setNotificationsOpen(!notificationsOpen)}
+            className="relative p-2 rounded-full hover:bg-[#E0DBDF]/40 transition-colors">
+            <BellIcon />
+            {hasUnread && (
+              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#BA1A1A] border-2 border-[#FAF9F6]" />
+            )}
+          </button>
+
+          {/* Notifications dropdown */}
+          {notificationsOpen && (
+            <div className="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-y-auto bg-white rounded-xl border border-[#E0DBDF] shadow-lg z-40">
+              <div className="sticky top-0 bg-white border-b border-[#E0DBDF] px-4 py-3 flex items-center justify-between">
+                <h3 className="font-semibold text-[#051C37] text-sm">Notifikasi</h3>
+                <button
+                  onClick={() => setNotificationsOpen(false)}
+                  className="p-1 hover:bg-[#F5F5F5] rounded transition-colors"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" fill="currentColor"/>
+                  </svg>
+                </button>
+              </div>
+
+              {notifications.length > 0 ? (
+                <div className="divide-y divide-[#E0DBDF]">
+                  {notifications.map((notif, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleNotificationClick(notif)}
+                      className="w-full text-left px-4 py-3 hover:bg-[#F5F5F5] transition-colors"
+                    >
+                      {notif.title && (
+                        <p className="text-xs font-bold text-[#5A4199] mb-1">{notif.title}</p>
+                      )}
+                      <p className="text-sm text-[#051C37] font-medium">{notif.message}</p>
+                      {notif.timestamp && (
+                        <p className="text-xs text-[#8E8994] mt-1">
+                          {new Date(notif.timestamp).toLocaleDateString('id-ID')}
+                        </p>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="px-4 py-8 text-center text-[#8E8994] text-sm">
+                  Tidak ada notifikasi
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Divider */}
         <div className="w-px h-6 bg-[#E0DBDF]" />

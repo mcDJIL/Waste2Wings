@@ -29,11 +29,6 @@ export default function StakeholderDashboardPage() {
             <KpiCards />
           </section>
 
-          {/* Tab navigation */}
-          <section className="animate-fade-slide-up" style={{ animationDelay: '80ms' }}>
-            <TabNavigation activeTab={activeTab} onChange={setActiveTab} />
-          </section>
-
           {/* Tab content */}
           <section className="animate-fade-slide-up" style={{ animationDelay: '160ms' }}>
             {activeTab === 'Overview' && (
@@ -50,25 +45,12 @@ export default function StakeholderDashboardPage() {
                 </div>
               </div>
             )}
-
-            {activeTab === 'Pengajuan' && <PlaceholderTab title="Pengajuan Pengepul" />}
-            {activeTab === 'Lab' && <PlaceholderTab title="Hasil Uji Lab" />}
-            {activeTab === 'Peta' && <PlaceholderTab title="Peta Sebaran" />}
-            {activeTab === 'Prediksi' && <PlaceholderTab title="Prediksi Dana" />}
-            {activeTab === 'Harga Acuan' && <PlaceholderTab title="Harga Acuan" />}
           </section>
         </main>
 
         {/* Footer */}
         <DashboardFooter />
       </div>
-
-      {/* Floating action button */}
-      <button className="fixed bottom-6 right-6 w-14 h-14 flex items-center justify-center rounded-full bg-[#0B5E4B] shadow-[0_20px_25px_-5px_rgba(0,0,0,0.10),0_8px_10px_-6px_rgba(0,0,0,0.10)] text-white transition-all duration-200 hover:scale-110 hover:bg-[#004536] active:scale-95 z-30">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <path d="M7.5 10H0V7.5H7.5V0H10V7.5H17.5V10H10V17.5H7.5V10Z" fill="white" />
-        </svg>
-      </button>
     </div>
   )
 }

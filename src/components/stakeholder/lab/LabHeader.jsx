@@ -16,12 +16,6 @@ export default function LabHeader() {
           </svg>
           Export Report
         </button>
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0B5E4B] text-white text-sm font-bold transition-all duration-200 hover:bg-[#004536] hover:shadow-lg active:scale-95 whitespace-nowrap">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M7 1v12M1 7h12" stroke="white" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-          New Analysis
-        </button>
       </div>
     </div>
   )

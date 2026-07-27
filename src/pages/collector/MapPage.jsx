@@ -80,15 +80,19 @@ export default function MapPage() {
       try {
         setIsLoading(true)
         const response = await api.get('/collectors/me/map')
-        console.log('Map API Response:', response)
         const data = response.data?.data || response.data
-        console.log('Map Data:', data)
 
         if (data) {
-          setMapData(data)
+          // Transform API response to match our data structure
+          const transformedData = {
+            collector: data.collector,
+            henReceptionLocation: data.henReceptionLocation,
+            communityMarkers: data.communityMarkers || [],
+          }
+          setMapData(transformedData)
 
-          if (data.collectorLocation?.latitude && data.collectorLocation?.longitude) {
-            setCenterCoords([data.collectorLocation.latitude, data.collectorLocation.longitude])
+          if (data.collector?.latitude && data.collector?.longitude) {
+            setCenterCoords([data.collector.latitude, data.collector.longitude])
           }
         }
       } catch (error) {
@@ -104,22 +108,22 @@ export default function MapPage() {
     const points = []
 
     // Collector location
-    if (mapData?.collectorLocation) {
+    if (mapData?.collector) {
       points.push({
         type: 'collector',
         icon: () => createPin('#004536'),
-        pos: [mapData.collectorLocation.latitude, mapData.collectorLocation.longitude],
-        popup: { name: 'Lokasi Anda', detail: mapData.collectorLocation.address || 'Collector Location' },
+        pos: [mapData.collector.latitude, mapData.collector.longitude],
+        popup: { name: mapData.collector.companyName, detail: mapData.collector.address },
       })
     }
 
     // HEN receiving location
-    if (mapData?.henLocation) {
+    if (mapData?.henReceptionLocation) {
       points.push({
         type: 'hen',
         icon: () => createPin('#BA1A1A'),
-        pos: [mapData.henLocation.latitude, mapData.henLocation.longitude],
-        popup: { name: 'HEN Penerimaan', detail: mapData.henLocation.address || 'HEN Receiving Location' },
+        pos: [mapData.henReceptionLocation.latitude, mapData.henReceptionLocation.longitude],
+        popup: { name: mapData.henReceptionLocation.name, detail: mapData.henReceptionLocation.address },
       })
     }
 
@@ -130,7 +134,7 @@ export default function MapPage() {
           type: 'community',
           icon: createUserDot,
           pos: [marker.latitude, marker.longitude],
-          popup: { name: marker.communityName, detail: `${marker.totalLiter} L • ${marker.submissionCount} Setoran` },
+          popup: { name: marker.name, detail: `${marker.totalCleanLiter} L • ${marker.submissionCount} Setoran` },
         })
       })
     }
@@ -215,7 +219,7 @@ export default function MapPage() {
             transition-all duration-300 ease-in-out
             ${panelOpen ? 'flex' : 'hidden'}
           `}>
-            <MapRightPanel />
+            <MapRightPanel mapData={mapData} />
           </div>
         </main>
 

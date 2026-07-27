@@ -95,9 +95,55 @@ export default function RegisterCard() {
   const [selectedRole, setSelectedRole] = useState('COMMUNITY')
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [coords, setCoords] = useState({ latitude: -6.2615, longitude: 106.8106 })
+  const [isDetecting, setIsDetecting] = useState(false)
 
   function handleChange(e) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+  }
+
+  async function handleAutoDetect() {
+    if (!navigator.geolocation) {
+      setErrorMessage('Geolocation tidak didukung oleh browser Anda.')
+      return
+    }
+
+    setIsDetecting(true)
+    setErrorMessage('')
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords
+        setCoords({ latitude, longitude })
+
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          )
+          const data = await response.json()
+          const address = data.address?.road || data.address?.suburb || data.display_name || ''
+          setForm((prev) => ({
+            ...prev,
+            alamat: address.substring(0, 200),
+          }))
+        } catch (error) {
+          console.error('Reverse geocoding failed:', error)
+          setErrorMessage('Gagal mendapatkan nama alamat. Koordinat sudah tersimpan.')
+        } finally {
+          setIsDetecting(false)
+        }
+      },
+      (error) => {
+        setIsDetecting(false)
+        const errorMessages = {
+          'PERMISSION_DENIED': 'Izin akses lokasi ditolak.',
+          'POSITION_UNAVAILABLE': 'Lokasi tidak tersedia.',
+          'TIMEOUT': 'Waktu tunggu akses lokasi habis.',
+        }
+        setErrorMessage(errorMessages[error.code] || 'Gagal mengakses lokasi.')
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
   }
 
   async function handleSubmit(e) {
@@ -121,8 +167,8 @@ export default function RegisterCard() {
         profile: {
           category: 'HOUSEHOLD',
           address: alamat.trim(),
-          latitude: -6.2615,
-          longitude: 106.8106,
+          latitude: coords.latitude,
+          longitude: coords.longitude,
         },
       }
 
@@ -294,7 +340,9 @@ export default function RegisterCard() {
             <div className="absolute inset-0 flex items-center justify-center">
               <button
                 type="button"
-                className="flex items-center gap-2 px-3 py-1 rounded-full cursor-pointer"
+                onClick={handleAutoDetect}
+                disabled={isDetecting}
+                className="flex items-center gap-2 px-3 py-1 rounded-full cursor-pointer transition-opacity disabled:opacity-50"
                 style={{
                   background: 'rgba(29, 49, 77, 0.80)',
                   backdropFilter: 'blur(2px)',
@@ -302,7 +350,7 @@ export default function RegisterCard() {
               >
                 <LocationPinIcon />
                 <span className="text-white text-[10px] font-bold leading-[15px]">
-                  Deteksi Otomatis
+                  {isDetecting ? 'Mendeteksi...' : 'Deteksi Otomatis'}
                 </span>
               </button>
             </div>

@@ -25,18 +25,6 @@ export default function CollectorWelcome({ onInputSetoran }) {
           {getFormattedDate()} • Pantau performa harian Anda.
         </p>
       </div>
-
-      <button
-        onClick={onInputSetoran}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#5A4199] text-white
-          text-base font-normal font-poppins shadow-sm
-          hover:bg-[#4a3489] hover:-translate-y-0.5 hover:shadow-md
-          active:scale-95 active:translate-y-0
-          transition-all duration-200"
-      >
-        <PlusCircleIcon />
-        Input Setoran Manual
-      </button>
     </div>
   )
 }

@@ -18,7 +18,7 @@ const InfoIcon = () => (
   </svg>
 )
 
-export default function Toast({ message, type = 'success', onClose, duration = 3000 }) {
+export default function Toast({ message, title, type = 'success', onClose, duration = 3000 }) {
   useEffect(() => {
     if (duration) {
       const timer = setTimeout(onClose, duration)
@@ -40,10 +40,13 @@ export default function Toast({ message, type = 'success', onClose, duration = 3
 
   return (
     <div
-      className={`fixed bottom-6 right-6 flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg text-white animate-fade-slide-up max-w-sm z-50 ${bgColor}`}
+      className={`fixed bottom-6 right-6 flex items-start gap-3 px-4 py-3 rounded-lg shadow-lg text-white animate-fade-slide-up max-w-sm z-50 ${bgColor}`}
     >
-      <div className="shrink-0 text-white">{icon}</div>
-      <p className="text-sm font-semibold flex-1">{message}</p>
+      <div className="shrink-0 text-white pt-0.5">{icon}</div>
+      <div className="flex flex-col flex-1 gap-0.5">
+        {title && <p className="text-xs font-bold uppercase tracking-wide">{title}</p>}
+        <p className="text-sm font-semibold">{message}</p>
+      </div>
     </div>
   )
 }
