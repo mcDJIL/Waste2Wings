@@ -25,16 +25,32 @@ jobs:
           script: |
             set -e
 
-            APP_DIR="${{ secrets.VPS_APP_DIR || '/opt/henwasteoil-fe' }}"
+            APP_DIR="${{ secrets.VPS_APP_DIR || '/home/developer/henwasteoil-fe' }}"
             REPO_URL="https://github.com/${{ github.repository }}.git"
             BRANCH="${{ github.ref_name }}"
             GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
             APP_PORT="${{ vars.APP_PORT || '8080' }}"
             VITE_API_URL="${{ vars.VITE_API_URL || 'http://api.eepis.web.id/api/v1' }}"
+            SUDO_PASSWORD="${{ secrets.VPS_SUDO_PASSWORD }}"
+
+            sudo_cmd() {
+              if [ -n "$SUDO_PASSWORD" ]; then
+                printf '%s\n' "$SUDO_PASSWORD" | sudo -S "$@"
+              else
+                sudo -n "$@"
+              fi
+            }
+
+            docker_cmd() {
+              if docker info >/dev/null 2>&1; then
+                docker "$@"
+              else
+                sudo_cmd docker "$@"
+              fi
+            }
 
             if [ ! -d "$APP_DIR/.git" ]; then
-              sudo mkdir -p "$APP_DIR"
-              sudo chown "$USER":"$USER" "$APP_DIR"
+              mkdir -p "$APP_DIR"
               git -c http.extraHeader="AUTHORIZATION: bearer $GITHUB_TOKEN" clone --branch "$BRANCH" "$REPO_URL" "$APP_DIR"
             fi
 
@@ -45,5 +61,5 @@ jobs:
 
             printf 'APP_PORT=%s\nVITE_API_URL=%s\n' "$APP_PORT" "$VITE_API_URL" > .env
 
-            docker compose up -d --build
-            docker image prune -f
+            docker_cmd compose up -d --build
+            docker_cmd image prune -f
