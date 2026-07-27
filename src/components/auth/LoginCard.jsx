@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../../services/api'
+import { useAuth } from '../../contexts/AuthContext'
 import logo from '../../assets/images/logo.png'
 
 function EmailIcon() {
@@ -60,6 +61,7 @@ function ArrowRightIcon() {
 
 export default function LoginCard() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -83,9 +85,17 @@ export default function LoginCard() {
       })
 
       const { token, user } = response.data
-      localStorage.setItem('token', token)
-      localStorage.setItem('user', JSON.stringify(user))
-      navigate('/')
+      login(token, user)
+      const role = user.role?.toUpperCase()
+      if (role === 'COMMUNITY') {
+        navigate('/community/dashboard')
+      } else if (role === 'COLLECTOR') {
+        navigate('/collector/dashboard')
+      } else if (role === 'STAKEHOLDER') {
+        navigate('/stakeholder/dashboard')
+      } else {
+        navigate('/')
+      }
     } catch (error) {
       const message = error?.response?.data?.error?.message || error?.response?.data?.message || 'Gagal terhubung ke server.'
       setErrorMessage(message)

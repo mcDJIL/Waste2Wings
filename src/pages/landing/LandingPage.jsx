@@ -10,10 +10,18 @@ export default function LandingPage() {
     <div className="min-w-[280px]">
       <Navbar />
       <main>
-        <HeroSection />
-        <EkosistemSection />
-        <StatsBentoSection />
-        <CTASection />
+        <div id="tentang">
+          <HeroSection />
+        </div>
+        <div id="cara-kerja">
+          <EkosistemSection />
+        </div>
+        <div id="manfaat">
+          <StatsBentoSection />
+        </div>
+        <div id="kontak">
+          <CTASection />
+        </div>
       </main>
       <Footer />
     </div>

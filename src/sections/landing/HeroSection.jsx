@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import bg from '../../assets/images/hero.png'
 
 const impactBars = [
@@ -7,6 +8,18 @@ const impactBars = [
   { height: 'h-36', opacity: 'bg-[rgba(0,69,54,0.80)]' },
   { height: 'h-40', opacity: 'bg-[#004536]' },
 ]
+
+const scrollToSection = (e, sectionId) => {
+  e.preventDefault()
+  const element = document.getElementById(sectionId)
+  if (element) {
+    const offsetTop = element.offsetTop - 61
+    window.scrollTo({
+      top: offsetTop,
+      behavior: 'smooth',
+    })
+  }
+}
 
 function ImpactCard() {
   return (
@@ -78,13 +91,17 @@ export default function HeroSection() {
           </p>
 
           <div className="flex flex-col min-[380px]:flex-row flex-wrap gap-3 sm:gap-4 pt-2">
-            <button className="flex items-center justify-center gap-2 px-6 sm:px-8 py-4 rounded-xl bg-brand-dark text-white text-sm sm:text-base font-medium hover:bg-brand-green transition-colors">
+            <Link to="/register" className="flex items-center justify-center gap-2 px-6 sm:px-8 py-4 rounded-xl bg-brand-dark text-white text-sm sm:text-base font-medium hover:bg-brand-green transition-colors">
               Mulai Berkontribusi
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M12.175 9H0V7H12.175L6.575 1.4L8 0L16 8L8 16L6.575 14.6L12.175 9Z" fill="white" />
               </svg>
-            </button>
-            <button className="flex items-center justify-center px-6 sm:px-8 py-4 rounded-xl border border-[rgba(0,69,54,0.20)] bg-[rgba(255,255,255,0.70)] backdrop-blur-[10px] text-brand-dark text-sm sm:text-base font-medium shadow-[0_10px_30px_-10px_rgba(0,69,54,0.10)] hover:bg-white/90 transition-colors">
+            </Link>
+            <button
+              to="#cara-kerja"
+              className="cursor-pointer flex items-center justify-center px-6 sm:px-8 py-4 rounded-xl border border-[rgba(0,69,54,0.20)] bg-[rgba(255,255,255,0.70)] backdrop-blur-[10px] text-brand-dark text-sm sm:text-base font-medium shadow-[0_10px_30px_-10px_rgba(0,69,54,0.10)] hover:bg-white/90 transition-colors"
+              onClick={(e) => scrollToSection(e, 'cara-kerja')}
+            >
               Pelajari Teknologi Kami
             </button>
           </div>

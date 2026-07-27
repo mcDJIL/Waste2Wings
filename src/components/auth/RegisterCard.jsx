@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../../services/api'
+import { useAuth } from '../../contexts/AuthContext'
 
 const LOGO_URL =
   'https://api.builder.io/api/v1/image/assets/TEMP/125834ef82b85efc2a276f0b188074feb41b9fc1?width=96'
@@ -83,6 +84,7 @@ function ArrowRightIcon() {
 
 export default function RegisterCard() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [form, setForm] = useState({
     namaLengkap: '',
     nomorTelepon: '',
@@ -126,9 +128,17 @@ export default function RegisterCard() {
 
       const response = await api.post('/auth/register', payload)
       const { token, user } = response.data
-      localStorage.setItem('token', token)
-      localStorage.setItem('user', JSON.stringify(user))
-      navigate('/')
+      login(token, user)
+      const role = (user.role || selectedRole).toUpperCase()
+      if (role === 'COMMUNITY') {
+        navigate('/community/dashboard')
+      } else if (role === 'COLLECTOR') {
+        navigate('/collector/dashboard')
+      } else if (role === 'STAKEHOLDER') {
+        navigate('/stakeholder/dashboard')
+      } else {
+        navigate('/')
+      }
     } catch (error) {
       const message =
         error?.response?.data?.error?.message ||
