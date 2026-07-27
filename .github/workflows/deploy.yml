@@ -1,0 +1,49 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -e
+
+            APP_DIR="${{ secrets.VPS_APP_DIR || '/opt/henwasteoil-fe' }}"
+            REPO_URL="https://github.com/${{ github.repository }}.git"
+            BRANCH="${{ github.ref_name }}"
+            GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+            APP_PORT="${{ vars.APP_PORT || '8080' }}"
+            VITE_API_URL="${{ vars.VITE_API_URL || 'http://api.eepis.web.id/api/v1' }}"
+
+            if [ ! -d "$APP_DIR/.git" ]; then
+              sudo mkdir -p "$APP_DIR"
+              sudo chown "$USER":"$USER" "$APP_DIR"
+              git -c http.extraHeader="AUTHORIZATION: bearer $GITHUB_TOKEN" clone --branch "$BRANCH" "$REPO_URL" "$APP_DIR"
+            fi
+
+            cd "$APP_DIR"
+            git -c http.extraHeader="AUTHORIZATION: bearer $GITHUB_TOKEN" fetch origin "$BRANCH"
+            git checkout "$BRANCH"
+            git reset --hard "origin/$BRANCH"
+
+            printf 'APP_PORT=%s\nVITE_API_URL=%s\n' "$APP_PORT" "$VITE_API_URL" > .env
+
+            docker compose up -d --build
+            docker image prune -f
