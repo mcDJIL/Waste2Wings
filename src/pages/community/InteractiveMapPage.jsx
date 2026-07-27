@@ -326,11 +326,32 @@ export default function InteractiveMapPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [selectedCollectorId, setSelectedCollectorId] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
-
-  const userLat = user?.profile?.latitude || -6.2615
-  const userLng = user?.profile?.longitude || 106.8106
+  const [userLat, setUserLat] = useState(-6.2615)
+  const [userLng, setUserLng] = useState(106.8106)
+  const [userName, setUserName] = useState('')
 
   const handleMapReady = useCallback((map) => setMapInstance(map), [])
+
+  // Fetch user profile to get latest lat/lng from API
+  useEffect(() => {
+    const fetchUserLocation = async () => {
+      try {
+        const response = await api.get('/profiles/me')
+        const profile = response.data
+        if (profile?.profile?.latitude && profile?.profile?.longitude) {
+          setUserLat(profile.profile.latitude)
+          setUserLng(profile.profile.longitude)
+        }
+        if (profile?.name) {
+          setUserName(profile.name)
+        }
+      } catch (error) {
+        console.error('Failed to fetch user location:', error)
+      }
+    }
+
+    fetchUserLocation()
+  }, [])
 
   // Filter collectors based on search query
   const filteredCollectors = collectors.filter(collector => {
@@ -393,9 +414,33 @@ export default function InteractiveMapPage() {
               <ZoomController onReady={handleMapReady} />
 
               {/* User marker */}
-              <Marker position={[userLat, userLng]} icon={createMapPin('green', 'Anda')}>
+              <Marker position={[userLat, userLng]} icon={createMapPin('green', 'Anda')} zIndexOffset={1000}>
                 <Popup>
-                  <span className="font-semibold text-[#004536]">Lokasi Anda</span>
+                  <div className="min-w-[240px] p-3 bg-white rounded-lg">
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-9 h-9 rounded-full bg-[#D1FAE5] flex items-center justify-center flex-shrink-0">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S15.33 8 14.5 8 13 8.67 13 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S8.33 8 7.5 8 6 8.67 6 9.5 6.67 11 7.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" fill="#065F46" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-[#051C37] text-sm leading-tight">Lokasi Anda</h4>
+                        <p className="text-[#6F7975] text-xs mt-1">{user?.name || 'Komunitas'}</p>
+                        <div className="flex items-center gap-1 mt-2 text-[10px] text-[#3F4945]">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" fill="#6F7975" />
+                          </svg>
+                          <span>Latitude: {userLat.toFixed(4)}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] text-[#3F4945]">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" fill="#6F7975" />
+                          </svg>
+                          <span>Longitude: {userLng.toFixed(4)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </Popup>
               </Marker>
 
@@ -410,18 +455,32 @@ export default function InteractiveMapPage() {
                   }}
                 >
                   <Popup>
-                    <div className="p-2 min-w-[220px]">
-                      <h4 className="font-bold text-[#004536] mb-1">{collector.companyName}</h4>
-                      <p className="text-[10px] text-[#3F4945] mb-2">{collector.address}</p>
-                      <p className="text-xs text-[#006C49] font-semibold">
-                        Jarak: {collector.distanceKm.toFixed(2)} km
-                      </p>
-                      <p className="text-[10px] text-[#3F4945] mt-1">
-                        Harga: Rp {collector.buyPricePerLiter.toLocaleString('id-ID')}/L
-                      </p>
-                      <p className="text-[10px] text-[#3F4945] mt-1">
-                        Kapasitas: {collector.capacityLiter.toLocaleString('id-ID')} L
-                      </p>
+                    <div className="min-w-[260px] p-3 bg-white rounded-lg">
+                      <div className="flex items-start gap-2.5 mb-3">
+                        <div className="w-9 h-9 rounded-full bg-[#DBEAFE] flex items-center justify-center flex-shrink-0">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.06c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z" fill="#2563EB" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-[#051C37] text-sm leading-tight">{collector.companyName}</h4>
+                          <p className="text-[#6F7975] text-xs mt-0.5">{collector.address}</p>
+                        </div>
+                      </div>
+                      <div className="space-y-2 text-xs">
+                        <div className="flex items-center justify-between p-2 rounded-lg bg-[#F3F4F6]">
+                          <span className="text-[#6F7975]">Jarak</span>
+                          <span className="font-semibold text-[#2563EB]">{collector.distanceKm.toFixed(2)} km</span>
+                        </div>
+                        <div className="flex items-center justify-between p-2 rounded-lg bg-[#FEF3C7]">
+                          <span className="text-[#6F7975]">Harga Beli</span>
+                          <span className="font-semibold text-[#B45309]">Rp {collector.buyPricePerLiter.toLocaleString('id-ID')}/L</span>
+                        </div>
+                        <div className="flex items-center justify-between p-2 rounded-lg bg-[#D1FAE5]">
+                          <span className="text-[#6F7975]">Kapasitas</span>
+                          <span className="font-semibold text-[#065F46]">{collector.capacityLiter.toLocaleString('id-ID')} L</span>
+                        </div>
+                      </div>
                     </div>
                   </Popup>
                 </Marker>

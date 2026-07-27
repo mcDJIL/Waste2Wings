@@ -196,7 +196,7 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
               {/* Stakeholder Note */}
               <div className="border-t border-[#BEC9C3]/20 pt-6">
                 <label className="block text-sm font-bold text-[#051C37] mb-2">
-                  Catatan/Alasan {!batchData?.status || !['ACCEPTED_BY_STAKEHOLDER', 'REJECTED_BY_STAKEHOLDER'].includes(batchData.status) ? '*' : ''}
+                  Catatan/Alasan *
                 </label>
                 <textarea
                   value={note}
@@ -207,7 +207,7 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
                   }}
                   placeholder="Jelaskan alasan penerimaan atau penolakan hasil lab ini..."
                   rows="3"
-                  disabled={batchData?.status && ['ACCEPTED_BY_STAKEHOLDER', 'REJECTED_BY_STAKEHOLDER'].includes(batchData.status) && actionLoading === null}
+                  disabled={actionLoading !== null}
                   className="w-full px-4 py-2.5 rounded-lg border border-[rgba(190,201,195,0.30)] bg-white text-[#051C37] outline-none focus:border-[#004536] focus:ring-2 focus:ring-[#004536]/20 transition-all duration-200 resize-none disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
@@ -216,17 +216,17 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
               <div className="border-t border-[#BEC9C3]/20 pt-6 flex gap-3">
                 <button
                   onClick={handleReject}
-                  disabled={actionLoading || !note.trim()}
+                  disabled={actionLoading === 'reject' || !note.trim()}
                   className="flex-1 px-4 py-2.5 rounded-lg bg-[#FEE2E2] text-[#991B1B] font-bold text-sm transition-all duration-200 hover:bg-[#FECACA] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
                 >
-                  {actionLoading === 'reject' ? 'Menolak...' : batchData?.status === 'REJECTED_BY_STAKEHOLDER' ? 'Ubah ke Tolak' : 'Tolak'}
+                  {actionLoading === 'reject' ? 'Menolak...' : batchData?.status === 'REJECTED_BY_STAKEHOLDER' ? 'Ubah Alasan Tolak' : 'Tolak'}
                 </button>
                 <button
                   onClick={handleAccept}
-                  disabled={actionLoading || !note.trim()}
+                  disabled={actionLoading === 'accept' || !note.trim()}
                   className="flex-1 px-4 py-2.5 rounded-lg bg-[#D1FAE5] text-[#065F46] font-bold text-sm transition-all duration-200 hover:bg-[#A7F3D0] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
                 >
-                  {actionLoading === 'accept' ? 'Menerima...' : batchData?.status === 'ACCEPTED_BY_STAKEHOLDER' ? 'Ubah ke Terima' : 'Terima'}
+                  {actionLoading === 'accept' ? 'Menerima...' : batchData?.status === 'ACCEPTED_BY_STAKEHOLDER' ? 'Ubah Alasan Terima' : 'Terima'}
                 </button>
               </div>
 
