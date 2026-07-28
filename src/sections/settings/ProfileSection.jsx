@@ -45,10 +45,10 @@ export default function ProfileSection() {
         console.log('Profile data loaded:', profileData)
 
         setProfile(profileData)
-        setName(profileData.name || '')
-        setEmail(profileData.email || '')
-        setPhone(profileData.phone || '')
-        setAddress(profileData.profile?.address || profileData.address || '')
+        setName(profileData.user.name || '')
+        setEmail(profileData.user.email || '')
+        setPhone(profileData.user.phone || '')
+        setAddress(profileData.profile?.address || profileData.user.address || '')
       } catch (error) {
         console.error('Failed to fetch profile:', error)
         setSaveMessage('Gagal memuat profil. Silakan refresh halaman.')
@@ -99,17 +99,21 @@ export default function ProfileSection() {
       setIsSaving(true)
       setSaveMessage('')
 
-      // Geocode the address to get lat/long
-      const { latitude, longitude } = await geocodeAddress(address)
+      const profilePayload = {
+        address: address.trim(),
+      }
+
+      // Only add latitude/longitude if the profile already has these fields (e.g., collector)
+      if (profile?.profile?.latitude !== undefined || profile?.profile?.longitude !== undefined) {
+        const { latitude, longitude } = await geocodeAddress(address)
+        profilePayload.latitude = latitude
+        profilePayload.longitude = longitude
+      }
 
       const payload = {
         name: name.trim(),
         phone: phone.trim(),
-        profile: {
-          address: address.trim(),
-          latitude,
-          longitude,
-        },
+        profile: profilePayload,
       }
 
       console.log('Sending payload:', payload)

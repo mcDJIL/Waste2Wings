@@ -51,10 +51,6 @@ export default function PrediksiDanaPage() {
             <PrediksiKpiCards trends={trends} settings={settings} isLoading={isLoading} />
           </section>
 
-          <section className="animate-fade-slide-up" style={{ animationDelay: '120ms' }}>
-            <ForecastChartSection trends={trends} isLoading={isLoading} />
-          </section>
-
           <section className="animate-fade-slide-up" style={{ animationDelay: '180ms' }}>
             <BudgetScenarioSection trends={trends} settings={settings} isLoading={isLoading} />
           </section>

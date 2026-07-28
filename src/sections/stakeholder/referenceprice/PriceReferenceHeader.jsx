@@ -21,17 +21,6 @@ export default function PriceReferenceHeader() {
           Indeks harga pasar real-time untuk optimalisasi margin profit
         </p>
       </div>
-
-      <div className="flex items-center gap-3 flex-shrink-0 flex-wrap">
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#6F7975]/30 bg-white shadow-sm text-[#004536] text-sm font-semibold leading-5 tracking-[0.14px] hover:bg-[#004536]/5 hover:border-[#004536]/40 active:scale-95 transition-all duration-200">
-          <ExportIcon />
-          Export Data
-        </button>
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0B5E4B] text-white text-sm font-semibold leading-5 tracking-[0.14px] hover:bg-[#004536] hover:shadow-lg active:scale-95 transition-all duration-200">
-          <SwapIcon />
-          Update Harga Acuan
-        </button>
-      </div>
     </div>
   )
 }

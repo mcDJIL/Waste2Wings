@@ -1,8 +1,6 @@
 function getMoneyFormat(amount) {
-  if (!amount) return '$0'
-  if (amount >= 1000000) return `$${(amount / 1000000).toFixed(2)}M`
-  if (amount >= 1000) return `$${(amount / 1000).toFixed(0)}K`
-  return `$${amount}`
+  if (!amount) return 'Rp0'
+  return `Rp${amount.toLocaleString('id-ID')}`
 }
 
 function ArrowUpIcon({ color }) {
@@ -21,36 +19,6 @@ function StarIcon() {
   )
 }
 
-function AiTrustCard() {
-  return (
-    <div className="flex flex-col gap-2 flex-1 p-6 rounded-xl border-t-[3px] border-[#C9A96E] border-x border-b bg-[rgba(11,94,75,0.05)] backdrop-blur-[10px]" style={{ borderColor: '#C9A96E' }}>
-      <div className="relative h-[72px]">
-        <span className="text-[#6F7975] text-base font-extrabold leading-6 tracking-[1.6px] uppercase absolute left-0 top-0">
-          TINGKAT<br />KEPERCAYAAN<br />AI
-        </span>
-        <svg className="absolute right-0 top-4" width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M3 20V15.7C2.05 14.8333 1.3125 13.8208 0.7875 12.6625C0.2625 11.5042 0 10.2833 0 9C0 6.5 0.875 4.375 2.625 2.625C4.375 0.875 6.5 0 9 0C11.0833 0 12.9292 0.6125 14.5375 1.8375C16.1458 3.0625 17.1917 4.65833 17.675 6.625L18.975 11.75C19.0583 12.0667 19 12.3542 18.8 12.6125C18.6 12.8708 18.3333 13 18 13H16V16C16 16.55 15.8042 17.0208 15.4125 17.4125C15.0208 17.8042 14.55 18 14 18H12V20H10V16H14V11H16.7L15.75 7.125C15.3667 5.60833 14.55 4.375 13.3 3.425C12.05 2.475 10.6167 2 9 2C7.06667 2 5.41667 2.675 4.05 4.025C2.68333 5.375 2 7.01667 2 8.95C2 9.95 2.20417 10.9 2.6125 11.8C3.02083 12.7 3.6 13.5 4.35 14.2L5 14.8V20H3Z" fill="#006C49" />
-        </svg>
-      </div>
-
-      <div className="flex items-end justify-between">
-        <span className="text-[#004536] text-base font-extrabold leading-6">94.8%</span>
-        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-          <g clipPath="url(#clip-ai-trust)">
-            <path d="M32 60C47.4536 60 60 47.4536 60 32C60 16.5464 47.4536 4 32 4C16.5464 4 4 16.5464 4 32C4 47.4536 16.5464 60 32 60V60" stroke="#D5E3FF" strokeWidth="4" />
-            <path d="M32 60C47.4536 60 60 47.4536 60 32C60 16.5464 47.4536 4 32 4C16.5464 4 4 16.5464 4 32C4 47.4536 16.5464 60 32 60V60" stroke="#006C49" strokeWidth="4" />
-            <rect x="1.04102" y="20.9109" width="25.6418" height="14.4872" transform="rotate(-57.6516 1.04102 20.9109)" fill="#F2F7F6" />
-          </g>
-          <defs>
-            <clipPath id="clip-ai-trust">
-              <rect width="64" height="64" fill="white" transform="matrix(0 -1 1 0 0 64)" />
-            </clipPath>
-          </defs>
-        </svg>
-      </div>
-    </div>
-  )
-}
 
 export default function PrediksiKpiCards({ trends = [], settings, isLoading }) {
   const historical_volumes = trends.map(trend => trend.totalFinalLiter || 0)
@@ -95,7 +63,7 @@ export default function PrediksiKpiCards({ trends = [], settings, isLoading }) {
   ]
 
   return (
-    <div className="grid grid-cols-2 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 xl:grid-cols-3 gap-6">
       {kpiCards.map((card) => (
         <div
           key={card.label}
@@ -118,7 +86,6 @@ export default function PrediksiKpiCards({ trends = [], settings, isLoading }) {
           </div>
         </div>
       ))}
-      <AiTrustCard />
     </div>
   )
 }

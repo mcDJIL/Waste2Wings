@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function SaveIcon() {
   return (
@@ -20,6 +20,12 @@ export default function PriceSettingsSection({ settings, isLoading, onUpdate }) 
       longitude: 0,
     }
   )
+
+  useEffect(() => {
+    if (settings) {
+      setFormData(settings)
+    }
+  }, [settings])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target

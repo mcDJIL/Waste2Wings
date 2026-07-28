@@ -179,9 +179,34 @@ export default function MapPage() {
                     icon={point.icon()}
                   >
                     <Popup>
-                      <div className="flex flex-col gap-1 min-w-[140px]">
-                        <span className="font-bold text-[#051C37] text-sm">{point.popup.name}</span>
-                        <span className="text-[#3F4945] text-xs">{point.popup.detail}</span>
+                      <div className="min-w-[200px] p-3 bg-white rounded-lg">
+                        <div className="flex items-start gap-2">
+                          {point.type === 'community' && (
+                            <div className="w-8 h-8 rounded-full bg-[#81F9C1] flex items-center justify-center flex-shrink-0">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#00734E" />
+                              </svg>
+                            </div>
+                          )}
+                          {point.type === 'collector' && (
+                            <div className="w-8 h-8 rounded-full bg-[#004536] flex items-center justify-center flex-shrink-0">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.06c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z" fill="white" />
+                              </svg>
+                            </div>
+                          )}
+                          {point.type === 'hen' && (
+                            <div className="w-8 h-8 rounded-full bg-[#BA1A1A] flex items-center justify-center flex-shrink-0">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-5-9h10v2H7z" fill="white" />
+                              </svg>
+                            </div>
+                          )}
+                          <div className="flex-1">
+                            <p className="font-bold text-[#051C37] text-sm leading-tight">{point.popup.name}</p>
+                            <p className="text-[#6F7975] text-xs mt-0.5 leading-4">{point.popup.detail}</p>
+                          </div>
+                        </div>
                       </div>
                     </Popup>
                   </Marker>

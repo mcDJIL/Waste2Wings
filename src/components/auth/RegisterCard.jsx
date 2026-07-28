@@ -176,15 +176,7 @@ export default function RegisterCard() {
       const { token, user } = response.data
       login(token, user)
       const role = (user.role || selectedRole).toUpperCase()
-      if (role === 'COMMUNITY') {
-        navigate('/community/dashboard')
-      } else if (role === 'COLLECTOR') {
-        navigate('/collector/dashboard')
-      } else if (role === 'STAKEHOLDER') {
-        navigate('/stakeholder/dashboard')
-      } else {
-        navigate('/')
-      }
+      navigate('/login', { state: { role } })
     } catch (error) {
       const message =
         error?.response?.data?.error?.message ||

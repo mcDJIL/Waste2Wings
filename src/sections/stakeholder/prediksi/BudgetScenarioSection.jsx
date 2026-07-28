@@ -1,44 +1,14 @@
 import { useState } from 'react'
 
-const allocations = [
-  { label: 'Logistik & Transportasi', pct: 42, color: '#004536' },
-  { label: 'Laboratorium & Pemurnian', pct: 28, color: '#006C49' },
-  { label: 'Litbang & Teknologi', pct: 18, color: '#C9A96E' },
-  { label: 'Insentif Jaringan', pct: 12, color: '#6F7975' },
-]
-
-function BudgetAllocationCard() {
-  return (
-    <div className="flex flex-col gap-6 p-8 rounded-xl border border-white/30 bg-white/70 backdrop-blur-[10px]">
-      <h3 className="text-[#004536] text-base font-extrabold leading-6">Alokasi Terprediksi</h3>
-      <div className="flex flex-col gap-6">
-        {allocations.map((item) => (
-          <div key={item.label} className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[#051C37] text-base font-bold leading-6">{item.label}</span>
-              <span className="text-[#051C37] text-base font-extrabold leading-6">{item.pct}%</span>
-            </div>
-            <div className="h-2 rounded-full bg-[#DEE8FF] overflow-hidden">
-              <div
-                className="h-2 rounded-full transition-all duration-500"
-                style={{ width: `${item.pct}%`, background: item.color }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
 
 function ScenarioSimulatorCard({ trends = [], settings }) {
   const historical_volumes = trends.map(trend => trend.totalFinalLiter || 0)
   const avgVolume = historical_volumes.length > 0 ? historical_volumes.reduce((a, b) => a + b, 0) / historical_volumes.length : 12500
 
   const [volume, setVolume] = useState(avgVolume)
-  const [price, setPrice] = useState(settings?.referencePricePerLiter || 1.85)
+  const [price, setPrice] = useState(settings?.referencePricePerLiter || 5000)
 
-  const netProfit = ((volume * price * 0.0000135)).toFixed(2)
+  const netProfit = (volume * price * 0.73).toLocaleString('id-ID', { maximumFractionDigits: 0 })
 
   return (
     <div className="relative flex flex-col gap-6 p-8 rounded-xl bg-[#004536] overflow-hidden">
@@ -84,15 +54,15 @@ function ScenarioSimulatorCard({ trends = [], settings }) {
           {/* Price slider */}
           <div className="flex flex-col gap-4">
             <div className="flex items-start justify-between opacity-90">
-              <span className="text-white text-base font-bold leading-6">Harga Pasar Global ($/L)</span>
-              <span className="text-[#006C49] text-base font-extrabold leading-6">{price.toFixed(2)}</span>
+              <span className="text-white text-base font-bold leading-6">Harga Acuan (Rp/L)</span>
+              <span className="text-[#006C49] text-base font-extrabold leading-6">Rp{price.toLocaleString('id-ID')}</span>
             </div>
             <div className="relative">
               <input
                 type="range"
-                min={0.5}
-                max={4.0}
-                step={0.05}
+                min={1000}
+                max={10000}
+                step={100}
                 value={price}
                 onChange={(e) => setPrice(Number(e.target.value))}
                 className="w-full h-2 rounded-full appearance-none cursor-pointer"
@@ -100,8 +70,8 @@ function ScenarioSimulatorCard({ trends = [], settings }) {
               />
             </div>
             <div className="flex justify-between opacity-70">
-              <span className="text-white text-[10px] font-extrabold leading-[15px] tracking-[1px] uppercase">RENDAH (0.5)</span>
-              <span className="text-white text-[10px] font-extrabold leading-[15px] tracking-[1px] uppercase">TINGGI (4.0)</span>
+              <span className="text-white text-[10px] font-extrabold leading-[15px] tracking-[1px] uppercase">RENDAH (1RB)</span>
+              <span className="text-white text-[10px] font-extrabold leading-[15px] tracking-[1px] uppercase">TINGGI (10RB)</span>
             </div>
           </div>
         </div>
@@ -111,7 +81,7 @@ function ScenarioSimulatorCard({ trends = [], settings }) {
           <span className="text-white/70 text-[10px] font-extrabold leading-[15px] tracking-[1px] uppercase text-center">
             SIMULASI LABA BERSIH
           </span>
-          <span className="text-[#C9A96E] text-2xl font-extrabold leading-8">${netProfit}M</span>
+          <span className="text-[#C9A96E] text-xl font-extrabold leading-7">Rp{netProfit}</span>
           <span className="text-[#81F9C1] text-xs font-bold leading-4 mt-1">Menguntungkan</span>
         </div>
       </div>
@@ -121,13 +91,8 @@ function ScenarioSimulatorCard({ trends = [], settings }) {
 
 export default function BudgetScenarioSection({ trends = [], settings, isLoading }) {
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6" style={{ opacity: isLoading ? 0.6 : 1 }}>
-      <div className="xl:col-span-1">
-        <BudgetAllocationCard />
-      </div>
-      <div className="xl:col-span-2">
-        <ScenarioSimulatorCard trends={trends} settings={settings} />
-      </div>
+    <div style={{ opacity: isLoading ? 0.6 : 1 }}>
+      <ScenarioSimulatorCard trends={trends} settings={settings} />
     </div>
   )
 }
