@@ -83,16 +83,6 @@ function EcosystemCard({ card }) {
           </li>
         ))}
       </ul>
-
-      <button
-        className={`w-full py-3 rounded-full text-sm sm:text-base leading-6 transition-all ${
-          card.ctaStyle === 'gold'
-            ? 'bg-brand-gold text-[#002D22] font-medium shadow-[0_4px_6px_-1px_rgba(0,0,0,0.10)] hover:brightness-105'
-            : 'border border-[rgba(0,69,54,0.20)] text-brand-dark hover:bg-[rgba(0,69,54,0.05)]'
-        }`}
-      >
-        {card.cta}
-      </button>
     </div>
   )
 }
