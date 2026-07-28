@@ -25,7 +25,6 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
           target: ${{ secrets.VPS_APP_DIR || '/home/developer/henwasteoil-fe' }}
-          rm: true
           source: >-
             .dockerignore,
             Dockerfile,
@@ -50,8 +49,6 @@ jobs:
             set -e
 
             APP_DIR="${{ secrets.VPS_APP_DIR || '/home/developer/henwasteoil-fe' }}"
-            APP_PORT="${{ vars.APP_PORT || '8080' }}"
-            VITE_API_URL="${{ vars.VITE_API_URL || 'http://api.eepis.web.id/api/v1' }}"
             SUDO_PASSWORD="${{ secrets.VPS_SUDO_PASSWORD }}"
 
             sudo_cmd() {
@@ -71,7 +68,6 @@ jobs:
             }
 
             cd "$APP_DIR"
-            printf 'APP_PORT=%s\nVITE_API_URL=%s\n' "$APP_PORT" "$VITE_API_URL" > .env
 
             docker_cmd compose up -d --build
             docker_cmd image prune -f
