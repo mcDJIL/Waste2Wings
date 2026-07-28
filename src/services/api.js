@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://3000.devops.my.id/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || 'https://api.eepis.web.id/api/v1',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
