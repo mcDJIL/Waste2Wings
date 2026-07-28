@@ -2,7 +2,7 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-ARG VITE_API_URL=http://api.eepis.web.id/api/v1
+ARG VITE_API_URL=https://api.eepis.web.id/api/v1
 ENV VITE_API_URL=$VITE_API_URL
 
 COPY package*.json ./
