@@ -3,6 +3,7 @@ import { ProtectedRoute, RoleBasedRoute } from './ProtectedRoute'
 
 import LandingPage from '../pages/landing/LandingPage'
 import AuthPage from '../pages/auth/AuthPage'
+import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage'
 import CommunityDashboardPage from '../pages/community/DashboardPage'
 import CollectorDashboardPage from '../pages/collector/CollectorDashboardPage'
 import SetoranPage from '../pages/community/SetoranPage'
@@ -28,6 +29,7 @@ export default function Router() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<AuthPage />} />
       <Route path="/register" element={<AuthPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
       {/* Community Routes */}
       <Route path="/community/dashboard" element={<RoleBasedRoute element={<CommunityDashboardPage />} allowedRoles={['COMMUNITY']} />} />

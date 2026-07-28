@@ -155,12 +155,12 @@ export default function LoginCard() {
             <label className="text-[#3F4945] text-sm font-semibold tracking-[0.14px]">
               Kata Sandi
             </label>
-            <a
-              href="#"
+            <Link
+              to="/forgot-password"
               className="text-[#E57A16] text-sm underline underline-offset-2 hover:text-[#c96a0e] transition-colors"
             >
               Lupa Kata Sandi?
-            </a>
+            </Link>
           </div>
           <div className="input-glass flex items-center gap-2 rounded-[12px] px-3 py-2">
             <LockIcon />
