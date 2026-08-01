@@ -60,7 +60,7 @@ router.get('/settings', getStakeholderSetting);
  *                 example: 10000
  *               receptionLocationName:
  *                 type: string
- *                 example: HEN Jakarta Reception Plant
+ *                 example: W2W Jakarta Reception Plant
  *               receptionAddress:
  *                 type: string
  *                 example: Kawasan Industri Pulogadung, Jakarta
