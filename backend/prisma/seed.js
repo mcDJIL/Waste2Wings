@@ -28,10 +28,10 @@ async function cleanDemoData() {
   await prisma.collectorBatch.deleteMany({});
   await prisma.communitySubmission.deleteMany({});
   await prisma.stakeholderSetting.deleteMany({});
-  await prisma.communityProfile.deleteMany({ where: { user: { email: { endsWith: '@hen.test' } } } });
-  await prisma.collectorProfile.deleteMany({ where: { user: { email: { endsWith: '@hen.test' } } } });
-  await prisma.stakeholderProfile.deleteMany({ where: { user: { email: { endsWith: '@hen.test' } } } });
-  await prisma.user.deleteMany({ where: { email: { endsWith: '@hen.test' } } });
+  await prisma.communityProfile.deleteMany({ where: { user: { email: { endsWith: '@w2w.test' } } } });
+  await prisma.collectorProfile.deleteMany({ where: { user: { email: { endsWith: '@w2w.test' } } } });
+  await prisma.stakeholderProfile.deleteMany({ where: { user: { email: { endsWith: '@w2w.test' } } } });
+  await prisma.user.deleteMany({ where: { email: { endsWith: '@w2w.test' } } });
 }
 
 async function createUser({ name, email, role, phone }) {
@@ -152,9 +152,9 @@ async function main() {
 
   const stakeholderUsers = [];
   for (const data of [
-    { name: 'HEN Admin', email: 'stakeholder@hen.test', phone: '081100000001' },
-    { name: 'HEN Lab Officer', email: 'stakeholder2@hen.test', phone: '081100000002' },
-    { name: 'HEN Operations Lead', email: 'stakeholder3@hen.test', phone: '081100000003' },
+    { name: 'W2W Admin', email: 'stakeholder@w2w.test', phone: '081100000001' },
+    { name: 'W2W Lab Officer', email: 'stakeholder2@w2w.test', phone: '081100000002' },
+    { name: 'W2W Operations Lead', email: 'stakeholder3@w2w.test', phone: '081100000003' },
   ]) {
     stakeholderUsers.push(await createUser({ ...data, role: 'STAKEHOLDER' }));
   }
@@ -174,7 +174,7 @@ async function main() {
   const setting = await prisma.stakeholderSetting.create({
     data: {
       referencePricePerLiter: 13000,
-      receptionLocationName: 'HEN Jakarta Reception Plant',
+      receptionLocationName: 'W2W Jakarta Reception Plant',
       receptionAddress: 'Kawasan Industri Pulogadung, Jakarta',
       latitude: -6.1917,
       longitude: 106.8926,
@@ -209,7 +209,7 @@ async function main() {
     const [companyName, address, latitude, longitude, capacityLiter, buyPricePerLiter] = collectorSeeds[i];
     const user = await createUser({
       name: companyName,
-      email: `collector${i + 1}@hen.test`,
+      email: `collector${i + 1}@w2w.test`,
       role: 'COLLECTOR',
       phone: makePhone('0822', i + 1),
     });
@@ -233,7 +233,7 @@ async function main() {
     ['Ibu Rina', 'HOUSEHOLD', 'Pancoran, Jakarta Selatan', -6.2458, 106.8456],
     ['Warung Pak Budi', 'UMKM', 'Mampang, Jakarta Selatan', -6.2501, 106.8242],
     ['Hotel Melati', 'HOTEL_RESTAURANT', 'Kuningan, Jakarta Selatan', -6.2247, 106.8307],
-    ['Kantin Kampus HEN', 'UMKM', 'Rawamangun, Jakarta Timur', -6.1932, 106.8912],
+    ['Kantin Kampus W2W', 'UMKM', 'Rawamangun, Jakarta Timur', -6.1932, 106.8912],
     ['Restoran Nusantara', 'HOTEL_RESTAURANT', 'Bekasi Barat', -6.2399, 106.9923],
     ['UMKM Keripik Jaya', 'INDUSTRY', 'Depok', -6.4025, 106.7942],
     ['Dapur Bu Sari', 'HOUSEHOLD', 'Cawang, Jakarta Timur', -6.2506, 106.8731],
@@ -267,7 +267,7 @@ async function main() {
     const [name, category, address, latitude, longitude] = communitySeeds[i];
     const user = await createUser({
       name,
-      email: `community${i + 1}@hen.test`,
+      email: `community${i + 1}@w2w.test`,
       role: 'COMMUNITY',
       phone: makePhone('0833', i + 1),
     });
@@ -306,7 +306,7 @@ async function main() {
           actualLiter,
           sedimentLiter,
           pricePerLiter: collector.buyPricePerLiter,
-          collectorNote: 'Setoran diterima dan masuk batch yang diterima HEN.',
+          collectorNote: 'Setoran diterima dan masuk batch yang diterima W2W.',
           createdAt,
         });
         submissions.push(submission);
@@ -319,7 +319,7 @@ async function main() {
       const acceptedBatch = await createBatchWithItems({
         collectorProfileId: collector.id,
         stakeholderSettingId: setting.id,
-        batchCode: `HEN-BATCH-${batchDate.toISOString().slice(0, 7).replace('-', '')}-${collectorIndex + 1}`,
+        batchCode: `W2W-BATCH-${batchDate.toISOString().slice(0, 7).replace('-', '')}-${collectorIndex + 1}`,
         submissions,
         requestedPricePerLiter: setting.referencePricePerLiter,
         status: 'ACCEPTED_BY_STAKEHOLDER',
@@ -333,7 +333,7 @@ async function main() {
         batchId: acceptedBatch.id,
         testedById: stakeholderUsers[collectorIndex % stakeholderUsers.length].id,
         grade: collectorIndex % 2 === 0 ? 'A' : 'B',
-        notes: 'Batch memenuhi standar mutu HEN.',
+        notes: 'Batch memenuhi standar mutu W2W.',
         water: 0.4 + (collectorIndex % 3) * 0.2,
         ffa: 1.4 + (collectorIndex % 4) * 0.3,
         impurity: 0.2 + (collectorIndex % 3) * 0.2,
@@ -411,7 +411,7 @@ async function main() {
     const reviewBatch = await createBatchWithItems({
       collectorProfileId: collector.id,
       stakeholderSettingId: setting.id,
-      batchCode: `HEN-BATCH-DEMO-REVIEW-${batchIndex + 1}`,
+      batchCode: `W2W-BATCH-DEMO-REVIEW-${batchIndex + 1}`,
       submissions,
       requestedPricePerLiter: setting.referencePricePerLiter,
       status: 'LAB_REVIEW',
@@ -454,7 +454,7 @@ async function main() {
     const rejectedBatch = await createBatchWithItems({
       collectorProfileId: collector.id,
       stakeholderSettingId: setting.id,
-      batchCode: `HEN-BATCH-DEMO-REJECTED-${batchIndex + 1}`,
+      batchCode: `W2W-BATCH-DEMO-REJECTED-${batchIndex + 1}`,
       submissions,
       requestedPricePerLiter: setting.referencePricePerLiter,
       status: 'REJECTED_BY_STAKEHOLDER',
@@ -467,7 +467,7 @@ async function main() {
       batchId: rejectedBatch.id,
       testedById: stakeholderUsers[1].id,
       grade: 'REJECT',
-      notes: 'Tidak memenuhi standar mutu HEN.',
+      notes: 'Tidak memenuhi standar mutu W2W.',
       water: 2.5 + batchIndex * 0.3,
       ffa: 5.0 + batchIndex * 0.5,
       impurity: 4.0 + batchIndex * 0.4,
@@ -510,7 +510,7 @@ async function main() {
   console.log(`Accepted batches: ${acceptedBatches.length}`);
   console.log(`Lab review batches: ${reviewBatches.length}`);
   console.log(`Rejected batches: ${rejectedBatches.length}`);
-  console.log('Main accounts: stakeholder@hen.test, collector1@hen.test, community1@hen.test');
+  console.log('Main accounts: stakeholder@w2w.test, collector1@w2w.test, community1@w2w.test');
 }
 
 main()

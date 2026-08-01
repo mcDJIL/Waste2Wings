@@ -1,0 +1,94 @@
+name: waste2wings
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: waste2wings-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-waste2wings}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-35432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  api:
+    build:
+      context: ./backend
+    image: waste2wings-be:latest
+    container_name: waste2wings-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      ml-service:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-33000}
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:38080}
+      ML_SERVICE_BASE_URL: ${ML_SERVICE_BASE_URL:-http://ml-service:33001}
+    ports:
+      - "127.0.0.1:${API_PORT:-33000}:33000"
+    networks:
+      - app-network
+
+  ml-service:
+    build:
+      context: ./ml
+    image: waste2wings-ml:latest
+    container_name: waste2wings-ml
+    restart: unless-stopped
+    environment:
+      OMP_NUM_THREADS: ${OMP_NUM_THREADS:-1}
+    ports:
+      - "127.0.0.1:${ML_PORT:-33001}:33001"
+    volumes:
+      - ml_models:/app/models
+      - ./ml/data:/app/data:ro
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:33001/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - app-network
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:33000/api/v1}
+    image: waste2wings-fe:latest
+    container_name: waste2wings-fe
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "127.0.0.1:${APP_PORT:-38080}:80"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    name: waste2wings-network
+
+volumes:
+  postgres_data:
+    name: waste2wings-postgres-data
+  ml_models:
+    name: waste2wings-ml-models

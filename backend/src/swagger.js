@@ -5,9 +5,9 @@ const swaggerSpec = swaggerJsdoc({
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'HenWasteOil API',
+      title: 'Waste2Wings API',
       version: '1.0.0',
-      description: 'REST API documentation for HenWasteOil backend.',
+      description: 'REST API documentation for Waste2Wings backend.',
     },
     servers: [
       {

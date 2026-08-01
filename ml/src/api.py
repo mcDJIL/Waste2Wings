@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 from src.routes import prediction, clustering
 
@@ -10,7 +13,7 @@ app = FastAPI(
     version="1.0.0",
     contact={
         "name": "Waste Oil System",
-        "url": "http://localhost:3001",
+        "url": "http://localhost:33001",
     },
     openapi_tags=[
         {
@@ -47,4 +50,4 @@ def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=3001)
+    uvicorn.run(app, host="0.0.0.0", port=33001)

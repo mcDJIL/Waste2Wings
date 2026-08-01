@@ -1,4 +1,4 @@
-# HenWasteOil Backend
+# Waste2Wings Backend
 
 REST API backend untuk platform rantai pasok minyak jelantah PT Hijau Energi Nusantara (HEN): masyarakat menyetor minyak ke pengepul, pengepul membuat batch ke stakeholder, stakeholder melakukan lab review, validasi, dashboard, audit trail, dan integrasi ML.
 
@@ -43,13 +43,13 @@ npm run dev
 API berjalan di:
 
 ```text
-http://localhost:3000
+http://localhost:33000
 ```
 
 Swagger docs:
 
 ```text
-http://localhost:3000/api-docs
+http://localhost:33000/api-docs
 ```
 
 Health check:
@@ -75,17 +75,17 @@ docker compose exec api npm run prisma:seed
 API container expose ke host di:
 
 ```text
-127.0.0.1:3000
+127.0.0.1:33000
 ```
 
-Untuk public domain, gunakan Nginx reverse proxy ke `http://127.0.0.1:3000`.
+Untuk public domain, gunakan Nginx reverse proxy ke `http://127.0.0.1:33000`.
 
 ## Environment Penting
 
 ```env
 NODE_ENV=production
 PORT=3000
-DATABASE_URL=postgresql://postgres:password@db:5432/henwasteoil?schema=public
+DATABASE_URL=postgresql://postgres:password@db:5432/waste2wings?schema=public
 JWT_SECRET=change-me
 JWT_EXPIRES_IN=1d
 CORS_ORIGIN=https://eepis.web.id

@@ -37,7 +37,7 @@ setupSwagger(app);
 app.get('/api/v1/health', (req, res) => {
   res.json({
     status: 'ok',
-    service: 'henwasteoil-be',
+    service: 'waste2wings-be',
   });
 });
 

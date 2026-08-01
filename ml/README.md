@@ -67,12 +67,12 @@ python src/api.py
 bash run.sh
 ```
 
-Server akan berjalan di `http://localhost:3001`
+Server akan berjalan di `http://localhost:33001`
 
 ### 3. Access API Documentation
 
-- **Swagger UI**: http://localhost:3001/docs
-- **ReDoc**: http://localhost:3001/redoc
+- **Swagger UI**: http://localhost:33001/docs
+- **ReDoc**: http://localhost:33001/redoc
 
 ---
 
@@ -141,12 +141,12 @@ Lihat [API.md](API.md) untuk dokumentasi lengkap.
 
 ```bash
 # Train model
-curl -X POST http://localhost:3001/api/prediction/train \
+curl -X POST http://localhost:33001/api/prediction/train \
   -H "Content-Type: application/json" \
   -d '{"data_path": "data/waste_oil_dummy.csv"}'
 
 # Predict with reference price 13000
-curl -X POST http://localhost:3001/api/prediction/predict \
+curl -X POST http://localhost:33001/api/prediction/predict \
   -H "Content-Type: application/json" \
   -d '{"reference_price": 13000}'
 ```
@@ -155,12 +155,12 @@ curl -X POST http://localhost:3001/api/prediction/predict \
 
 ```bash
 # Train clustering model
-curl -X POST http://localhost:3001/api/clustering/train \
+curl -X POST http://localhost:33001/api/clustering/train \
   -H "Content-Type: application/json" \
   -d '{"data_path": "data/collector_locations_dummy.csv"}'
 
 # Recommend area for coordinates
-curl -X POST http://localhost:3001/api/clustering/recommend \
+curl -X POST http://localhost:33001/api/clustering/recommend \
   -H "Content-Type: application/json" \
   -d '{"latitude": -6.220, "longitude": 106.890}'
 ```
@@ -169,7 +169,7 @@ curl -X POST http://localhost:3001/api/clustering/recommend \
 
 ```javascript
 // Prediction
-const predictionRes = await fetch('http://localhost:3001/api/prediction/predict', {
+const predictionRes = await fetch('http://localhost:33001/api/prediction/predict', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ reference_price: 13000 })
@@ -179,7 +179,7 @@ console.log(prediction);
 // { predicted_volume: 3228, predicted_fund: 41964000 }
 
 // Clustering Recommendation
-const clusterRes = await fetch('http://localhost:3001/api/clustering/recommend', {
+const clusterRes = await fetch('http://localhost:33001/api/clustering/recommend', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ latitude: -6.220, longitude: 106.890 })
@@ -233,8 +233,8 @@ newgrp docker
 Clone repository ke VPS:
 
 ```bash
-git clone <url-repository> henwasteoil-ml
-cd henwasteoil-ml
+git clone <url-repository> waste2wings-ml
+cd waste2wings-ml
 ```
 
 Jika project dikirim manual, pastikan folder `data/`, `src/`, `requirements.txt`, `Dockerfile`, dan `docker-compose.yml` ikut ter-upload.
@@ -261,7 +261,7 @@ docker compose logs -f ml-service
 ### 4. Test Health Check
 
 ```bash
-curl http://localhost:3001/health
+curl http://localhost:33001/health
 ```
 
 Jika diakses dari komputer lokal:
@@ -275,11 +275,11 @@ curl http://<ip-vps>:3001/health
 Endpoint training tetap menggunakan path relatif project karena `data/` di-mount ke `/app/data`:
 
 ```bash
-curl -X POST http://localhost:3001/api/v1/prediction/train \
+curl -X POST http://localhost:33001/api/v1/prediction/train \
   -H "Content-Type: application/json" \
   -d '{"data_path": "data/waste_oil_dummy.csv"}'
 
-curl -X POST http://localhost:3001/api/v1/clustering/train \
+curl -X POST http://localhost:33001/api/v1/clustering/train \
   -H "Content-Type: application/json" \
   -d '{"data_path": "data/collector_locations_dummy.csv"}'
 ```
@@ -371,7 +371,7 @@ Saat ini tidak ada env vars yang diperlukan. Semua paths hardcoded relative ke p
 
 **Solution**: Jalankan training endpoint terlebih dahulu:
 ```bash
-curl -X POST http://localhost:3001/api/prediction/train \
+curl -X POST http://localhost:33001/api/prediction/train \
   -H "Content-Type: application/json" \
   -d '{"data_path": "data/waste_oil_dummy.csv"}'
 ```
