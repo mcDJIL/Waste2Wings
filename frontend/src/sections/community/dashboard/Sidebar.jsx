@@ -1,6 +1,7 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useLogout } from '../../../hooks/useLogout'
+const LOGO_URL = '../../../assets/images/logo.png'
 
 const NAV_ITEMS = [
   {
@@ -119,8 +120,8 @@ export default function Sidebar({ isOpen, onClose }) {
         {/* Brand */}
         <div className="flex items-center gap-3 px-6 pt-7 pb-4">
           <img
-            src="https://api.builder.io/api/v1/image/assets/TEMP/91d73bb2ff12a34f2ca3d4fe393403ff8204637c?width=82"
-            alt="HEN Logo"
+            src={LOGO_URL}
+            alt="Logo"
             className="w-9 h-9 rounded-full flex-shrink-0"
           />
           <div>
