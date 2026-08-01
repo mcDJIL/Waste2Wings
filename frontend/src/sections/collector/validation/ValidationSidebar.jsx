@@ -115,7 +115,7 @@ export default function ValidationSidebar({ isOpen, onClose }) {
             className="w-9 h-9 rounded-full flex-shrink-0"
           />
           <div>
-            <p className="text-[#81F9C1] font-bold text-base leading-5">HEN Waste Oil</p>
+            <p className="text-[#81F9C1] font-bold text-base leading-5">Waste2Wings</p>
             <p className="text-white/60 text-[11px] font-bold tracking-[0.55px] uppercase leading-4">
               COLLECTOR PORTAL
             </p>
