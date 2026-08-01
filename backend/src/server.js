@@ -1,9 +1,11 @@
-require('dotenv').config();
+const path = require('path');
+
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const app = require('./app');
 
-const port = Number(process.env.PORT) || 3000;
+const port = Number(process.env.PORT) || 33000;
 
 app.listen(port, () => {
-  console.log(`HenWasteOil API listening on port ${port}`);
+  console.log(`Waste2Wings API listening on port ${port}`);
 });

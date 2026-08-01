@@ -16,8 +16,6 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
-ARG DATABASE_URL="postgresql://postgres:postgres@localhost:5432/henwasteoil?schema=public"
-ENV DATABASE_URL=$DATABASE_URL
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY package*.json ./
@@ -26,6 +24,6 @@ COPY src ./src
 
 RUN npx prisma generate
 
-EXPOSE 3000
+EXPOSE 33000
 
 CMD ["sh", "-c", "npx prisma migrate deploy && node src/server.js"]
