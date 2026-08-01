@@ -1,7 +1,7 @@
 {
-  "name": "henwasteoil-be",
+  "name": "waste2wings-be",
   "version": "1.0.0",
-  "description": "REST API backend for HenWasteOil supply chain platform.",
+  "description": "REST API backend for Waste2Wings supply chain platform.",
   "main": "src/server.js",
   "type": "commonjs",
   "scripts": {
@@ -19,7 +19,7 @@
     "express",
     "prisma",
     "postgresql",
-    "henwasteoil"
+    "waste2wings"
   ],
   "author": "",
   "license": "MIT",

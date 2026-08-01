@@ -1,4 +1,6 @@
 .vscode
+.env
+.env.*
 *.joblib
 __pycache__
 *.pyc

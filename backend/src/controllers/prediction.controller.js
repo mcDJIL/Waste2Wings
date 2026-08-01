@@ -1,7 +1,7 @@
 const ApiError = require('../utils/ApiError');
 const prisma = require('../prismaClient');
 
-const DEFAULT_ML_SERVICE_BASE_URL = 'http://localhost:3001';
+const DEFAULT_ML_SERVICE_BASE_URL = 'http://localhost:33001';
 
 function getMlServiceBaseUrl() {
   return (process.env.ML_SERVICE_BASE_URL || DEFAULT_ML_SERVICE_BASE_URL).replace(/\/$/, '');

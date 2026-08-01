@@ -1,11 +1,2 @@
-services:
-  web:
-    build:
-      context: .
-      args:
-        VITE_API_URL: ${VITE_API_URL:-https://api.eepis.web.id/api/v1}
-    image: henwasteoil-fe:latest
-    container_name: henwasteoil-fe
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:${APP_PORT:-8080}:80"
+include:
+  - ../docker-compose.yml
