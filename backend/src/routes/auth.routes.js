@@ -87,7 +87,7 @@ const loginSchema = z.object({
  *                     example: Community One
  *                   email:
  *                     type: string
- *                     example: community1@hen.test
+ *                     example: community1@w2w.test
  *                   password:
  *                     type: string
  *                     example: password123
@@ -123,7 +123,7 @@ const loginSchema = z.object({
  *                     example: Collector One
  *                   email:
  *                     type: string
- *                     example: collector1@hen.test
+ *                     example: collector1@w2w.test
  *                   password:
  *                     type: string
  *                     example: password123
@@ -161,10 +161,10 @@ const loginSchema = z.object({
  *                 properties:
  *                   name:
  *                     type: string
- *                     example: HEN Admin
+ *                     example: W2W Admin
  *                   email:
  *                     type: string
- *                     example: stakeholder@hen.test
+ *                     example: stakeholder@w2w.test
  *                   password:
  *                     type: string
  *                     example: password123
@@ -190,7 +190,7 @@ const loginSchema = z.object({
  *               summary: Community registration
  *               value:
  *                 name: Community One
- *                 email: community1@hen.test
+ *                 email: community1@w2w.test
  *                 password: password123
  *                 role: COMMUNITY
  *                 phone: '081234567890'
@@ -203,7 +203,7 @@ const loginSchema = z.object({
  *               summary: Collector registration
  *               value:
  *                 name: Collector One
- *                 email: collector1@hen.test
+ *                 email: collector1@w2w.test
  *                 password: password123
  *                 role: COLLECTOR
  *                 phone: '081234567891'
@@ -217,8 +217,8 @@ const loginSchema = z.object({
  *             stakeholder:
  *               summary: Stakeholder registration
  *               value:
- *                 name: HEN Admin
- *                 email: stakeholder@hen.test
+ *                 name: W2W Admin
+ *                 email: stakeholder@w2w.test
  *                 password: password123
  *                 role: STAKEHOLDER
  *                 phone: '081234567892'
@@ -236,7 +236,7 @@ const loginSchema = z.object({
  *               user:
  *                 id: clx123user001
  *                 name: Community One
- *                 email: community1@hen.test
+ *                 email: community1@w2w.test
  *                 role: COMMUNITY
  *                 phone: '081234567890'
  *                 createdAt: '2026-06-22T08:25:00.000Z'
@@ -282,7 +282,7 @@ router.post('/register', validate(registerSchema), register);
  *             properties:
  *               email:
  *                 type: string
- *                 example: community1@hen.test
+ *                 example: community1@w2w.test
  *               password:
  *                 type: string
  *                 example: password123
@@ -290,17 +290,17 @@ router.post('/register', validate(registerSchema), register);
  *             community:
  *               summary: Community login
  *               value:
- *                 email: community1@hen.test
+ *                 email: community1@w2w.test
  *                 password: password123
  *             collector:
  *               summary: Collector login
  *               value:
- *                 email: collector1@hen.test
+ *                 email: collector1@w2w.test
  *                 password: password123
  *             stakeholder:
  *               summary: Stakeholder login
  *               value:
- *                 email: stakeholder@hen.test
+ *                 email: stakeholder@w2w.test
  *                 password: password123
  *     responses:
  *       200:
@@ -313,7 +313,7 @@ router.post('/register', validate(registerSchema), register);
  *               user:
  *                 id: clx123user001
  *                 name: Community One
- *                 email: community1@hen.test
+ *                 email: community1@w2w.test
  *                 role: COMMUNITY
  *                 phone: '081234567890'
  *                 createdAt: '2026-06-22T08:25:00.000Z'
@@ -365,7 +365,7 @@ router.post('/login', validate(loginSchema), login);
  *               user:
  *                 id: clx123user001
  *                 name: Community One
- *                 email: community1@hen.test
+ *                 email: community1@w2w.test
  *                 role: COMMUNITY
  *                 phone: '081234567890'
  *                 createdAt: '2026-06-22T08:25:00.000Z'

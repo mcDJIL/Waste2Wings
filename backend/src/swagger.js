@@ -55,7 +55,7 @@ const swaggerSpec = swaggerJsdoc({
             },
             email: {
               type: 'string',
-              example: 'community1@hen.test',
+              example: 'community1@w2w.test',
             },
             role: {
               type: 'string',

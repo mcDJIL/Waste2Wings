@@ -17,6 +17,14 @@ function addMonths(months) {
   return date;
 }
 
+function monthKey(months) {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + months, 1))
+    .toISOString()
+    .slice(0, 7)
+    .replace('-', '');
+}
+
 function makePhone(prefix, index) {
   return `${prefix}${String(index).padStart(8, '0')}`;
 }
@@ -319,7 +327,7 @@ async function main() {
       const acceptedBatch = await createBatchWithItems({
         collectorProfileId: collector.id,
         stakeholderSettingId: setting.id,
-        batchCode: `W2W-BATCH-${batchDate.toISOString().slice(0, 7).replace('-', '')}-${collectorIndex + 1}`,
+        batchCode: `W2W-BATCH-${monthKey(monthOffset)}-${collectorIndex + 1}`,
         submissions,
         requestedPricePerLiter: setting.referencePricePerLiter,
         status: 'ACCEPTED_BY_STAKEHOLDER',

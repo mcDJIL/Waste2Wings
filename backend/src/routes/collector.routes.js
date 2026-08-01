@@ -171,7 +171,7 @@ router.get(
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Collector location, HEN reception location, and related community markers
+ *         description: Collector location, W2W reception location, and related community markers
  *       403:
  *         description: Only collector can access this endpoint
  */

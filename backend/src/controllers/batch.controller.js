@@ -13,7 +13,7 @@ function generateBatchCode() {
   const date = new Date();
   const datePart = date.toISOString().slice(0, 10).replace(/-/g, "");
   const randomPart = Math.random().toString(36).slice(2, 8).toUpperCase();
-  return `HEN-BATCH-${datePart}-${randomPart}`;
+  return `W2W-BATCH-${datePart}-${randomPart}`;
 }
 
 function getBatchInclude() {
