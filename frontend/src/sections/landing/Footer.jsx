@@ -48,7 +48,7 @@ export default function Footer() {
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 py-16 sm:py-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-6">
           <div className="flex flex-col gap-6 sm:col-span-2 lg:col-span-1">
-            <p className="text-brand-gold font-medium text-base leading-6">HEN Waste Oil</p>
+            <p className="text-brand-gold font-medium text-base leading-6">Waste2Wings</p>
             <p className="text-brand-muted text-sm sm:text-base leading-6">
               Pioneering sustainable aviation fuel through community-driven circular economy platform in Indonesia.
             </p>
@@ -94,7 +94,7 @@ export default function Footer() {
       <div className="border-t border-[rgba(201,169,110,0.10)] px-4 sm:px-8 lg:px-12 py-5">
         <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm">
           <p className="text-brand-muted text-center sm:text-left">
-            © 2024 HEN Waste Oil Platform. Fueling the Future Responsibly.
+            © 2026 Waste2Wings Platform. Fueling the Future Responsibly.
           </p>
           <div className="flex flex-col min-[380px]:flex-row items-center gap-3 sm:gap-6">
             <button className="flex items-center gap-2 text-brand-gold hover:opacity-80 transition-opacity">

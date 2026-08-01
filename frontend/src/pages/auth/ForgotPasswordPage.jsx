@@ -169,7 +169,7 @@ export default function ForgotPasswordPage() {
         <div className="flex flex-col items-center mb-5 animate-fade-slide-up" style={{ animationDelay: '0.1s' }}>
           <img
             src={logo}
-            alt="HEN Waste Oil Logo"
+            alt="Waste2Wings Logo"
             className="w-12 h-12 rounded-full object-cover mb-3"
           />
           <h2 className="text-black text-lg sm:text-xl font-bold leading-tight text-center">

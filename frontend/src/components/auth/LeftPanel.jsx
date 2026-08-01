@@ -44,7 +44,7 @@ export default function LeftPanel() {
           className="text-white/70 font-light leading-relaxed animate-fade-slide-left"
           style={{ fontSize: 'clamp(14px, 1.2vw, 18px)', animationDelay: '0.2s' }}
         >
-          HEN Waste Oil Platform menghubungkan ekosistem pengelolaan minyak
+          Waste2Wings Platform menghubungkan ekosistem pengelolaan minyak
           jelantah untuk solusi bahan bakar penerbangan berkelanjutan yang
           transparan dan bernilai tinggi.
         </p>
