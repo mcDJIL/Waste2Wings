@@ -56,10 +56,10 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 h-[61px] flex items-center justify-between px-4 sm:px-8 lg:px-12 border-b border-[rgba(190,201,195,0.20)] bg-[rgba(249,249,255,0.80)] backdrop-blur-md shadow-[0_10px_15px_-3px_rgba(255,255,255,0.10)]">
       <div className="flex items-center gap-2 sm:gap-3">
-        <img src={logo} alt="HEN Waste Oil Logo" className="w-8 h-8" />
+        <img src={logo} alt="Waste2Wings Logo" className="w-8 h-8" />
 
         <span className="text-brand-dark font-bold text-base leading-6 shrink-0 min-w-0">
-          HEN Waste Oil
+          Waste2Wings
         </span>
       </div>
 
