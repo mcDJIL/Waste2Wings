@@ -1,4 +1,5 @@
 import { useNavigate, useLocation, NavLink } from 'react-router-dom'
+const LOGO_URL = '../../../assets/images/logo.png'
 
 const DashboardIcon = () => (
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -110,8 +111,8 @@ export default function ValidationSidebar({ isOpen, onClose }) {
         {/* Brand */}
         <div className="flex items-center gap-3 px-6 pt-7 pb-4">
           <img
-            src="https://api.builder.io/api/v1/image/assets/TEMP/30f7b17162844e6618a588f8aa7300aeba8a1470?width=73"
-            alt="HEN Logo"
+            src={LOGO_URL}
+            alt="Logo"
             className="w-9 h-9 rounded-full flex-shrink-0"
           />
           <div>

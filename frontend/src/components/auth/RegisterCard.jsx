@@ -4,7 +4,7 @@ import api from '../../services/api'
 import { useAuth } from '../../contexts/AuthContext'
 
 const LOGO_URL =
-  'https://api.builder.io/api/v1/image/assets/TEMP/125834ef82b85efc2a276f0b188074feb41b9fc1?width=96'
+  '../../assets/images/logo.png'
 const MAP_PREVIEW_URL =
   'https://api.builder.io/api/v1/image/assets/TEMP/f5291117958bfe176983375bd9a8d2a218027943?width=832'
 const AVATAR_1_URL =
