@@ -9,7 +9,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-waste2wings}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
-    ports:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -52,7 +51,6 @@ services:
     restart: unless-stopped
     environment:
       OMP_NUM_THREADS: ${OMP_NUM_THREADS}
-    ports:
     volumes:
       - ml_models:/app/models
       - ./ml/data:/app/data:ro
