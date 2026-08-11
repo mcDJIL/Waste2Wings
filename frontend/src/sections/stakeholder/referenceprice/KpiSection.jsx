@@ -78,7 +78,7 @@ export default function KpiSection() {
 
   const kpiItems = [
     {
-      label: 'HARGA BELI HEN (TODAY)',
+      label: 'HARGA BELI WASTE2WINGS (TODAY)',
       value: `Rp\n${buyPrice?.toLocaleString('id-ID') || '0'}`,
       unit: '/kg',
       badge: getPercentageColor(buyPriceChange),

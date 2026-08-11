@@ -1,5 +1,5 @@
 const LEGEND_ITEMS = [
-  { color: '#BA1A1A', label: 'HEN Headquarters' },
+  { color: '#BA1A1A', label: 'Waste2Wings Headquarters' },
   { color: '#004536', label: 'Pengepul (Collectors)' },
   { color: '#81F9C1', label: 'Masyarakat (Users)', border: '#00734E' },
 ]
@@ -7,7 +7,7 @@ const LEGEND_ITEMS = [
 export default function MapLegend() {
   return (
     <div className="
-      absolute bottom-8 left-4 z-[500]
+      absolute bottom-8 left-4 z-[100]
       flex flex-col gap-2 px-4 py-3 rounded-xl
       bg-white/95 backdrop-blur-sm
       border border-[rgba(190,201,195,0.40)]

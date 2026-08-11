@@ -1,5 +1,5 @@
 const legendItems = [
-  { color: 'bg-brand-gold', label: 'Pusat Distribusi (HEN)' },
+  { color: 'bg-brand-gold', label: 'Pusat Distribusi (W2W)' },
   { color: 'bg-brand-green', label: 'Pengepul Terverifikasi' },
   { color: 'bg-[#0B5E4B] border border-white', label: 'Armada Logistik' },
 ]

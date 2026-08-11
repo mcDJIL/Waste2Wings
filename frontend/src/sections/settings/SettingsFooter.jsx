@@ -6,7 +6,7 @@ export default function SettingsFooter() {
       <div className="flex flex-col xs:flex-row flex-wrap items-start xs:items-center justify-between gap-3 xs:gap-4">
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-[#004536] text-sm sm:text-base font-bold" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-            HEN Platform
+            Waste2Wings Platform
           </span>
           <span className="text-[#6F7975] text-sm sm:text-base">|</span>
           <span className="text-[#3F4945] text-xs font-medium" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>

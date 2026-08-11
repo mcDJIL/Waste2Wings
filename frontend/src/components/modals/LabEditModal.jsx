@@ -64,21 +64,21 @@ export default function LabEditModal({ isOpen, labResult, onClose, onSuccess }) 
   if (!isOpen) return null
 
   const modalContent = (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white rounded-3xl w-full max-w-lg shadow-[0_25px_50px_-12px_rgba(0,0,0,0.35)] animate-fade-slide-up max-h-[85vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-2 xs:p-4 animate-fade-in">
+      <div className="bg-white rounded-3xl w-full max-w-lg min-w-0 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.35)] animate-fade-slide-up max-h-[85vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-[#004536] to-[#006C49] px-6 sm:px-8 py-5 flex items-center justify-between shrink-0 rounded-t-3xl">
-          <h2 className="text-lg sm:text-xl font-bold text-white">Edit Hasil Uji Lab</h2>
+        <div className="sticky top-0 bg-gradient-to-r from-[#004536] to-[#006C49] px-4 sm:px-8 py-4 sm:py-5 flex items-start justify-between gap-3 shrink-0 rounded-t-3xl">
+          <h2 className="min-w-0 break-words text-lg sm:text-xl font-bold text-white">Edit Hasil Uji Lab</h2>
           <button
             onClick={onClose}
-            className="p-2 text-white hover:bg-white/20 rounded-lg transition-all duration-200"
+            className="p-2 text-white hover:bg-white/20 rounded-lg transition-all duration-200 shrink-0"
           >
             <CloseIcon />
           </button>
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto flex-1 p-6 sm:p-8">
+        <div className="overflow-y-auto flex-1 p-4 sm:p-8">
           {error && (
             <div className="p-4 rounded-xl bg-red-50 text-red-700 text-sm border border-red-200 mb-6">
               {error}

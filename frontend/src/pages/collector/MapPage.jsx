@@ -117,7 +117,6 @@ export default function MapPage() {
       })
     }
 
-    // HEN receiving location
     if (mapData?.henReceptionLocation) {
       points.push({
         type: 'hen',
@@ -163,7 +162,7 @@ export default function MapPage() {
               <MapContainer
                 center={centerCoords}
                 zoom={13}
-                className="w-full h-full"
+                className="w-full h-full z-10"
                 style={{ minHeight: '100%' }}
                 zoomControl={true}
               >
@@ -227,7 +226,7 @@ export default function MapPage() {
             {/* Mobile panel toggle */}
             <button
               onClick={() => setPanelOpen(!panelOpen)}
-              className="lg:hidden absolute top-4 right-4 z-[500] flex items-center gap-2
+              className="lg:hidden absolute top-4 right-4 z-[100] flex items-center gap-2
                 px-4 py-2.5 rounded-xl bg-white shadow-lg border border-[rgba(190,201,195,0.30)]
                 text-[#004536] text-sm font-bold hover:bg-[#004536]/5 transition-colors"
             >

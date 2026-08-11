@@ -7,6 +7,7 @@ const {
   getMyCollectorMap,
   getNearbyCollectors,
   updateMyCollectorPrice,
+  getMyCollectorNotifications,
 } = require('../controllers/collector.controller');
 const { authenticate } = require('../middleware/auth');
 const { authorize } = require('../middleware/role');
@@ -39,6 +40,12 @@ const updatePriceSchema = z.object({
   }),
   query: z.object({}).optional(),
   params: z.object({}).optional(),
+});
+
+const notificationsSchema = z.object({
+  body: z.object({}).optional(),
+  params: z.object({}).optional(),
+  query: z.object({}).optional(),
 });
 
 const historySchema = z.object({
@@ -152,6 +159,14 @@ router.get('/nearby', validate(nearbySchema), getNearbyCollectors);
  *       403:
  *         description: Only collector can access this endpoint
  */
+router.get(
+  '/me/notifications',
+  authenticate,
+  authorize(ROLES.COLLECTOR),
+  validate(notificationsSchema),
+  getMyCollectorNotifications,
+);
+
 router.get(
   '/me/history',
   authenticate,

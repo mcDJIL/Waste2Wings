@@ -129,19 +129,18 @@ export default function ValidationPage() {
         <CollectorTopBar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
 
         {/* Two-panel content area */}
-        <main className="flex-1 flex overflow-hidden" style={{ minHeight: 0 }}>
+        <main className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
 
           {/* ── Left panel: Queue ── */}
           <section
             className={`
-              flex flex-col shrink-0 overflow-hidden
+              flex flex-col flex-1 lg:flex-none shrink-0 min-h-0 overflow-hidden
               transition-all duration-300 ease-in-out
               ${showDetail
-                ? 'w-0 opacity-0 pointer-events-none lg:w-[44%] lg:opacity-100 lg:pointer-events-auto'
-                : 'w-full opacity-100 lg:w-[44%]'
+                ? 'hidden lg:flex lg:w-[44%]'
+                : 'flex w-full lg:w-[44%]'
               }
             `}
-            style={{ minHeight: 0 }}
           >
             <div className="h-full overflow-hidden flex flex-col">
               <ValidationQueue
@@ -157,15 +156,13 @@ export default function ValidationPage() {
           {/* ── Right panel: Detail ── */}
           <section
             className={`
-              flex flex-col flex-1 overflow-hidden bg-white
+              flex flex-col flex-1 min-h-0 overflow-hidden bg-white
               transition-all duration-300 ease-in-out
               ${showDetail
-                ? 'opacity-100 translate-x-0'
-                : 'opacity-0 lg:opacity-100 pointer-events-none lg:pointer-events-auto'
+                ? 'flex w-full lg:w-auto'
+                : 'hidden lg:flex'
               }
-              ${!showDetail && !selectedSubmission ? 'hidden lg:flex' : 'flex'}
             `}
-            style={{ minHeight: 0 }}
           >
             {/* Mobile back button */}
             <div className="lg:hidden flex items-center gap-2 px-4 pt-4 pb-1 shrink-0">
@@ -179,7 +176,7 @@ export default function ValidationPage() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto" style={{ minHeight: 0 }}>
+            <div className="flex-1 min-h-0 overflow-y-auto">
               {selectedSubmission ? (
                 <ValidationDetail
                   key={selectedSubmission.id}
@@ -207,7 +204,7 @@ export default function ValidationPage() {
       </div>
 
       {/* Toast notifications */}
-      <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50 pointer-events-none">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 flex flex-col gap-3 z-50 pointer-events-none">
         {toasts.map((t) => (
           <div
             key={t.id}

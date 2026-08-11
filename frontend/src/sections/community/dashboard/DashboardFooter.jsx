@@ -9,7 +9,7 @@ export default function DashboardFooter() {
     <footer className="px-6 sm:px-12 py-6 sm:py-8 border-t border-[#BEC9C3]/30 bg-white shrink-0">
       <div className="flex flex-col xs:flex-row items-center justify-between gap-3 max-w-screen-xl mx-auto">
         <div className="flex flex-wrap items-center gap-2 text-center xs:text-left">
-          <span className="font-bold text-[#004536] text-sm sm:text-base">HEN Platform</span>
+          <span className="font-bold text-[#004536] text-sm sm:text-base">Waste2Wings Platform</span>
           <span className="text-[#6F7975] hidden xs:inline">|</span>
           <span className="text-[#3F4945] text-[11px] sm:text-xs font-medium">
             © 2026 Veridian Energy. Sustainable Luxury in Waste Management.

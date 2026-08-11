@@ -117,21 +117,21 @@ export default function SubmissionModal({ isOpen, onClose, onSubmissionCreated }
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] animate-fade-slide-up">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-2 xs:p-4 animate-fade-in">
+      <div className="bg-white rounded-2xl max-w-lg w-full min-w-0 max-h-[90vh] overflow-y-auto shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] animate-fade-slide-up">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-[#BEC9C3]/20 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-[#004536]">Buat Setoran Baru</h2>
+        <div className="sticky top-0 bg-white border-b border-[#BEC9C3]/20 px-4 sm:px-6 py-3 sm:py-4 flex items-start justify-between gap-3">
+          <h2 className="min-w-0 break-words text-lg sm:text-xl font-bold text-[#004536]">Buat Setoran Baru</h2>
           <button
             onClick={onClose}
-            className="p-2 text-[#3F4945] hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-[#3F4945] hover:bg-gray-100 rounded-lg transition-colors shrink-0"
           >
             <CloseIcon />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 flex flex-col gap-6">
+        <div className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-6">
           {/* Estimasi Liter Input */}
           <div>
             <label className="block text-sm font-bold text-[#404945] uppercase mb-2">
@@ -178,10 +178,10 @@ export default function SubmissionModal({ isOpen, onClose, onSubmissionCreated }
                         : 'border-[#BFC9C3]/30 hover:border-[#006C49]/50'
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start justify-between gap-3 min-w-0">
                       <div className="flex-1 min-w-0">
                         <h4 className="font-semibold text-[#004536] text-sm">{collector.name}</h4>
-                        <p className="text-xs text-[#3F4945] mt-1">{collector.address || 'Alamat tidak tersedia'}</p>
+                        <p className="text-xs text-[#3F4945] mt-1 break-words">{collector.address || 'Alamat tidak tersedia'}</p>
                         {collector.distance !== undefined && (
                           <p className="text-xs text-[#006C49] font-medium mt-2">
                             Jarak: {collector.distance.toFixed(2)} km
@@ -216,17 +216,17 @@ export default function SubmissionModal({ isOpen, onClose, onSubmissionCreated }
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <button
               onClick={onClose}
-              className="flex-1 px-6 py-3 rounded-lg border border-[#006C49] text-[#006C49] font-semibold hover:bg-[#006C49]/5 active:scale-95 transition-all"
+              className="w-full sm:flex-1 px-4 sm:px-6 py-3 rounded-lg border border-[#006C49] text-[#006C49] font-semibold hover:bg-[#006C49]/5 active:scale-95 transition-all"
             >
               Batal
             </button>
             <button
               onClick={handleSubmit}
               disabled={isSubmitting || !estimatedLiter || !selectedCollectorId}
-              className="flex-1 px-6 py-3 rounded-lg bg-[#006C49] text-white font-semibold hover:bg-[#005639] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+              className="w-full sm:flex-1 px-4 sm:px-6 py-3 rounded-lg bg-[#006C49] text-white font-semibold hover:bg-[#005639] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
             >
               {isSubmitting && <LoadingSpinner />}
               {isSubmitting ? 'Membuat...' : 'Buat Setoran'}

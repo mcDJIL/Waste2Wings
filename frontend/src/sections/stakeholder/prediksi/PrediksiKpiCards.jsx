@@ -63,24 +63,24 @@ export default function PrediksiKpiCards({ trends = [], settings, isLoading }) {
   ]
 
   return (
-    <div className="grid grid-cols-2 xl:grid-cols-3 gap-6">
+    <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3 xl:gap-6">
       {kpiCards.map((card) => (
         <div
           key={card.label}
-          className="flex flex-col gap-2 p-6 rounded-xl border-t-[3px] border-x border-b bg-white/70 backdrop-blur-[10px] transition-all duration-300"
+          className="flex min-w-0 flex-col gap-2 rounded-xl border-x border-b border-t-[3px] bg-white/70 p-4 backdrop-blur-[10px] transition-all duration-300 sm:p-5 xl:p-6"
           style={{ borderColor: '#C9A96E', opacity: isLoading ? 0.6 : 1 }}
         >
-          <div className="flex items-start justify-between">
-            <span className="text-[#6F7975] text-base font-extrabold leading-6 tracking-[1.6px] uppercase">
+          <div className="flex min-w-0 items-start justify-between gap-2">
+            <span className="min-w-0 break-words text-xs font-extrabold leading-5 tracking-[1px] text-[#6F7975] uppercase sm:text-sm sm:leading-6 sm:tracking-[1.4px] xl:text-base xl:tracking-[1.6px]">
               {card.label}
             </span>
             {card.icon}
           </div>
-          <span className="text-[#004536] text-base font-extrabold leading-6">{card.value}</span>
-          <div className="flex items-center gap-1">
+          <span className="break-words text-base font-extrabold leading-6 text-[#004536] sm:text-lg">{card.value}</span>
+          <div className="flex min-w-0 items-start gap-1">
             {card.badge.arrowUp && <ArrowUpIcon color={card.badge.color} />}
             {card.badge.star && <StarIcon />}
-            <span className="text-base font-bold leading-6" style={{ color: card.badge.color }}>
+            <span className="break-words text-xs font-bold leading-5 sm:text-sm sm:leading-6" style={{ color: card.badge.color }}>
               {card.badge.text}
             </span>
           </div>

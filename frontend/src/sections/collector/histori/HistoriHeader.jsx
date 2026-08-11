@@ -54,24 +54,24 @@ const STAT_CARDS = [
 
 function StatCard({ icon, iconBg, badge, label, value, unit }) {
   return (
-    <div className="relative flex-1 min-w-[220px] rounded-2xl border-t-[3px] border-[#C9A96E] bg-white/70 backdrop-blur-[10px] shadow-[0_1px_2px_rgba(0,0,0,0.30)] overflow-hidden p-6">
+    <div className="relative flex-1 min-w-0 sm:min-w-[220px] rounded-2xl border-t-[3px] border-[#C9A96E] bg-white/70 backdrop-blur-[10px] shadow-[0_1px_2px_rgba(0,0,0,0.30)] overflow-hidden p-4 sm:p-6">
       <div className="flex items-center justify-between mb-3">
         <span className={`flex items-center justify-center w-10 h-10 rounded-xl ${iconBg}`}>
           {icon}
         </span>
-        <span className={`px-2 py-1 rounded text-xs font-bold leading-4 ${badge.className}`}>
+        <span className={`max-w-[58%] truncate px-2 py-1 rounded text-[10px] sm:text-xs font-bold leading-4 ${badge.className}`}>
           {badge.text}
         </span>
       </div>
-      <p className="text-[#3F4945] text-sm font-semibold tracking-[0.14px] mb-1" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+      <p className="text-[#3F4945] text-sm font-semibold tracking-[0.14px] mb-1">
         {label}
       </p>
       <div className="flex items-baseline gap-1">
-        <span className="text-[#004536] font-bold leading-[56px] tracking-[-1.2px]" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: '48px' }}>
+        <span className="text-[#004536] text-3xl sm:text-[48px] font-bold leading-tight sm:leading-[56px] tracking-[-1.2px]">
           {value}
         </span>
         {unit && (
-          <span className="text-[#004536] text-2xl font-medium opacity-60 tracking-[-1.2px]" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+          <span className="text-[#004536] text-xl sm:text-2xl font-medium opacity-60 tracking-[-1.2px]">
             {unit}
           </span>
         )}
@@ -118,35 +118,31 @@ export default function HistoriHeader({ summary, isLoading, onExport }) {
   const statCards = getStatCards()
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 sm:gap-6">
       {/* Title row */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="flex flex-col gap-2">
-          <h1 className="text-[#004536] font-semibold leading-10" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: '32px' }}>
+          <h1 className="text-[#004536] text-2xl sm:text-[32px] font-semibold leading-9 sm:leading-10">
             Histori Setoran
           </h1>
-          <p className="text-[#3F4945] text-base font-normal leading-6 max-w-[672px]" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+          <p className="text-[#3F4945] text-sm sm:text-base font-normal leading-6 max-w-[672px]">
             Pantau dan kelola seluruh riwayat transaksi pengumpulan minyak jelantah dengan sistem verifikasi real-time.
           </p>
         </div>
 
         <button
           onClick={onExport}
-          className="flex items-center gap-3 px-6 py-3 rounded-xl text-white font-normal leading-6 shrink-0 shadow-[0_10px_15px_-3px_rgba(11,94,75,0.20),0_4px_6px_-4px_rgba(11,94,75,0.20)] hover:shadow-lg active:scale-95 transition-all"
-          style={{
-            fontFamily: 'Plus Jakarta Sans, sans-serif',
-            background: 'linear-gradient(90deg, #0B5E4B 0%, #006C49 100%)',
-          }}>
+          className="flex w-full sm:w-auto items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-white font-normal leading-6 shrink-0 bg-[linear-gradient(90deg,_#0B5E4B_0%,_#006C49_100%)] shadow-[0_10px_15px_-3px_rgba(11,94,75,0.20),0_4px_6px_-4px_rgba(11,94,75,0.20)] hover:shadow-lg active:scale-95 transition-all">
           <DownloadIcon />
-          <span className="text-center">Ekspor Laporan<br />(PDF)</span>
+          <span className="text-center">Ekspor Laporan<span className="hidden sm:inline"><br /></span> (PDF)</span>
         </button>
       </div>
 
       {/* Stat cards */}
-      <div className="flex flex-col sm:flex-row gap-6">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="flex-1 min-w-[220px] h-[150px] rounded-2xl bg-white/70 animate-pulse border-t-[3px] border-[#C9A96E]" />
+            <div key={i} className="flex-1 min-w-0 sm:min-w-[220px] h-[120px] sm:h-[150px] rounded-2xl bg-white/70 animate-pulse border-t-[3px] border-[#C9A96E]" />
           ))
         ) : (
           statCards.map((card) => (

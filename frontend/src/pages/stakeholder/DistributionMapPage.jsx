@@ -99,7 +99,7 @@ export default function DistributionMapPage() {
           </div>
 
           {/* Map Container */}
-          <div className="flex-1 relative">
+          <div className="flex-1 relative z-10">
             {isLoading ? (
               <div className="w-full h-full flex items-center justify-center">
                 <div className="flex flex-col items-center gap-3">
@@ -224,41 +224,41 @@ export default function DistributionMapPage() {
 
             {/* Legend Overlay */}
             {!isLoading && markers.length > 0 && (
-              <div className="absolute top-6 right-6 p-4 rounded-xl border border-[#BEC9C3]/20 bg-white/95 backdrop-blur-md shadow-[0_8px_24px_-4px_rgba(0,0,0,0.12)] z-[400] max-w-xs animate-fade-slide-up" style={{ animationDelay: '200ms' }}>
-                <p className="text-[#051C37] text-sm font-bold leading-6 mb-3">Legenda</p>
+              <div className="absolute top-2 right-2 z-[400] w-[164px] rounded-lg border border-[#BEC9C3]/20 bg-white/95 p-2 shadow-[0_8px_24px_-4px_rgba(0,0,0,0.12)] backdrop-blur-md animate-fade-slide-up sm:top-4 sm:right-4 sm:w-[190px] sm:rounded-xl sm:p-3 md:w-[210px] lg:top-6 lg:right-6 lg:w-auto lg:max-w-xs lg:p-4" style={{ animationDelay: '200ms' }}>
+                <p className="mb-2 text-xs font-bold leading-5 text-[#051C37] sm:mb-3 sm:text-sm sm:leading-6">Legenda</p>
                 
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
+                <div className="space-y-1.5 sm:space-y-2">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <div className="flex-shrink-0">
-                      <svg width="24" height="24" viewBox="0 0 32 42" fill="none">
+                      <svg width="24" height="24" viewBox="0 0 32 42" fill="none" className="h-5 w-4 shrink-0 sm:h-6 sm:w-5">
                         <path d="M16 2C10.48 2 6 6.48 6 12c0 9 10 22 10 22s10-13 10-22c0-5.52-4.48-10-10-10z"
                           fill="#006C49" stroke="white" strokeWidth="2.5"/>
                         <circle cx="16" cy="12" r="4.5" fill="white"/>
                       </svg>
                     </div>
                     <div>
-                      <p className="text-[#051C37] text-xs font-semibold">Komunitas ({communityMarkers.length})</p>
-                      <p className="text-[#3F4945] text-[11px]">Sumber minyak jelantah</p>
+                      <p className="text-[11px] font-semibold leading-4 text-[#051C37] sm:text-xs sm:leading-5">Komunitas ({communityMarkers.length})</p>
+                      <p className="text-[10px] leading-4 text-[#3F4945] sm:text-[11px]">Sumber minyak jelantah</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <div className="flex-shrink-0">
-                      <svg width="24" height="24" viewBox="0 0 32 42" fill="none">
+                      <svg width="24" height="24" viewBox="0 0 32 42" fill="none" className="h-5 w-4 shrink-0 sm:h-6 sm:w-5">
                         <path d="M16 2C10.48 2 6 6.48 6 12c0 9 10 22 10 22s10-13 10-22c0-5.52-4.48-10-10-10z"
                           fill="#004B7E" stroke="white" strokeWidth="2.5"/>
                         <circle cx="16" cy="12" r="4.5" fill="white"/>
                       </svg>
                     </div>
                     <div>
-                      <p className="text-[#051C37] text-xs font-semibold">Pengepul ({collectorMarkers.length})</p>
-                      <p className="text-[#3F4945] text-[11px]">Pengumpul & penyaring</p>
+                      <p className="text-[11px] font-semibold leading-4 text-[#051C37] sm:text-xs sm:leading-5">Pengepul ({collectorMarkers.length})</p>
+                      <p className="text-[10px] leading-4 text-[#3F4945] sm:text-[11px]">Pengumpul & penyaring</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-[#BEC9C3]/20">
-                  <p className="text-[#3F4945] text-[10px] leading-4">
+                <div className="mt-2 border-t border-[#BEC9C3]/20 pt-2 sm:mt-4 sm:pt-4">
+                  <p className="text-[9px] leading-3 text-[#3F4945] sm:text-[10px] sm:leading-4">
                     Total: {markers.length} lokasi
                   </p>
                 </div>

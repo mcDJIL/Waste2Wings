@@ -70,7 +70,7 @@ export default function CollectorTopBar({ onMenuToggle }) {
   }, [notificationsOpen])
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between px-6 sm:px-12 h-16 gap-4
+    <header className="sticky top-0 z-30 flex items-center shrink-0 px-4 sm:px-6 h-[74px] gap-2
       border-b border-[#E0DBDF]/40 bg-[#FAF9F6]/80 backdrop-blur-[8px] font-poppins">
 
       {/* Mobile hamburger */}
@@ -84,7 +84,7 @@ export default function CollectorTopBar({ onMenuToggle }) {
       </button>
 
       {/* Search bar */}
-      <div className="flex-1 max-w-xl relative">
+      <div className="flex-1 min-w-0 max-w-[512px] relative">
         <div className={`flex items-center gap-3 px-4 py-2 rounded-full border bg-[#FCFAF8]
           transition-all duration-200
           ${searchFocused
@@ -106,7 +106,7 @@ export default function CollectorTopBar({ onMenuToggle }) {
       </div>
 
       {/* Right actions */}
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 ml-auto shrink-0">
         {/* Bell with notification dropdown */}
         <div className="relative" onClick={(e) => e.stopPropagation()}>
           <button
@@ -120,7 +120,7 @@ export default function CollectorTopBar({ onMenuToggle }) {
 
           {/* Notifications dropdown */}
           {notificationsOpen && (
-            <div className="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-y-auto bg-white rounded-xl border border-[#E0DBDF] shadow-lg z-40">
+            <div className="fixed right-4 top-[74px] w-80 max-w-[calc(100vw-2rem)] max-h-[calc(100vh-100px)] overflow-y-auto bg-white rounded-xl border border-[#E0DBDF] shadow-lg z-40">
               <div className="sticky top-0 bg-white border-b border-[#E0DBDF] px-4 py-3 flex items-center justify-between">
                 <h3 className="font-semibold text-[#051C37] text-sm">Notifikasi</h3>
                 <button
@@ -163,10 +163,10 @@ export default function CollectorTopBar({ onMenuToggle }) {
         </div>
 
         {/* Divider */}
-        <div className="w-px h-6 bg-[#E0DBDF]" />
+        <div className="hidden sm:block w-px h-6 bg-[#E0DBDF]" />
 
         {/* PENGEPUL badge */}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full
+        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full
           border border-[#C19A00]/20 bg-[#F0C34D] shadow-sm">
           <PengepulStarIcon />
           <span className="text-[10px] font-bold text-[#403100] tracking-[0.5px] uppercase font-poppins">

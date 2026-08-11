@@ -18,7 +18,7 @@ export default function TopNav({ onMenuToggle }) {
             Executive Command Center
           </p>
           <span className="hidden sm:flex items-center px-3 py-1 rounded-full border border-[#1D4ED8]/20 bg-[#DEE8FF] text-[#1D4ED8] text-sm font-normal leading-6 whitespace-nowrap">
-            Stakeholder HEN
+            Stakeholder Waste2Wings
           </span>
         </div>
       </div>

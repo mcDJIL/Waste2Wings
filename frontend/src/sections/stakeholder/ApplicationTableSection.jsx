@@ -154,6 +154,12 @@ export default function ApplicationTableSection({ batches = [], isLoading = fals
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const pageData = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const paginationItems = useMemo(() => {
+    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1)
+    if (page <= 3) return [1, 2, 3, 'ellipsis-end', totalPages]
+    if (page >= totalPages - 2) return [1, 'ellipsis-start', totalPages - 2, totalPages - 1, totalPages]
+    return [1, 'ellipsis-start', page, 'ellipsis-end', totalPages]
+  }, [page, totalPages])
 
   return (
     <div className="rounded-2xl border border-white/30 bg-white/70 shadow-[0_4px_12px_0_rgba(11,94,75,0.20)] backdrop-blur-sm overflow-hidden">
@@ -274,41 +280,51 @@ export default function ApplicationTableSection({ batches = [], isLoading = fals
       </div>
 
       {/* Pagination */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-6 py-4 border-t border-[rgba(190,201,195,0.30)] bg-[rgba(240,243,255,0.30)]">
-        <p className="text-[#3F4945] text-xs sm:text-sm">
+      <div className="flex flex-col gap-3 border-t border-[rgba(190,201,195,0.30)] bg-[rgba(240,243,255,0.30)] px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2 sm:px-6 sm:py-4">
+        <p className="text-center text-xs text-[#3F4945] sm:text-left sm:text-sm">
           Menampilkan {filtered.length > 0 ? (page - 1) * PAGE_SIZE + 1 : 0} - {Math.min(page * PAGE_SIZE, filtered.length)} dari {filtered.length} Batch
         </p>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex max-w-full items-center justify-center gap-1 overflow-x-auto pb-0.5 sm:justify-end">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="flex items-center justify-center w-9 h-9 rounded-lg border border-[rgba(190,201,195,0.30)] text-[#051C37] transition-all duration-200 hover:bg-[rgba(0,69,54,0.06)] disabled:opacity-40 disabled:cursor-not-allowed"
+            aria-label="Halaman sebelumnya"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[rgba(190,201,195,0.30)] text-[#051C37] transition-all duration-200 hover:bg-[rgba(0,69,54,0.06)] disabled:cursor-not-allowed disabled:opacity-40 sm:h-9 sm:w-9"
           >
             <svg width="7" height="10" viewBox="0 0 7 10" fill="none">
               <path d="M5 10L0 5L5 0L6.16667 1.16667L2.33333 5L6.16667 8.83333L5 10Z" fill="currentColor" />
             </svg>
           </button>
 
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-            <button
-              key={p}
-              onClick={() => setPage(p)}
-              className={[
-                'flex items-center justify-center w-9 h-9 rounded-lg text-sm font-bold transition-all duration-200',
-                page === p
-                  ? 'bg-[#004536] text-white shadow-md scale-105'
-                  : 'border border-[rgba(190,201,195,0.30)] text-[#051C37] hover:bg-[rgba(0,69,54,0.06)]',
-              ].join(' ')}
-            >
-              {p}
-            </button>
+          {paginationItems.map((item) => (
+            item.toString().startsWith('ellipsis') ? (
+              <span key={item} className="flex h-7 w-4 shrink-0 items-center justify-center text-xs text-[#6F7975] sm:h-9 sm:w-5">
+                …
+              </span>
+            ) : (
+              <button
+                key={item}
+                onClick={() => setPage(item)}
+                aria-label={`Ke halaman ${item}`}
+                aria-current={page === item ? 'page' : undefined}
+                className={[
+                  'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition-all duration-200 sm:h-9 sm:w-9 sm:text-sm',
+                  page === item
+                    ? 'bg-[#004536] text-white shadow-md'
+                    : 'border border-[rgba(190,201,195,0.30)] text-[#051C37] hover:bg-[rgba(0,69,54,0.06)]',
+                ].join(' ')}
+              >
+                {item}
+              </button>
+            )
           ))}
 
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="flex items-center justify-center w-9 h-9 rounded-lg border border-[rgba(190,201,195,0.30)] text-[#051C37] transition-all duration-200 hover:bg-[rgba(0,69,54,0.06)] disabled:opacity-40 disabled:cursor-not-allowed"
+            aria-label="Halaman berikutnya"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[rgba(190,201,195,0.30)] text-[#051C37] transition-all duration-200 hover:bg-[rgba(0,69,54,0.06)] disabled:cursor-not-allowed disabled:opacity-40 sm:h-9 sm:w-9"
           >
             <svg width="7" height="10" viewBox="0 0 7 10" fill="none">
               <path d="M3.83333 5L0 1.16667L1.16667 0L6.16667 5L1.16667 10L0 8.83333L3.83333 5Z" fill="currentColor" />

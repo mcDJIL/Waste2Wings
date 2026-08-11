@@ -32,7 +32,8 @@ export default function StakeholderDashboardPage() {
 
         setSummary(summaryRes.data?.summary)
         setMapMarkers(mapRes.data?.markers || [])
-        setTrends(trendsRes.data?.trends || [])
+        const trendData = Array.isArray(trendsRes.data) ? trendsRes.data : trendsRes.data?.trends
+        setTrends(trendData || [])
         setSettings(settingsRes.data?.setting)
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error)

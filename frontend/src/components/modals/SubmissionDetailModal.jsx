@@ -59,21 +59,21 @@ export default function SubmissionDetailModal({ isOpen, submissionId, onClose })
   if (!isOpen) return null
 
   const modalContent = (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white rounded-3xl w-full max-w-xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.35)] animate-fade-slide-up max-h-[85vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-2 xs:p-4 animate-fade-in">
+      <div className="bg-white rounded-3xl w-full max-w-xl min-w-0 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.35)] animate-fade-slide-up max-h-[85vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-[#004536] to-[#006C49] px-6 sm:px-8 py-5 flex items-center justify-between shrink-0 rounded-t-3xl">
-          <h2 className="text-lg sm:text-xl font-bold text-white">Detail Setoran</h2>
+        <div className="sticky top-0 bg-gradient-to-r from-[#004536] to-[#006C49] px-4 sm:px-8 py-4 sm:py-5 flex items-start justify-between gap-3 shrink-0 rounded-t-3xl">
+          <h2 className="min-w-0 break-words text-lg sm:text-xl font-bold text-white">Detail Setoran</h2>
           <button
             onClick={onClose}
-            className="p-2 text-white hover:bg-white/20 rounded-lg transition-all duration-200"
+            className="p-2 text-white hover:bg-white/20 rounded-lg transition-all duration-200 shrink-0"
           >
             <CloseIcon />
           </button>
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto flex-1 p-6 sm:p-8">
+        <div className="overflow-y-auto flex-1 p-4 sm:p-8">
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
               <div className="flex flex-col items-center gap-3">
@@ -88,7 +88,7 @@ export default function SubmissionDetailModal({ isOpen, submissionId, onClose })
           ) : submission ? (
             <div className="space-y-5">
               {/* Status Badge */}
-              <div className="flex items-center justify-between pb-4 border-b border-[#BEC9C3]/20">
+              <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 pb-4 border-b border-[#BEC9C3]/20">
                 <span className="text-[#3F4945] font-semibold text-sm">Status Setoran</span>
                 <span
                   className={`px-4 py-2 rounded-full text-xs font-bold`}
@@ -102,7 +102,7 @@ export default function SubmissionDetailModal({ isOpen, submissionId, onClose })
               </div>
 
               {/* Submission Info */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pb-4 border-b border-[#BEC9C3]/20">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-4 border-b border-[#BEC9C3]/20">
                 <div>
                   <p className="text-[10px] font-bold uppercase text-[#3F4945] tracking-wide mb-2">ID</p>
                   <p className="text-xs font-mono text-[#051C37]">{submission.id.substring(0, 12)}</p>
@@ -145,11 +145,11 @@ export default function SubmissionDetailModal({ isOpen, submissionId, onClose })
                   </div>
                   <div className="flex items-start gap-2 text-xs text-[#3F4945] px-3">
                     <LocationIcon />
-                    <span>{submission.community.address}</span>
+                    <span className="min-w-0 break-words">{submission.community.address}</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-[#3F4945] px-3">
                     <PhoneIcon />
-                    <a href={`tel:${submission.community.user.phone}`} className="hover:text-[#006C49]">
+                    <a href={`tel:${submission.community.user.phone}`} className="min-w-0 break-all hover:text-[#006C49]">
                       {submission.community.user.phone}
                     </a>
                   </div>
@@ -175,11 +175,11 @@ export default function SubmissionDetailModal({ isOpen, submissionId, onClose })
                   </div>
                   <div className="flex items-start gap-2 text-xs text-[#3F4945] px-3">
                     <LocationIcon />
-                    <span>{submission.collector.address}</span>
+                    <span className="min-w-0 break-words">{submission.collector.address}</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-[#3F4945] px-3">
                     <PhoneIcon />
-                    <a href={`tel:${submission.collector.user.phone}`} className="hover:text-[#006C49]">
+                    <a href={`tel:${submission.collector.user.phone}`} className="min-w-0 break-all hover:text-[#006C49]">
                       {submission.collector.user.phone}
                     </a>
                   </div>
@@ -190,7 +190,7 @@ export default function SubmissionDetailModal({ isOpen, submissionId, onClose })
               {submission.totalPaid && (
                 <div className="pb-4 border-b border-[#BEC9C3]/20">
                   <h3 className="text-xs font-bold uppercase text-[#3F4945] tracking-wide mb-3">Pembayaran</h3>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="p-3 rounded-lg bg-[#F0F3FF]/50 border border-[#BEC9C3]/10">
                       <p className="text-[10px] font-bold uppercase text-[#3F4945] mb-1">Harga/L</p>
                       <p className="text-sm font-bold text-[#006C49]">

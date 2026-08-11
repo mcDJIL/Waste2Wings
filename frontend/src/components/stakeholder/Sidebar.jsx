@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useLogout } from '../../hooks/useLogout'
-const LOGO_URL = '../../assets/images/logo.png'
+const LOGO_URL = '/favicon.ico'
 
 const navItems = [
   {
