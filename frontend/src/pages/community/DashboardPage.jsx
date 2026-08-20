@@ -67,7 +67,7 @@ export default function DashboardPage() {
         <TopBar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-12">
-          <div className="animate-fade-slide-up" style={{ animationDelay: '0ms' }}>
+          <div className="dashboard-intro-enter animate-fade-slide-up">
             <div className="flex flex-wrap items-end justify-between gap-3 mb-6 sm:mb-8">
               <div>
                 <h1 className="text-xl sm:text-2xl font-semibold text-[#004536]">
@@ -81,12 +81,12 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="animate-fade-slide-up mb-6 sm:mb-8" style={{ animationDelay: '80ms' }}>
+          <div className="dashboard-stats-enter animate-fade-slide-up mb-6 sm:mb-8">
             <StatCards data={dashboardData?.summary} isLoading={isLoading} />
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8
-            animate-fade-slide-up" style={{ animationDelay: '160ms' }}>
+          <div className="dashboard-content-enter grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8
+            animate-fade-slide-up">
             <div className="xl:col-span-2 flex flex-col gap-6 sm:gap-8 h-full">
               <ActivityFeed activities={dashboardData?.recentActivities} isLoading={isLoading} />
             </div>

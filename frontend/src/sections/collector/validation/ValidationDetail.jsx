@@ -54,16 +54,16 @@ export default function ValidationDetail({ submission, onVerify, onReject }) {
       {/* Gold-bordered detail card */}
       <div
         className="
-          m-6 rounded-2xl
+          m-3 xs:m-4 sm:m-6 rounded-2xl
           border-t-[3px] border-l border-r border-b border-[#C9A96E]
           bg-white/70 backdrop-blur-[10px]
           shadow-[0_20px_25px_-5px_rgba(0,0,0,0.10),0_8px_10px_-6px_rgba(0,0,0,0.10)]
           animate-fade-in
-          flex flex-col gap-8 p-6 sm:p-8
+          flex flex-col gap-6 sm:gap-8 p-4 sm:p-8
         "
       >
         {/* ── Header ── */}
-        <div className="flex flex-wrap items-start justify-between gap-4 pb-6 border-b border-[rgba(190,201,195,0.20)]">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-6 border-b border-[rgba(190,201,195,0.20)]">
           <div className="flex items-center gap-4 sm:gap-5 min-w-0">
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#81F9C1] flex items-center justify-center shrink-0
               shadow-[0_0_0_4px_rgba(129,249,193,0.30)] text-white font-bold text-lg">
@@ -84,7 +84,7 @@ export default function ValidationDetail({ submission, onVerify, onReject }) {
             </div>
           </div>
 
-          <div className="flex flex-col items-end gap-1 shrink-0">
+          <div className="flex flex-col items-start sm:items-end gap-1 shrink-0">
             <span className="text-[#6F7975] text-sm sm:text-base font-normal leading-6 text-right">
               Tanggal Pengajuan
             </span>
@@ -108,15 +108,15 @@ export default function ValidationDetail({ submission, onVerify, onReject }) {
               DATA PENGAJUAN
             </span>
             <div className="flex flex-col gap-2">
-              <div className="flex justify-between items-start gap-4">
+              <div className="flex flex-col xs:flex-row xs:justify-between items-start gap-1 xs:gap-4">
                 <span className="text-[#3F4945] text-base font-normal leading-6">Volume Estimasi</span>
-                <span className="text-[#051C37] text-base font-bold leading-6 text-right">
+                <span className="text-[#051C37] text-base font-bold leading-6 text-left xs:text-right break-words">
                   {submission?.estimatedLiter || 0} Liter
                 </span>
               </div>
-              <div className="flex justify-between items-start gap-4">
+              <div className="flex flex-col xs:flex-row xs:justify-between items-start gap-1 xs:gap-4">
                 <span className="text-[#3F4945] text-base font-normal leading-6">Dari Komunitas</span>
-                <span className="text-[#051C37] text-base font-bold leading-6 text-right">
+                <span className="text-[#051C37] text-base font-bold leading-6 text-left xs:text-right break-words">
                   {submission?.community?.user?.phone || '-'}
                 </span>
               </div>
@@ -187,8 +187,7 @@ export default function ValidationDetail({ submission, onVerify, onReject }) {
             BUKTI FOTO SETORAN
           </span>
           <div
-            className="relative rounded-2xl overflow-hidden bg-[#DEE8FF] cursor-pointer group"
-            style={{ aspectRatio: '188/95' }}
+            className="relative aspect-[188/95] rounded-2xl overflow-hidden bg-[#DEE8FF] cursor-pointer group"
             onClick={() => setImageExpanded(true)}
           >
             <img
@@ -209,10 +208,10 @@ export default function ValidationDetail({ submission, onVerify, onReject }) {
         </div>
 
         {/* ── Summary & Actions ── */}
-        <div className="flex flex-wrap items-center gap-6 p-6 rounded-2xl
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-4 sm:p-6 rounded-2xl
           border border-[rgba(190,201,195,0.10)] bg-[rgba(213,227,255,0.30)]">
           {/* Clean volume estimate */}
-          <div className="flex flex-col gap-1 flex-1 min-w-[140px]">
+          <div className="flex flex-col gap-1 w-full sm:flex-1 min-w-0">
             <span className="text-[#3F4945] text-base font-normal leading-6">Volume Bersih</span>
             <div className="flex items-baseline gap-2">
               <span className="text-[#004536] text-base font-extrabold leading-6">
@@ -228,14 +227,14 @@ export default function ValidationDetail({ submission, onVerify, onReject }) {
           <div className="w-px h-16 bg-[rgba(190,201,195,0.30)] hidden sm:block shrink-0" />
 
           {/* Action buttons */}
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto shrink-0">
             <button
               onClick={handleReject}
               disabled={rejectLoading}
-              className="px-4 sm:px-6 py-2.5 rounded-xl border-2 border-[#BA1A1A]
+              className="w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-xl border-2 border-[#BA1A1A]
                 text-[#BA1A1A] font-bold text-base leading-6
                 hover:bg-[#BA1A1A]/5 active:scale-95
-                transition-all duration-200 disabled:opacity-60 whitespace-nowrap"
+                transition-all duration-200 disabled:opacity-60"
             >
               {rejectLoading ? 'Menolak...' : 'Tolak Setoran'}
             </button>
@@ -243,12 +242,12 @@ export default function ValidationDetail({ submission, onVerify, onReject }) {
             <button
               onClick={handleVerify}
               disabled={verifyLoading}
-              className="flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl
                 bg-gradient-to-r from-[#004536] to-[#006C49] text-white font-bold text-base leading-6
                 shadow-[0_10px_15px_-3px_rgba(0,69,54,0.20),0_4px_6px_-4px_rgba(0,69,54,0.20)]
                 hover:shadow-[0_16px_24px_-4px_rgba(0,69,54,0.35)]
                 hover:-translate-y-0.5 active:translate-y-0 active:scale-95
-                transition-all duration-200 disabled:opacity-60 whitespace-nowrap"
+                transition-all duration-200 disabled:opacity-60"
             >
               <VerifyIcon />
               {verifyLoading ? 'Menyimpan...' : 'Verifikasi & Simpan'}
@@ -272,7 +271,7 @@ export default function ValidationDetail({ submission, onVerify, onReject }) {
           />
           <button
             onClick={() => setImageExpanded(false)}
-            className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/20
+            className="absolute top-3 right-3 sm:top-6 sm:right-6 w-10 h-10 rounded-full bg-white/20
               flex items-center justify-center text-white hover:bg-white/30
               transition-colors duration-150"
           >

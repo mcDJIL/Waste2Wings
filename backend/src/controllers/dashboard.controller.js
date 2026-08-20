@@ -1,6 +1,8 @@
 const prisma = require('../prismaClient');
 const { BATCH_STATUS, ROLES, SUBMISSION_STATUS } = require('../utils/status');
 
+const CO2_SAVED_KG_PER_LITER = 1.52;
+
 function getMonthKey(date) {
   return date.toISOString().slice(0, 7);
 }
@@ -219,6 +221,7 @@ async function getCommunityDashboard(req, res, next) {
         summary: {
           totalSubmissions: 0,
           totalCleanLiter: 0,
+          co2SavedKg: 0,
           totalEstimatedLiter: 0,
           totalPaid: 0,
           latestSubmission: null,
@@ -297,6 +300,7 @@ async function getCommunityDashboard(req, res, next) {
       summary: {
         totalSubmissions,
         totalCleanLiter: aggregate._sum.cleanLiter || 0,
+        co2SavedKg: (aggregate._sum.cleanLiter || 0) * CO2_SAVED_KG_PER_LITER,
         totalEstimatedLiter: aggregate._sum.estimatedLiter || 0,
         totalPaid: aggregate._sum.totalPaid || 0,
         latestSubmission,

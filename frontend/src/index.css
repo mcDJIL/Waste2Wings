@@ -193,6 +193,18 @@
   animation: dashboardCardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+.dashboard-intro-enter {
+  animation-delay: 0ms;
+}
+
+.dashboard-stats-enter {
+  animation-delay: 80ms;
+}
+
+.dashboard-content-enter {
+  animation-delay: 160ms;
+}
+
 .status-pulse {
   animation: statusPulse 2.5s ease-in-out infinite;
 }

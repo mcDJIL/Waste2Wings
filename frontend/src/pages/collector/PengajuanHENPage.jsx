@@ -24,11 +24,11 @@ const LightbulbIcon = () => (
 )
 
 const ShippingTipsCard = () => (
-  <div className="flex flex-col gap-2 p-5 rounded-xl bg-white/70 backdrop-blur-[10px]
+  <div className="flex flex-col gap-2 p-4 sm:p-5 rounded-xl bg-white/70 backdrop-blur-[10px]
     border-t border-r border-b border-[#FFDEA4] border-l-4 border-l-[#FFDEA4]">
     <div className="flex items-center gap-3">
       <LightbulbIcon />
-      <span className="text-[#4E3807] text-base font-bold leading-6">Tips Pengiriman</span>
+      <span className="text-[#4E3807] text-sm sm:text-base font-bold leading-6">Tips Pengiriman</span>
     </div>
     <p className="text-[#3F4945] text-[13px] leading-[19.5px]">
       Pastikan minyak tidak tercampur dengan air hujan. Pengiriman dengan kadar air &lt; 1%
@@ -123,24 +123,24 @@ export default function PengajuanHENPage() {
       <div className="flex-1 flex flex-col lg:ml-[279px] min-w-0">
         <CollectorTopBar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
 
-        <main className="flex-1 p-6 lg:p-12 flex flex-col gap-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-12 flex flex-col gap-6 sm:gap-8">
 
           {/* Page header */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="flex flex-col gap-1">
-              <h1 className="text-[#004536] text-2xl font-bold leading-8">
-                Pengajuan HEN
+              <h1 className="text-[#004536] text-xl sm:text-2xl font-bold leading-8">
+                Pengajuan Waste2Wings
               </h1>
-              <p className="text-[#3F4945] text-base leading-6 max-w-lg">
+              <p className="text-[#3F4945] text-sm sm:text-base leading-6 max-w-lg">
                 Pilih setoran yang sudah diterima untuk dibuat batch pengajuan.
               </p>
             </div>
             <button
               onClick={handleSubmit}
               disabled={selectedSubmissions.length === 0 || isSubmitting}
-              className="px-8 py-3 rounded-xl
+              className="w-full sm:w-auto px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl
                 bg-gradient-to-r from-[#0B5E4B] to-[#004536]
-                text-white text-base font-bold leading-6
+                text-white text-sm sm:text-base font-bold leading-6
                 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.10),0_4px_6px_-4px_rgba(0,0,0,0.10)]
                 hover:shadow-[0_20px_30px_-6px_rgba(0,69,54,0.30)]
                 hover:-translate-y-0.5 active:translate-y-0 active:scale-95
@@ -151,26 +151,26 @@ export default function PengajuanHENPage() {
           </div>
 
           {/* Content grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
 
             {/* Left: Submissions List */}
             <div className="lg:col-span-8 flex flex-col gap-6">
               <div className="rounded-2xl border-t-2 border-r border-b border-l border-[#FFDEA4]
                 bg-white/70 backdrop-blur-[10px]">
 
-                <div className="px-6 py-5 border-b border-[#BEC9C3]/20">
-                  <h2 className="text-[#004536] text-lg font-bold">
+                <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-[#BEC9C3]/20">
+                  <h2 className="text-[#004536] text-base sm:text-lg font-bold">
                     Daftar Setoran Diterima ({submissions.length})
                   </h2>
                 </div>
 
                 {isLoading ? (
-                  <div className="flex items-center justify-center py-12">
+                  <div className="flex items-center justify-center py-8 sm:py-12">
                     <div className="w-6 h-6 border-2 border-[#006C49] border-t-transparent rounded-full animate-spin"></div>
                   </div>
                 ) : submissions.length === 0 ? (
-                  <div className="px-6 py-12 text-center">
-                    <p className="text-[#3F4945]">Tidak ada setoran yang sudah diterima</p>
+                  <div className="px-4 sm:px-6 py-8 sm:py-12 text-center">
+                    <p className="text-[#3F4945] text-sm sm:text-base">Tidak ada setoran yang sudah diterima</p>
                   </div>
                 ) : (
                   <div className="divide-y divide-[#BEC9C3]/10">
@@ -178,29 +178,29 @@ export default function PengajuanHENPage() {
                       <button
                         key={submission.id}
                         onClick={() => toggleSubmission(submission.id)}
-                        className="w-full px-6 py-4 text-left hover:bg-[#004536]/[0.02]
-                          transition-colors duration-150 flex items-center gap-4">
+                        className="w-full px-4 sm:px-6 py-3 sm:py-4 text-left hover:bg-[#004536]/[0.02]
+                          transition-colors duration-150 flex flex-col xs:flex-row xs:items-center gap-3 sm:gap-4 min-w-0">
                         
                         <CheckboxIcon checked={selectedSubmissions.includes(submission.id)} />
 
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-[#051C37]">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <h3 className="text-sm sm:text-base font-semibold text-[#051C37] break-words">
                               {submission.community?.user?.name || 'Unknown'}
                             </h3>
-                            <span className="text-xs bg-[#81F9C1]/20 text-[#006C49] px-2 py-1 rounded">
+                            <span className="text-[10px] sm:text-xs bg-[#81F9C1]/20 text-[#006C49] px-2 py-1 rounded shrink-0">
                               {submission.estimatedLiter} L
                             </span>
                           </div>
                           <p className="text-xs text-[#6B7280] truncate">
                             {submission.community?.address || 'Alamat tidak tersedia'}
                           </p>
-                          <p className="text-xs text-[#3F4945] mt-1">
+                          <p className="text-[11px] sm:text-xs text-[#3F4945] mt-1 break-all">
                             ID: {submission.id.substring(0, 12)}...
                           </p>
                         </div>
 
-                        <div className="text-right shrink-0">
+                        <div className="w-full xs:w-auto text-left xs:text-right shrink-0">
                           <p className="text-sm font-bold text-[#004536]">
                             Rp {(submission.estimatedLiter * 8500).toLocaleString('id-ID')}
                           </p>
@@ -221,23 +221,23 @@ export default function PengajuanHENPage() {
               {/* Summary Card */}
               <div className="rounded-2xl border-t-2 border-r border-b border-l border-[#FFDEA4]
                 bg-gradient-to-br from-[#004536] to-[#0B5E4B]
-                p-6 text-white">
+                p-4 sm:p-6 text-white">
                 
-                <h3 className="text-[#81F9C1] text-base font-bold mb-4">Ringkasan Pengajuan</h3>
+                <h3 className="text-[#81F9C1] text-sm sm:text-base font-bold mb-3 sm:mb-4">Ringkasan Pengajuan</h3>
 
                 <div className="space-y-3 mb-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-white/80">Jumlah Setoran</span>
-                    <span className="font-bold text-lg">{selectedSubmissions.length}</span>
+                    <span className="text-white/80 text-sm sm:text-base">Jumlah Setoran</span>
+                    <span className="font-bold text-base sm:text-lg">{selectedSubmissions.length}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-white/80">Total Volume</span>
-                    <span className="font-bold text-lg">{totalVolume} L</span>
+                    <span className="text-white/80 text-sm sm:text-base">Total Volume</span>
+                    <span className="font-bold text-base sm:text-lg">{totalVolume} L</span>
                   </div>
                   <div className="h-px bg-white/20"></div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#81F9C1] font-bold">Estimasi Pendapatan</span>
-                    <span className="font-bold text-xl">
+                    <span className="text-[#81F9C1] font-bold text-sm sm:text-base">Estimasi Pendapatan</span>
+                    <span className="font-bold text-lg sm:text-xl text-right break-words">
                       Rp {estimatedReward.toLocaleString('id-ID')}
                     </span>
                   </div>
@@ -246,7 +246,7 @@ export default function PengajuanHENPage() {
                 <button
                   onClick={handleSubmit}
                   disabled={selectedSubmissions.length === 0 || isSubmitting}
-                  className="w-full mt-4 py-3 rounded-lg bg-[#81F9C1] text-[#004536]
+                  className="w-full mt-3 sm:mt-4 py-2.5 sm:py-3 rounded-lg bg-[#81F9C1] text-[#004536]
                     font-bold text-sm hover:bg-white
                     disabled:opacity-50 disabled:cursor-not-allowed
                     transition-all duration-200">

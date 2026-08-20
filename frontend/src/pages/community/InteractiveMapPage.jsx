@@ -171,7 +171,7 @@ function MapControlButtons({ mapRef }) {
   const handleLocate  = () => mapRef?.locate({ setView: true, maxZoom: 15 })
 
   return (
-    <div className="flex flex-col gap-3 animate-fade-in">
+    <div className="flex flex-col gap-2 animate-fade-in">
       <div className="rounded-lg border border-[#E5E7EB] bg-white overflow-hidden
         shadow-[0_10px_15px_-3px_rgba(0,0,0,0.10)]">
         <button

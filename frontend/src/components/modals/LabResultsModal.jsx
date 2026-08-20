@@ -120,12 +120,12 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
   if (!isOpen) return null
 
   const modalContent = (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white rounded-3xl w-full max-w-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.35)] animate-fade-slide-up max-h-[85vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-2 xs:p-4 animate-fade-in">
+      <div className="bg-white rounded-3xl w-full max-w-2xl min-w-0 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.35)] animate-fade-slide-up max-h-[85vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-[#004536] to-[#006C49] px-6 sm:px-8 py-5 flex items-center justify-between shrink-0 rounded-t-3xl">
-          <div className="flex items-center gap-3">
-            <h2 className="text-lg sm:text-xl font-bold text-white">Hasil Uji Lab</h2>
+        <div className="sticky top-0 bg-gradient-to-r from-[#004536] to-[#006C49] px-4 sm:px-8 py-4 sm:py-5 flex items-start justify-between gap-3 shrink-0 rounded-t-3xl">
+          <div className="min-w-0 flex flex-wrap items-center gap-2 sm:gap-3">
+            <h2 className="break-words text-lg sm:text-xl font-bold text-white">Hasil Uji Lab</h2>
             {getStatusDisplay() && (
               <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusDisplay().color}`}>
                 {getStatusDisplay().label}
@@ -134,14 +134,14 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-white hover:bg-white/20 rounded-lg transition-all duration-200"
+            className="p-2 text-white hover:bg-white/20 rounded-lg transition-all duration-200 shrink-0"
           >
             <CloseIcon />
           </button>
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto flex-1 p-6 sm:p-8">
+        <div className="overflow-y-auto flex-1 p-4 sm:p-8">
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
               <div className="flex flex-col items-center gap-3">
@@ -156,7 +156,7 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
           ) : labResult ? (
             <div className="space-y-6">
               {/* Lab Test Results Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {labResult.waterContentPercent !== undefined && (
                   <div className="p-4 rounded-lg bg-gradient-to-br from-[#F0F3FF]/70 to-[#E8F1FF]/70 border border-[#BEC9C3]/15">
                     <p className="text-[10px] font-bold uppercase text-[#3F4945] mb-2 tracking-wide">Kadar Air</p>
@@ -213,18 +213,18 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
               </div>
 
               {/* Action Buttons */}
-              <div className="border-t border-[#BEC9C3]/20 pt-6 flex gap-3">
+              <div className="border-t border-[#BEC9C3]/20 pt-6 flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={handleReject}
                   disabled={actionLoading === 'reject' || !note.trim()}
-                  className="flex-1 px-4 py-2.5 rounded-lg bg-[#FEE2E2] text-[#991B1B] font-bold text-sm transition-all duration-200 hover:bg-[#FECACA] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                  className="w-full sm:flex-1 px-4 py-2.5 rounded-lg bg-[#FEE2E2] text-[#991B1B] font-bold text-sm transition-all duration-200 hover:bg-[#FECACA] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
                 >
                   {actionLoading === 'reject' ? 'Menolak...' : batchData?.status === 'REJECTED_BY_STAKEHOLDER' ? 'Ubah Alasan Tolak' : 'Tolak'}
                 </button>
                 <button
                   onClick={handleAccept}
                   disabled={actionLoading === 'accept' || !note.trim()}
-                  className="flex-1 px-4 py-2.5 rounded-lg bg-[#D1FAE5] text-[#065F46] font-bold text-sm transition-all duration-200 hover:bg-[#A7F3D0] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                  className="w-full sm:flex-1 px-4 py-2.5 rounded-lg bg-[#D1FAE5] text-[#065F46] font-bold text-sm transition-all duration-200 hover:bg-[#A7F3D0] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
                 >
                   {actionLoading === 'accept' ? 'Menerima...' : batchData?.status === 'ACCEPTED_BY_STAKEHOLDER' ? 'Ubah Alasan Terima' : 'Terima'}
                 </button>

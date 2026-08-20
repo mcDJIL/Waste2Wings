@@ -52,7 +52,7 @@ const LogoutIcon = () => (
 const NAV_ITEMS = [
   { id: 'dashboard',  label: 'Dashboard',        route: '/collector/dashboard',  icon: <DashboardIcon /> },
   { id: 'validasi',   label: 'Validasi Setoran',  route: '/collector/validasi',   icon: <ValidasiIcon /> },
-  { id: 'pengajuan',  label: 'Pengajuan Ke HEN',  route: '/collector/pengajuan',  icon: <PengajuanIcon /> },
+  { id: 'pengajuan',  label: 'Pengajuan Ke W2W',  route: '/collector/pengajuan',  icon: <PengajuanIcon /> },
   { id: 'histori',    label: 'Histori',            route: '/collector/histori',    icon: <HistoriIcon /> },
   { id: 'peta',       label: 'Peta',               route: '/collector/peta',       icon: <PetaIcon /> },
 ]
@@ -103,13 +103,13 @@ export default function ValidationSidebar({ isOpen, onClose }) {
 
       <aside
         className={[
-          'fixed top-0 left-0 h-full w-[280px] bg-[#051C37] z-40 flex flex-col',
+          'fixed top-0 left-0 h-full w-[calc(100vw-1rem)] max-w-[280px] overflow-y-auto bg-[#051C37] z-40 flex flex-col',
           'transition-transform duration-300 ease-in-out',
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
         ].join(' ')}
       >
         {/* Brand */}
-        <div className="flex items-center gap-3 px-6 pt-7 pb-4">
+        <div className="flex items-center gap-3 px-4 sm:px-6 pt-6 sm:pt-7 pb-4">
           <img
             src={LOGO_URL}
             alt="Logo"
@@ -124,7 +124,7 @@ export default function ValidationSidebar({ isOpen, onClose }) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-6 pt-4 flex flex-col gap-1 overflow-y-auto">
+        <nav className="flex-1 min-h-0 px-4 sm:px-6 pt-4 flex flex-col gap-1">
           {NAV_ITEMS.map((item) => (
             <NavItem
               key={item.id}
@@ -136,10 +136,10 @@ export default function ValidationSidebar({ isOpen, onClose }) {
         </nav>
 
         {/* Divider */}
-        <div className="mx-6 my-4 border-t border-white/20" />
+        <div className="mx-4 sm:mx-6 my-4 border-t border-white/20" />
 
         {/* Settings */}
-        <div className="px-6">
+        <div className="px-4 sm:px-6">
           <NavLink
             to="/collector/settings"
             className="flex items-center gap-4 px-4 py-2 text-[#D5E3FF] hover:bg-white/5 rounded-lg transition-all duration-200"
@@ -152,7 +152,7 @@ export default function ValidationSidebar({ isOpen, onClose }) {
         </div>
 
         {/* Request Pickup button */}
-        <div className="px-6 mt-4">
+        <div className="px-4 sm:px-6 mt-4">
           <button className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#0B5E4B] text-white font-bold text-sm transition-all duration-200 hover:bg-[#0d7560] hover:shadow-lg active:scale-95">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M9 15H11V11H15V9H11V5H9V9H5V11H9V15ZM10 20C8.61667 20 7.31667 19.7375 6.1 19.2125C4.88333 18.6875 3.825 17.975 2.925 17.075C2.025 16.175 1.3125 15.1167 0.7875 13.9C0.2625 12.6833 0 11.3833 0 10C0 8.61667 0.2625 7.31667 0.7875 6.1C1.3125 4.88333 2.025 3.825 2.925 2.925C3.825 2.025 4.88333 1.3125 6.1 0.7875C7.31667 0.2625 8.61667 0 10 0C11.3833 0 12.6833 0.2625 13.9 0.7875C15.1167 1.3125 16.175 2.025 17.075 2.925C17.975 3.825 18.6875 4.88333 19.2125 6.1C19.7375 7.31667 20 8.61667 20 10C20 11.3833 19.7375 12.6833 19.2125 13.9C18.6875 15.1167 17.975 16.175 17.075 17.075C16.175 17.975 15.1167 18.6875 13.9 19.2125C12.6833 19.7375 11.3833 20 10 20ZM10 18C12.2333 18 14.125 17.225 15.675 15.675C17.225 14.125 18 12.2333 18 10C18 7.76667 17.225 5.875 15.675 4.325C14.125 2.775 12.2333 2 10 2C7.76667 2 5.875 2.775 4.325 4.325C2.775 5.875 2 7.76667 2 10C2 12.2333 2.775 14.125 4.325 15.675C5.875 17.225 7.76667 18 10 18Z" fill="white" />
@@ -162,7 +162,7 @@ export default function ValidationSidebar({ isOpen, onClose }) {
         </div>
 
         {/* User card */}
-        <div className="mx-6 my-4 flex items-center gap-3 p-4 rounded-xl bg-white/5 backdrop-blur-sm">
+        <div className="mx-4 sm:mx-6 my-4 flex items-center gap-3 p-3 sm:p-4 rounded-xl bg-white/5 backdrop-blur-sm">
           <div className="w-10 h-10 rounded-full bg-[#81F9C1] overflow-hidden flex-shrink-0">
             <img
               src="https://api.builder.io/api/v1/image/assets/TEMP/12722183bce6bc818937ff4cd3ae05ff6edf167d?width=80"

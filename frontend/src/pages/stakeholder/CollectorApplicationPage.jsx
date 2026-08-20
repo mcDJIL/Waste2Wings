@@ -42,7 +42,7 @@ function PageFooter() {
     <footer className="border-t border-[rgba(190,201,195,0.30)] bg-white px-6 sm:px-12 py-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[#004536] text-sm font-bold">HEN Platform</span>
+          <span className="text-[#004536] text-sm font-bold">Waste2Wings Platform</span>
           <span className="text-[#6F7975] text-sm">|</span>
           <span className="text-[#3F4945] text-xs font-medium">
             © 2026 Veridian Energy. Sustainable Luxury in Waste Management.

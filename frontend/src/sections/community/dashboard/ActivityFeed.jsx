@@ -66,9 +66,9 @@ function ActivityItem({ activity, isLast }) {
         {!isLast && <div className="w-px flex-1 bg-[#BEC9C3]/30 mt-2 min-h-[2rem]" />}
       </div>
 
-      <div className={`flex items-start justify-between flex-1 gap-3 ${!isLast ? 'pb-6 sm:pb-8' : ''}`}>
+      <div className={`flex flex-1 min-w-0 flex-col gap-3 xs:flex-row xs:items-start xs:justify-between ${!isLast ? 'pb-6 sm:pb-8' : ''}`}>
         <div className="min-w-0">
-          <p className="text-[#051C37] font-bold text-sm sm:text-base leading-6 truncate">
+          <p className="text-[#051C37] font-bold text-sm sm:text-base leading-6 break-words">
             {activity.title}
           </p>
           <p className="text-[#3F4945] text-xs font-medium mt-0.5">{activity.subtitle}</p>

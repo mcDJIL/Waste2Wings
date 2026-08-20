@@ -1,7 +1,7 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useLogout } from '../../../hooks/useLogout'
-const LOGO_URL = '../../../assets/images/logo.png'
+const LOGO_URL = '/favicon.ico'
 
 const NAV_ITEMS = [
   {
@@ -105,14 +105,14 @@ export default function Sidebar({ isOpen, onClose }) {
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-1000 lg:hidden"
           onClick={onClose}
         />
       )}
 
       <aside
         className={[
-          'fixed top-0 left-0 h-full w-[280px] bg-[#051C37] z-40 flex flex-col',
+          'fixed top-0 left-0 h-full w-[280px] bg-[#051C37] z-1000 flex flex-col',
           'transition-transform duration-300 ease-in-out',
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
         ].join(' ')}

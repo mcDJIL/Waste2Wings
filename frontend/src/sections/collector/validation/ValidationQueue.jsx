@@ -4,7 +4,7 @@ const OilDropIcon = () => (
   </svg>
 )
 
-function QueueItem({ submission, isSelected, onClick, animDelay }) {
+function QueueItem({ submission, isSelected, onClick }) {
   const getStatusColor = (status) => {
     if (status === 'SUBMITTED') {
       return 'bg-[rgba(0,69,54,0.10)]'
@@ -27,26 +27,25 @@ function QueueItem({ submission, isSelected, onClick, animDelay }) {
     <button
       onClick={onClick}
       className={`
-        flex flex-col gap-2 p-4 rounded-xl w-full text-left cursor-pointer
+        flex flex-col gap-2 p-3 sm:p-4 rounded-xl w-full text-left cursor-pointer min-w-0
         animate-fade-in transition-all duration-200
         ${isSelected
           ? 'border-l-4 border-t border-r border-b border-[#004536] bg-white/70 backdrop-blur-[10px] shadow-[0_0_0_1px_rgba(0,69,54,0.20),0_1px_2px_0_rgba(0,0,0,0.05)]'
           : 'border border-[rgba(190,201,195,0.30)] bg-white/50 hover:border-[#004536]/40 hover:bg-white/80 hover:shadow-sm'
         }
       `}
-      style={{ animationDelay: animDelay }}
     >
-      <div className="flex items-start justify-between gap-2 w-full">
+      <div className="flex flex-col xs:flex-row xs:items-start xs:justify-between gap-2 w-full min-w-0">
         <div className="flex flex-col gap-0.5 min-w-0">
-          <span className="text-[#051C37] text-base font-bold leading-6 truncate">
+          <span className="text-[#051C37] text-base font-bold leading-6 break-words">
             {submission.community?.user?.name || 'Unknown'}
           </span>
-          <span className="text-[#3F4945] text-xs font-normal leading-[18px] truncate">
+          <span className="text-[#3F4945] text-xs font-normal leading-[18px] break-all">
             {submission.id.substring(0, 12)}...
           </span>
         </div>
         {submission.status === 'SUBMITTED' ? (
-          <span className={`flex items-center gap-1.5 px-2 py-1 rounded-lg ${getStatusColor(submission.status)} shrink-0`}>
+          <span className={`self-start xs:self-auto flex items-center gap-1.5 px-2 py-1 rounded-lg ${getStatusColor(submission.status)} shrink-0`}>
             <span className="w-1.5 h-1.5 rounded-full bg-[#004536] status-pulse shrink-0" />
             <span className="text-[#004536] text-[10px] font-bold leading-[15px] whitespace-nowrap">
               {getStatusLabel(submission.status)}
@@ -59,7 +58,7 @@ function QueueItem({ submission, isSelected, onClick, animDelay }) {
         )}
       </div>
 
-      <div className="flex items-center justify-between w-full">
+      <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-1 w-full">
         <div className="flex items-center gap-2">
           <OilDropIcon />
           <span className="text-[#051C37] text-base font-bold leading-6">
@@ -87,14 +86,14 @@ export default function ValidationQueue({ submissions, selectedId, onSelect, isL
 
   return (
     <div className="flex flex-col h-full border-r border-[rgba(190,201,195,0.10)]">
-      <div className="flex items-center justify-between px-6 pt-6 pb-5 shrink-0">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3 sm:px-6 pt-4 sm:pt-6 pb-4 sm:pb-5 shrink-0">
         <span className="text-[#004536] text-base font-normal leading-6">Antrean Validasi</span>
-        <span className="px-3 py-1 rounded-full bg-[#81F9C1] text-[#00734E] text-xs font-bold leading-[18px]">
+        <span className="px-2 sm:px-3 py-1 rounded-full bg-[#81F9C1] text-[#00734E] text-xs font-bold leading-[18px]">
           {pendingCount} Menunggu
         </span>
       </div>
 
-      <div className="flex flex-col gap-3 px-6 pb-6 flex-1 overflow-y-auto">
+      <div className="flex flex-col gap-3 px-3 sm:px-6 pb-4 sm:pb-6 flex-1 min-h-0 overflow-y-auto">
         {submissions && submissions.length > 0 ? (
           submissions.map((submission, i) => (
             <QueueItem
@@ -102,7 +101,6 @@ export default function ValidationQueue({ submissions, selectedId, onSelect, isL
               submission={submission}
               isSelected={selectedId === submission.id}
               onClick={() => onSelect(submission)}
-              animDelay={`${i * 50}ms`}
             />
           ))
         ) : (

@@ -103,7 +103,7 @@ export default function CollectorKpiGrid({ data, isLoading }) {
       {
         id: 'pengajuan',
         icon: <PengajuanIcon />,
-        label: 'Pengajuan ke HEN',
+        label: 'Pengajuan ke W2W',
         value: (
           <div className="flex items-center gap-2">
             <span className="text-[#1D1B1A] text-2xl font-bold font-poppins">{summary.henSubmissionCount || 0}</span>

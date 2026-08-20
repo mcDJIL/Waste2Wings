@@ -37,7 +37,7 @@ export default function HistoriFilters({ search, onSearchChange, dateRange, onDa
   const selectedDateLabel = DATE_RANGES.find(d => d.value === dateRange)?.label ?? '7 Hari Terakhir'
 
   return (
-    <div className="rounded-2xl border border-white/30 bg-white/70 backdrop-blur-[10px] px-6 py-5 flex flex-col gap-4">
+    <div className="rounded-2xl border border-white/30 bg-white/70 backdrop-blur-[10px] px-4 sm:px-6 py-4 sm:py-5 flex flex-col gap-3 sm:gap-4">
       {/* Top row: search + date */}
       <div className="flex flex-col sm:flex-row gap-3">
         {/* Search */}
@@ -50,8 +50,7 @@ export default function HistoriFilters({ search, onSearchChange, dateRange, onDa
             value={search}
             onChange={e => onSearchChange(e.target.value)}
             placeholder="Cari penyetor atau ID transaksi..."
-            className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-[#BEC9C3]/30 bg-white text-[#051C37] text-sm font-semibold placeholder:text-[#6B7280] placeholder:font-semibold outline-none focus:border-[#004536]/40 focus:ring-2 focus:ring-[#004536]/10 transition-all"
-            style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', letterSpacing: '0.14px' }}
+            className="w-full pl-12 pr-4 py-3 rounded-xl border border-[#BEC9C3]/30 bg-white text-[#051C37] text-sm font-semibold placeholder:text-[#6B7280] placeholder:font-semibold outline-none focus:border-[#004536]/40 focus:ring-2 focus:ring-[#004536]/10 transition-all"
           />
         </div>
 
@@ -59,22 +58,20 @@ export default function HistoriFilters({ search, onSearchChange, dateRange, onDa
         <div className="relative">
           <button
             onClick={() => setDateOpen(o => !o)}
-            className="flex items-center gap-2 px-4 py-3 rounded-xl border border-[#BEC9C3]/30 bg-white text-sm font-semibold text-[#051C37] whitespace-nowrap min-w-[180px]"
-            style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}
+            className="flex w-full sm:w-auto items-center justify-between gap-2 px-4 py-3 rounded-xl border border-[#BEC9C3]/30 bg-white text-sm font-semibold text-[#051C37] min-w-0 sm:min-w-[180px]"
           >
             <CalendarIcon />
             <span className="flex-1 text-left">{selectedDateLabel}</span>
             <ChevronDownIcon />
           </button>
           {dateOpen && (
-            <div className="absolute right-0 top-full mt-1 z-20 bg-white rounded-xl shadow-lg border border-[#BEC9C3]/30 overflow-hidden min-w-[180px]">
+            <div className="absolute left-0 right-0 sm:left-auto sm:right-0 top-full mt-1 z-20 bg-white rounded-xl shadow-lg border border-[#BEC9C3]/30 overflow-hidden w-full sm:min-w-[180px]">
               {DATE_RANGES.map(d => (
                 <button
                   key={d.value}
                   onClick={() => { onDateRangeChange(d.value); setDateOpen(false) }}
                   className={`w-full text-left px-4 py-2.5 text-sm hover:bg-[#F0F9F5] transition-colors
                     ${dateRange === d.value ? 'text-[#004536] font-semibold' : 'text-[#3F4945] font-medium'}`}
-                  style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}
                 >
                   {d.label}
                 </button>
@@ -85,20 +82,19 @@ export default function HistoriFilters({ search, onSearchChange, dateRange, onDa
       </div>
 
       {/* Status filter chips */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-[#3F4945] text-xs font-medium mr-2" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+      <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto sm:overflow-visible flex-nowrap sm:flex-wrap pb-1">
+        <span className="text-[#3F4945] text-[10px] sm:text-xs font-medium mr-1 sm:mr-2 whitespace-nowrap">
           Filter Status:
         </span>
         {STATUS_FILTERS.map(f => (
           <button
             key={f.value}
             onClick={() => onStatusChange(f.value)}
-            className={`px-4 py-2 rounded-full text-xs font-medium leading-4 transition-all duration-200
+            className={`shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs font-medium leading-4 transition-all duration-200
               ${activeStatus === f.value
                 ? 'bg-[#004536] text-white shadow-[0_4px_6px_-1px_rgba(0,0,0,0.10),0_2px_4px_-2px_rgba(0,0,0,0.10)]'
                 : 'bg-white border border-[#BEC9C3]/30 text-[#3F4945] hover:bg-[#F0F9F5]'
               }`}
-            style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}
           >
             {f.label}
           </button>

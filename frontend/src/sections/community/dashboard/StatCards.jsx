@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-function useCountUp(target, duration = 1400, delay = 200) {
+function useCountUp(target, duration = 1400, delay = 200, decimals = 0) {
   const [count, setCount] = useState(0)
   const startRef = useRef(null)
   const rafRef = useRef(null)
@@ -12,7 +12,7 @@ function useCountUp(target, duration = 1400, delay = 200) {
         const elapsed = timestamp - startRef.current
         const progress = Math.min(elapsed / duration, 1)
         const eased = 1 - Math.pow(1 - progress, 3)
-        setCount(Math.round(eased * target))
+        setCount(Number((eased * target).toFixed(decimals)))
         if (progress < 1) rafRef.current = requestAnimationFrame(animate)
       }
       rafRef.current = requestAnimationFrame(animate)
@@ -22,7 +22,7 @@ function useCountUp(target, duration = 1400, delay = 200) {
       clearTimeout(timer)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
-  }, [target, duration, delay])
+  }, [target, duration, delay, decimals])
 
   return count
 }
@@ -55,6 +55,14 @@ function TreeIcon() {
   return (
     <svg width="22" height="20" viewBox="0 0 22 20" fill="none">
       <path d="M5 20V16H0L3.2 10.5H1.7L8 0L11 4.3L14 0L20.3 10.5H18.8L22 16H17V20H13V16H9V20H5ZM14.725 14H18.35L14.475 8.5H16.15L13 4L10.225 8.025L13 12H11.15L13.725 14ZM3.65 14H14.35L10.475 8.5H12.15L9 4L5.85 8.5H7.525L3.65 14Z" fill="#674F1D" />
+    </svg>
+  )
+}
+
+function CarbonSavedIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+      <path d="M19.884 2.116C13.343 2.188 8.375 3.904 5.124 7.226c-2.762 2.823-3.086 6.573-3.118 8.826a1 1 0 0 0 1.306.966c2.043-.652 5.37-2.057 7.36-5.15 1.218-1.894 2.069-4.258 2.583-6.682-1.435 3.423-3.587 6.109-6.265 7.692 2.133-2.985 5.49-5.169 10.047-6.555-1.042 3.555-2.45 6.161-4.23 7.756-2.68 2.401-5.966 2.613-8.054 2.389a1 1 0 0 0-1.091 1.077c.244 2.1 2.006 3.735 4.155 3.735 1.435 0 2.678-.731 3.407-1.825 1.358.094 3.244-.106 5.023-1.699 3.47-3.107 4.758-8.686 4.588-14.609a1 1 0 0 0-.951-.951Z" fill="#006C49" />
     </svg>
   )
 }
@@ -154,6 +162,47 @@ function StatusTerakhirCard({ data, isLoading }) {
   )
 }
 
+function CarbonSavedCard({ data, isLoading }) {
+  const count = useCountUp(data?.co2SavedKg || 0, 1400, 300, 2)
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 min-w-0 p-6 rounded-2xl border-t-[3px] border-[#006C49] bg-white
+        shadow-[0_5px_5px_0_rgba(0,0,0,0.10)] animate-pulse">
+        <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+        <div className="h-10 bg-gray-200 rounded w-1/2"></div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex-1 min-w-0 p-6 rounded-2xl border-t-[3px] border-[#006C49] bg-white
+      shadow-[0_5px_5px_0_rgba(0,0,0,0.10)] hover:shadow-xl hover:-translate-y-1
+      transition-all duration-300 cursor-default">
+      <div className="flex justify-between items-start mb-3">
+        <div className="p-2 rounded-xl bg-[#006C49]/10">
+          <CarbonSavedIcon />
+        </div>
+        <span className="text-xs font-bold text-[#006C49] bg-[#006C49]/10 px-2 py-1 rounded-lg">
+          1,52 kg/L
+        </span>
+      </div>
+      <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.6px] text-[#3F4945] mt-4">
+        CO₂ Terselamatkan
+      </p>
+      <div className="flex items-end gap-1 mt-1">
+        <span className="text-2xl sm:text-3xl font-bold text-[#004536] leading-none tabular-nums">
+          {count.toLocaleString('id-ID', { maximumFractionDigits: 2 })}
+        </span>
+        <span className="text-sm sm:text-base font-semibold text-[#004536] mb-0.5">kg CO₂e</span>
+      </div>
+      <p className="text-[10px] text-[#3F4945] mt-3 leading-relaxed">
+        Dihitung berdasarkan LCA skenario Hamburg.         <a href="https://doi.org/10.1016/j.apenergy.2024.125075" target="_blank" rel="noopener noreferrer" className="underline">Sumber</a>
+      </p>
+    </div>
+  )
+}
+
 function PendapatanCard({ data, isLoading }) {
   const count = useCountUp(data?.totalPaid || 0, 1400, 300)
 
@@ -193,8 +242,9 @@ function PendapatanCard({ data, isLoading }) {
 
 export default function StatCards({ data, isLoading }) {
   return (
-    <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
       <TotalSetoranCard data={data} isLoading={isLoading} />
+      <CarbonSavedCard data={data} isLoading={isLoading} />
       <StatusTerakhirCard data={data} isLoading={isLoading} />
       <PendapatanCard data={data} isLoading={isLoading} />
     </div>

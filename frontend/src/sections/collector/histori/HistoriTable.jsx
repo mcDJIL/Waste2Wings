@@ -40,8 +40,7 @@ const STATUS_CONFIG = {
 function StatusBadge({ status }) {
   const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.MENUNGGU
   return (
-    <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold leading-[16.5px] ${cfg.bg}`}
-      style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold leading-[16.5px] ${cfg.bg}`}>
       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${cfg.dot}`} />
       <span className={cfg.text}>{cfg.label}</span>
     </span>
@@ -63,8 +62,8 @@ function PaginationButton({ children, active, disabled, onClick }) {
   if (active) {
     return (
       <button onClick={onClick}
-        className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#004536] text-white text-base font-normal shadow-[0_4px_6px_-1px_rgba(0,0,0,0.10),0_2px_4px_-2px_rgba(0,0,0,0.10)]"
-        style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+        className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg bg-[#004536] text-white text-sm sm:text-base font-normal shadow-[0_4px_6px_-1px_rgba(0,0,0,0.10),0_2px_4px_-2px_rgba(0,0,0,0.10)]"
+      >
         {children}
       </button>
     )
@@ -72,15 +71,15 @@ function PaginationButton({ children, active, disabled, onClick }) {
   if (disabled) {
     return (
       <button disabled
-        className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#BEC9C3]/30 opacity-30 cursor-not-allowed">
+        className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg border border-[#BEC9C3]/30 opacity-30 cursor-not-allowed">
         {children}
       </button>
     )
   }
   return (
     <button onClick={onClick}
-      className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#BEC9C3]/30 text-[#051C37] text-base font-normal hover:bg-[#F0F9F5] transition-colors"
-      style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+      className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg border border-[#BEC9C3]/30 text-[#051C37] text-sm sm:text-base font-normal hover:bg-[#F0F9F5] transition-colors"
+    >
       {children}
     </button>
   )
@@ -112,9 +111,9 @@ export default function HistoriTable({ rows, currentPage, totalPages, totalItems
             <tr>
               {['TANGGAL', 'ID TRANSAKSI', 'NAMA PENYETOR', 'VOLUME (L)', 'STATUS', 'AKSI'].map((h, i) => (
                 <th key={h}
-                  className={`px-6 py-5 text-[#004536] text-[11px] font-bold leading-[16.5px] tracking-[0.55px] uppercase
+                  className={`px-3 sm:px-6 py-4 sm:py-5 text-[#004536] text-[10px] sm:text-[11px] font-bold leading-[16.5px] tracking-[0.55px] uppercase
                     ${i === 3 ? 'text-right' : i === 5 ? 'text-center' : 'text-left'}`}
-                  style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                >
                   {h}
                 </th>
               ))}
@@ -123,7 +122,7 @@ export default function HistoriTable({ rows, currentPage, totalPages, totalItems
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-[#6F7975] text-sm" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                <td colSpan={6} className="px-3 sm:px-6 py-8 sm:py-12 text-center text-[#6F7975] text-sm">
                   Tidak ada transaksi ditemukan.
                 </td>
               </tr>
@@ -131,44 +130,44 @@ export default function HistoriTable({ rows, currentPage, totalPages, totalItems
               <tr key={row.idTransaksi}
                 className={`border-t border-[#BEC9C3]/10 ${idx % 2 === 0 ? '' : 'bg-white/30'} hover:bg-[#F0F9F5]/50 transition-colors`}>
                 {/* Tanggal */}
-                <td className="px-6 py-4">
-                  <p className="text-[#051C37] text-base font-normal leading-6" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                <td className="px-3 sm:px-6 py-3 sm:py-4">
+                  <p className="text-[#051C37] text-sm sm:text-base font-normal leading-5 sm:leading-6">
                     {row.tanggal}
                   </p>
-                  <p className="text-[#3F4945] text-[10px] font-normal leading-[15px]" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                  <p className="text-[#3F4945] text-[10px] font-normal leading-[15px]">
                     {row.waktu} WIB
                   </p>
                 </td>
                 {/* ID */}
-                <td className="px-6 py-4">
-                  <span className="text-[#004536] text-base font-bold leading-6" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                <td className="px-3 sm:px-6 py-3 sm:py-4">
+                  <span className="block max-w-[120px] truncate whitespace-nowrap text-[#004536] text-sm sm:text-base font-bold leading-5 sm:leading-6">
                     {row.idTransaksi}
                   </span>
                 </td>
                 {/* Penyetor */}
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
+                <td className="px-3 sm:px-6 py-3 sm:py-4">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                     <AvatarInitials name={row.namaPenyetor} />
-                    <span className="text-[#051C37] text-base font-normal leading-6" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                    <span className="min-w-0 truncate text-[#051C37] text-sm sm:text-base font-normal leading-5 sm:leading-6">
                       {row.namaPenyetor}
                     </span>
                   </div>
                 </td>
                 {/* Volume */}
-                <td className="px-6 py-4 text-right">
-                  <span className="text-[#004536] text-base font-bold leading-6" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
+                  <span className="text-[#004536] text-sm sm:text-base font-bold leading-5 sm:leading-6">
                     {row.volume}
                   </span>
                 </td>
                 {/* Status */}
-                <td className="px-6 py-4">
+                <td className="px-3 sm:px-6 py-3 sm:py-4">
                   <StatusBadge status={row.status} />
                 </td>
                 {/* Aksi */}
-                <td className="px-6 py-4 text-center">
+                <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
                   <button
                     onClick={() => onView(row)}
-                    className="inline-flex items-center justify-center p-2 rounded-lg hover:bg-[#F0F9F5] transition-colors"
+                    className="inline-flex items-center justify-center w-9 h-9 sm:w-auto sm:h-auto p-2.5 sm:p-2 rounded-lg hover:bg-[#F0F9F5] transition-colors"
                     title="Lihat detail"
                   >
                     <EyeIcon />
@@ -181,18 +180,18 @@ export default function HistoriTable({ rows, currentPage, totalPages, totalItems
       </div>
 
       {/* Pagination footer */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-[#BEC9C3]/10 bg-[#F0F3FF]">
-        <p className="text-[#3F4945] text-xs font-medium" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 px-4 sm:px-6 py-3 sm:py-4 border-t border-[#BEC9C3]/10 bg-[#F0F3FF]">
+        <p className="text-[#3F4945] text-[11px] sm:text-xs font-medium text-center sm:text-left">
           Menampilkan {startItem}–{endItem} dari {totalItems} Transaksi
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-nowrap overflow-x-auto max-w-full pb-1">
           <PaginationButton disabled={currentPage === 1} onClick={() => onPageChange(currentPage - 1)}>
             <ChevronLeftIcon />
           </PaginationButton>
 
           {pageNums.map((p, i) =>
             p === '...'
-              ? <span key={`ellipsis-${i}`} className="w-10 h-10 flex items-center justify-center text-[#6F7975] text-base" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>...</span>
+              ? <span key={`ellipsis-${i}`} className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-[#6F7975] text-sm sm:text-base">...</span>
               : <PaginationButton key={p} active={p === currentPage} onClick={() => onPageChange(p)}>
                   {p}
                 </PaginationButton>

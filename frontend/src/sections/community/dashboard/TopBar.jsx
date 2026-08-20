@@ -92,7 +92,7 @@ export default function TopBar({ onMenuToggle }) {
   }, [notificationsOpen])
 
   return (
-    <header className="sticky top-0 z-30 flex items-center px-4 h-[74px] gap-4
+    <header className="sticky top-0 z-30 flex items-center px-4 h-[74px] gap-2
       bg-white/70 backdrop-blur-[10px] border-b border-white/20 shadow-sm">
 
       <button
@@ -132,7 +132,7 @@ export default function TopBar({ onMenuToggle }) {
           >
             <BellIcon />
             {activities.length > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+              <span className="absolute top-1.5 w-2 h-2 rounded-full bg-red-600 animate-pulse" />
             )}
           </button>
 

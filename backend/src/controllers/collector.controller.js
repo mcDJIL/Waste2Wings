@@ -141,6 +141,75 @@ async function updateMyCollectorPrice(req, res, next) {
   }
 }
 
+async function getMyCollectorNotifications(req, res, next) {
+  try {
+    const collector = await prisma.collectorProfile.findUnique({
+      where: { userId: req.user.id },
+    });
+
+    if (!collector) {
+      throw new ApiError(400, 'Collector profile is not configured');
+    }
+
+    const submissions = await prisma.communitySubmission.findMany({
+      where: { collectorProfileId: collector.id },
+      include: {
+        communityProfile: {
+          include: {
+            user: { select: { name: true } },
+          },
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: 10,
+    });
+
+    const notificationDetails = {
+      SUBMITTED: {
+        title: 'Setoran Baru',
+        message: (communityName) => `Setoran baru dari ${communityName} menunggu validasi`,
+      },
+      ACCEPTED_BY_COLLECTOR: {
+        title: 'Setoran Diterima',
+        message: (communityName) => `Setoran dari ${communityName} berhasil diterima`,
+      },
+      REJECTED_BY_COLLECTOR: {
+        title: 'Setoran Ditolak',
+        message: (communityName) => `Setoran dari ${communityName} ditolak`,
+      },
+      IN_BATCH: {
+        title: 'Setoran Masuk Batch',
+        message: (communityName) => `Setoran dari ${communityName} masuk ke batch pengajuan`,
+      },
+      COMPLETED: {
+        title: 'Setoran Selesai',
+        message: (communityName) => `Setoran dari ${communityName} telah selesai`,
+      },
+    };
+
+    res.json(
+      submissions.map((submission) => {
+        const communityName = submission.communityProfile.user.name;
+        const details = notificationDetails[submission.status] || {
+          title: 'Pembaruan Setoran',
+          message: (name) => `Ada pembaruan pada setoran dari ${name}`,
+        };
+
+        return {
+          id: submission.id,
+          type: submission.status,
+          title: details.title,
+          message: details.message(communityName),
+          isRead: false,
+          timestamp: submission.updatedAt || submission.createdAt,
+        };
+      }),
+    );
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function getMyCollectorHistory(req, res, next) {
   try {
     const { query } = req.validated;
@@ -338,6 +407,7 @@ async function getMyCollectorMap(req, res, next) {
 module.exports = {
   getCollectors,
   getMyCollectorHistory,
+  getMyCollectorNotifications,
   getMyCollectorMap,
   getNearbyCollectors,
   updateMyCollectorPrice,
