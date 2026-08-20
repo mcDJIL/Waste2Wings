@@ -64,7 +64,7 @@ function PageFooter() {
   )
 }
 
-function RightSidebarDrawer({ open, onClose }) {
+function RightSidebarDrawer({ open, onClose, children }) {
   return (
     <>
       {open && (
@@ -89,7 +89,7 @@ function RightSidebarDrawer({ open, onClose }) {
             </svg>
           </button>
         </div>
-        <RightSidebarSection />
+        {children}
       </aside>
     </>
   )
@@ -106,7 +106,7 @@ export default function CollectorApplicationPage() {
     const fetchBatches = async () => {
       try {
         setIsLoading(true)
-        const response = await api.get('/batches')
+        const response = await api.get('/batches?include=summary')
         const data = response.data?.batches || response.data
         setBatches(Array.isArray(data) ? data : [])
       } catch (error) {
@@ -167,7 +167,7 @@ export default function CollectorApplicationPage() {
 
           {/* Right sidebar — desktop only */}
           <aside className="hidden xl:flex w-[250px] shrink-0 flex-col border-l border-[rgba(190,201,195,0.30)] bg-white overflow-y-auto">
-            <RightSidebarSection />
+            <RightSidebarSection batches={batches} isLoading={isLoading} />
           </aside>
         </div>
 
@@ -175,7 +175,9 @@ export default function CollectorApplicationPage() {
       </div>
 
       {/* Right sidebar drawer — mobile/tablet */}
-      <RightSidebarDrawer open={rightPanelOpen} onClose={() => setRightPanelOpen(false)} />
+      <RightSidebarDrawer open={rightPanelOpen} onClose={() => setRightPanelOpen(false)}>
+        <RightSidebarSection batches={batches} isLoading={isLoading} />
+      </RightSidebarDrawer>
     </div>
   )
 }

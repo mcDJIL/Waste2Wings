@@ -19,4 +19,21 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const config = error?.config
+    const isTimeout = error?.code === 'ECONNABORTED'
+    const isGet = config?.method?.toLowerCase() === 'get'
+
+    if (config && isTimeout && isGet && !config.__retryOnTimeout) {
+      config.__retryOnTimeout = true
+      config.timeout = 15000
+      return api.request(config)
+    }
+
+    return Promise.reject(error)
+  }
+)
+
 export default api

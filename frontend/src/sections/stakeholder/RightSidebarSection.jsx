@@ -1,5 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
-import api from '../../services/api'
+import { useMemo } from 'react'
 
 const REGION_COLORS = ['#004536', '#006C49', '#81F9C1', '#A8F1D8', '#BEC9C3', '#C9A96E']
 
@@ -48,26 +47,7 @@ function ReviewCard({ review }) {
   )
 }
 
-export default function RightSidebarSection() {
-  const [batches, setBatches] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchBatches = async () => {
-      try {
-        setIsLoading(true)
-        const response = await api.get('/batches')
-        const data = response.data?.batches || response.data
-        setBatches(Array.isArray(data) ? data : [])
-      } catch (error) {
-        console.error('Failed to fetch batches:', error)
-        setBatches([])
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    fetchBatches()
-  }, [])
+export default function RightSidebarSection({ batches = [], isLoading = false }) {
 
   // Calculate region distribution from collector addresses
   const regionData = useMemo(() => {

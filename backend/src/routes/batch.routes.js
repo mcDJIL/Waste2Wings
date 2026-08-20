@@ -35,6 +35,7 @@ const listBatchSchema = z.object({
         BATCH_STATUS.REJECTED_BY_STAKEHOLDER,
       ])
       .optional(),
+    include: z.enum(["summary", "full"]).optional(),
   }),
 });
 

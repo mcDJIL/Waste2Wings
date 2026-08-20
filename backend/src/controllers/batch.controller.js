@@ -55,6 +55,29 @@ function getBatchInclude() {
   };
 }
 
+function getBatchListInclude(includeMode = "full") {
+  if (includeMode === "summary") {
+    return {
+      collectorProfile: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+            },
+          },
+        },
+      },
+      stakeholderSetting: true,
+      labResult: true,
+    };
+  }
+
+  return getBatchInclude();
+}
+
 function toBatchResponse(batch) {
   return {
     id: batch.id,
@@ -177,6 +200,7 @@ async function createBatch(req, res, next) {
 async function getBatches(req, res, next) {
   try {
     const where = {};
+    const includeMode = req.query.include || "full";
 
     if (req.user.role === ROLES.COLLECTOR) {
       const collector = await prisma.collectorProfile.findUnique({
@@ -191,7 +215,7 @@ async function getBatches(req, res, next) {
 
     const batches = await prisma.collectorBatch.findMany({
       where,
-      include: getBatchInclude(),
+      include: getBatchListInclude(includeMode),
       orderBy: { createdAt: "desc" },
     });
 

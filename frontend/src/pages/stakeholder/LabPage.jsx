@@ -22,7 +22,7 @@ export default function LabPage() {
   const handleRefreshBatches = async () => {
     try {
       setIsLoading(true)
-      const response = await api.get('/batches')
+      const response = await api.get('/batches?include=summary')
       const data = response.data?.batches || response.data
       if (Array.isArray(data) && data.length > 0) {
         setBatches(data)
@@ -38,7 +38,7 @@ export default function LabPage() {
     const fetchBatches = async () => {
       try {
         setIsLoading(true)
-        const response = await api.get('/batches')
+        const response = await api.get('/batches?include=summary')
         const data = response.data?.batches || response.data
         if (Array.isArray(data) && data.length > 0) {
           setBatches(data)
