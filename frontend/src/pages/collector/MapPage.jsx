@@ -174,6 +174,19 @@ export default function MapPage() {
     return map
   }, [mapData])
 
+  const openMarkerPopup = (ref) => {
+    if (!ref) return
+    if (typeof ref.openPopup === 'function') {
+      ref.openPopup()
+    } else if (ref.element && typeof ref.element.openPopup === 'function') {
+      ref.element.openPopup()
+    } else if (ref.leafletElement && typeof ref.leafletElement.openPopup === 'function') {
+      ref.leafletElement.openPopup()
+    } else if (ref.target && typeof ref.target.openPopup === 'function') {
+      ref.target.openPopup()
+    }
+  }
+
   const focusCommunityOnMap = (community) => {
     if (!community || !mapInstance) return
 
@@ -190,16 +203,20 @@ export default function MapPage() {
   }
 
   const handleCommunitySelect = (community) => {
-    if (!community?.id) return
-    setSelectedCommunityId(community.id)
-    focusCommunityOnMap(community)
+    if (!community) return
+    const commId = typeof community === 'object' ? community.id : community
+    if (!commId) return
+
+    setSelectedCommunityId(commId)
+    const targetCommunity = typeof community === 'object' ? community : communityLookup.get(commId)
+    if (targetCommunity) {
+      focusCommunityOnMap(targetCommunity)
+    }
 
     setTimeout(() => {
-      const markerInstance = markerRefs.current[community.id]
-      if (markerInstance) {
-        markerInstance.openPopup()
-      }
-    }, 150)
+      const markerInstance = markerRefs.current[commId] || markerRefs.current[String(commId)]
+      openMarkerPopup(markerInstance)
+    }, 200)
   }
 
   return (
@@ -213,16 +230,15 @@ export default function MapPage() {
         <CollectorTopBar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
 
         {/* Main map + panel area */}
-        <main className="flex-1 flex flex-col lg:flex-row overflow-hidden" style={{ minHeight: 0 }}>
+        <main className="flex-1 flex flex-col lg:flex-row overflow-hidden relative" style={{ minHeight: 0 }}>
 
           {/* Map area */}
-          <div className="relative flex-1 min-h-[50vh] lg:min-h-0">
+          <div className="relative flex-1 min-h-[60vw] sm:min-h-[50vh] lg:min-h-0">
             {mapReady && !isLoading && (
               <MapContainer
                 center={centerCoords}
                 zoom={13}
-                className="w-full h-full z-10"
-                style={{ minHeight: '100%' }}
+                className="absolute inset-0 w-full h-full z-10"
                 zoomControl={true}
               >
                 <MapReadyHandler onReady={setMapInstance} />
@@ -237,25 +253,24 @@ export default function MapPage() {
                     ref={(ref) => {
                       if (point.id && ref) {
                         markerRefs.current[point.id] = ref
+                        markerRefs.current[String(point.id)] = ref
                       } else if (point.id) {
                         delete markerRefs.current[point.id]
+                        delete markerRefs.current[String(point.id)]
                       }
                     }}
                     position={point.pos}
                     icon={point.icon()}
-                    eventHandlers={point.type === 'community'
-                      ? {
-                          click: () => {
-                            const matched = point.id ? communityLookup.get(point.id) : null
-                            if (matched?.id) {
-                              setSelectedCommunityId(matched.id)
-                            }
-                            if (matched) {
-                              focusCommunityOnMap(matched)
-                            }
-                          },
+                    eventHandlers={{
+                      click: () => {
+                        if (point.type === 'community') {
+                          const matched = point.id ? communityLookup.get(point.id) : null
+                          if (matched) {
+                            handleCommunitySelect(matched)
+                          }
                         }
-                      : undefined}
+                      },
+                    }}
                   >
                     <Popup autoPan={false}>
                       <div className="min-w-[200px] p-3 bg-white rounded-lg">

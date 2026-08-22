@@ -339,6 +339,19 @@ export default function InteractiveMapPage() {
 
   const handleMapReady = useCallback((map) => setMapInstance(map), [])
 
+  const openMarkerPopup = useCallback((ref) => {
+    if (!ref) return
+    if (typeof ref.openPopup === 'function') {
+      ref.openPopup()
+    } else if (ref.element && typeof ref.element.openPopup === 'function') {
+      ref.element.openPopup()
+    } else if (ref.leafletElement && typeof ref.leafletElement.openPopup === 'function') {
+      ref.leafletElement.openPopup()
+    } else if (ref.target && typeof ref.target.openPopup === 'function') {
+      ref.target.openPopup()
+    }
+  }, [])
+
   const focusCollectorOnMap = useCallback((collector) => {
     if (!collector || !mapInstance) return
 
@@ -363,12 +376,10 @@ export default function InteractiveMapPage() {
     }
 
     setTimeout(() => {
-      const markerInstance = markerRefs.current[collectorId]
-      if (markerInstance) {
-        markerInstance.openPopup()
-      }
-    }, 150)
-  }, [collectors, focusCollectorOnMap])
+      const markerInstance = markerRefs.current[collectorId] || markerRefs.current[String(collectorId)]
+      openMarkerPopup(markerInstance)
+    }, 200)
+  }, [collectors, focusCollectorOnMap, openMarkerPopup])
 
   // Fetch user profile to get latest lat/lng from API
   useEffect(() => {
