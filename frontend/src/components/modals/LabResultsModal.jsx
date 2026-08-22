@@ -18,7 +18,7 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
   const [error, setError] = useState('')
   const [note, setNote] = useState('')
 
-  const cleanLiterValue = batchData?.cleanLiter || batch?.cleanLiter || 0
+  const cleanLiterValue = batchData?.totalCleanLiter ?? batch?.totalCleanLiter ?? 0
 
   useEffect(() => {
     if (isOpen && batchId) {
@@ -66,7 +66,7 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
       setActionLoading('accept')
       await api.patch(`/batches/${batchId}/stakeholder-validation`, {
         status: 'ACCEPTED_BY_STAKEHOLDER',
-        finalLiter: cleanLiterValue || labResult?.totalCleanLiter || 0,
+        finalLiter: cleanLiterValue,
         stakeholderNote: note,
       })
       showToast('Hasil lab berhasil diterima', 'success', 3000, 'Sukses')
