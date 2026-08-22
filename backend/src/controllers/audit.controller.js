@@ -32,6 +32,8 @@ async function getAuditLogs(req, res, next) {
       },
       take: limit,
     })
+
+    res.json({ auditLogs });
   } catch (error) {
     next(error);
   }

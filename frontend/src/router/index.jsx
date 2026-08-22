@@ -22,6 +22,7 @@ import CommunitySettingsPage from '../pages/community/SettingsPage'
 import CollectorSettingsPage from '../pages/collector/SettingsPage'
 import StakeholderSettingsPage from '../pages/stakeholder/SettingsPage'
 import PriceReferencePage from '../pages/stakeholder/PriceReferencePage'
+import AuditLogPage from '../pages/stakeholder/AuditLogPage'
 
 export default function Router() {
   return (
@@ -53,6 +54,7 @@ export default function Router() {
       <Route path="/stakeholder/map" element={<RoleBasedRoute element={<DistributionMapPage />} allowedRoles={['STAKEHOLDER']} />} />
       <Route path="/stakeholder/prediction" element={<RoleBasedRoute element={<PrediksiDanaPage />} allowedRoles={['STAKEHOLDER']} />} />
       <Route path="/stakeholder/price-reference" element={<RoleBasedRoute element={<PriceReferencePage />} allowedRoles={['STAKEHOLDER']} />} />
+      <Route path="/stakeholder/audit-logs" element={<RoleBasedRoute element={<AuditLogPage />} allowedRoles={['STAKEHOLDER']} />} />
       <Route path="/stakeholder/settings" element={<RoleBasedRoute element={<StakeholderSettingsPage />} allowedRoles={['STAKEHOLDER']} />} />
     </Routes>
   )

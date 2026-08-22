@@ -57,16 +57,17 @@ function StatusBadge({ status }) {
   )
 }
 
-function TableRow({ row, index }) {
+function TableRow({ row, index, onClick }) {
   return (
     <tr
-      className="border-t border-[rgba(190,201,195,0.20)] transition-colors duration-150 hover:bg-[rgba(0,69,54,0.03)] group"
+      onClick={() => onClick(row)}
+      className="border-t border-[rgba(190,201,195,0.20)] transition-colors duration-150 hover:bg-[rgba(0,69,54,0.05)] cursor-pointer group"
       style={{ animationDelay: `${index * 50}ms` }}
     >
       <td className="px-4 sm:px-6 py-4 text-[#3F4945] text-sm whitespace-nowrap">
         {new Date(row.createdAt).toLocaleDateString('id-ID')}
       </td>
-      <td className="px-4 sm:px-6 py-4 text-[#051C37] text-sm font-bold whitespace-nowrap">{row.batchCode}</td>
+      <td className="px-4 sm:px-6 py-4 text-[#051C37] text-sm font-bold whitespace-nowrap group-hover:text-[#004536] transition-colors">{row.batchCode}</td>
       <td className="px-4 sm:px-6 py-4">
         <div className="flex items-center gap-2.5">
           <div>
@@ -77,15 +78,23 @@ function TableRow({ row, index }) {
       </td>
       <td className="px-4 sm:px-6 py-4 text-[#3F4945] text-sm whitespace-nowrap hidden sm:table-cell">{row.collector?.address}</td>
       <td className="px-4 sm:px-6 py-4">
-        <StatusBadge status={row.status} />
+        <div className="flex items-center gap-2">
+          <StatusBadge status={row.status} />
+          <svg width="6" height="10" viewBox="0 0 6 10" fill="none" className="opacity-0 group-hover:opacity-40 transition-opacity ml-1">
+            <path d="M1 9L5 5L1 1" stroke="#004536" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
       </td>
     </tr>
   )
 }
 
-function MobileCard({ row, onAction }) {
+function MobileCard({ row, onClick }) {
   return (
-    <div className="p-3 rounded-xl border border-[rgba(190,201,195,0.30)] bg-white/80 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+    <div
+      onClick={() => onClick(row)}
+      className="p-3 rounded-xl border border-[rgba(190,201,195,0.30)] bg-white/80 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer active:scale-[0.98]"
+    >
       <div className="flex items-start justify-between gap-2 mb-2">
         <div>
           <p className="text-[#3F4945] text-xs">{new Date(row.createdAt).toLocaleDateString('id-ID')}</p>
@@ -100,14 +109,14 @@ function MobileCard({ row, onAction }) {
         </div>
       </div>
       <p className="text-[#3F4945] text-xs mt-1">{row.collector?.address}</p>
-      {row.status === 'SUBMITTED_TO_STAKEHOLDER' && (
-        <button
-          onClick={() => onAction(row, 'approve')}
-          className="mt-2 w-full px-3 py-1.5 rounded-lg bg-green-600 text-white text-xs font-bold hover:bg-green-700 active:scale-95 transition-all duration-150"
-        >
-          Approve
-        </button>
-      )}
+      <div className="flex items-center justify-end mt-2">
+        <span className="text-[#004536] text-xs font-bold flex items-center gap-1">
+          Lihat Detail
+          <svg width="6" height="10" viewBox="0 0 6 10" fill="none">
+            <path d="M1 9L5 5L1 1" stroke="#004536" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+      </div>
     </div>
   )
 }
@@ -115,12 +124,28 @@ function MobileCard({ row, onAction }) {
 export default function ApplicationTableSection({ batches = [], isLoading = false }) {
   const { showToast } = useToast()
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('Semua Status')
+
+  // Pre-apply status filter from URL query param (?status=SUBMITTED_TO_STAKEHOLDER etc.)
+  const location = typeof window !== 'undefined' ? window.location : { search: '' }
+  const initialStatus = useMemo(() => {
+    const params = new URLSearchParams(location.search)
+    const s = params.get('status')
+    return s || 'Semua Status'
+  }, [])
+
+  const [statusFilter, setStatusFilter] = useState(initialStatus)
   const [page, setPage] = useState(1)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [actionLoading, setActionLoading] = useState(null)
   const [labModalOpen, setLabModalOpen] = useState(false)
   const [selectedBatchId, setSelectedBatchId] = useState(null)
+  const [selectedBatch, setSelectedBatch] = useState(null)
+
+  const handleRowClick = (batch) => {
+    setSelectedBatch(batch)
+    setSelectedBatchId(batch.id)
+    setLabModalOpen(true)
+  }
 
   const handleBatchAction = async (batch, action) => {
     try {
@@ -249,7 +274,7 @@ export default function ApplicationTableSection({ batches = [], isLoading = fals
               ))
             ) : pageData.length > 0 ? (
               pageData.map((row, i) => (
-                <TableRow key={row.id} row={row} index={i} onAction={handleBatchAction} />
+                <TableRow key={row.id} row={row} index={i} onClick={handleRowClick} />
               ))
             ) : (
               <tr>
@@ -272,7 +297,7 @@ export default function ApplicationTableSection({ batches = [], isLoading = fals
           ))
         ) : pageData.length > 0 ? (
           pageData.map((row) => (
-            <MobileCard key={row.id} row={row} onAction={handleBatchAction} />
+            <MobileCard key={row.id} row={row} onClick={handleRowClick} />
           ))
         ) : (
           <p className="text-center text-[#8E8994] text-sm py-8">Tidak ada batch yang sesuai.</p>
@@ -336,7 +361,9 @@ export default function ApplicationTableSection({ batches = [], isLoading = fals
       <LabResultsModal
         isOpen={labModalOpen}
         batchId={selectedBatchId}
+        batch={selectedBatch}
         onClose={() => setLabModalOpen(false)}
+        onSuccess={() => { setLabModalOpen(false); window.location.reload() }}
       />
     </div>
   )

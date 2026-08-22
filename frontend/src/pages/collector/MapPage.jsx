@@ -197,7 +197,14 @@ export default function MapPage() {
     mapInstance.invalidateSize()
     const targetZoom = Math.max(mapInstance.getZoom(), 15)
 
-    mapInstance.flyTo([lat, lng], targetZoom, {
+    // Shift view center DOWN so marker sits at ~30% from top and popup (above it) is visible
+    const container = mapInstance.getContainer()
+    const mapH = container?.offsetHeight || 500
+    const markerPx = mapInstance.project([lat, lng], targetZoom)
+    const centerPx = L.point(markerPx.x, markerPx.y + mapH * 0.2)
+    const centerLatLng = mapInstance.unproject(centerPx, targetZoom)
+
+    mapInstance.flyTo(centerLatLng, targetZoom, {
       animate: true,
       duration: 0.8,
     })

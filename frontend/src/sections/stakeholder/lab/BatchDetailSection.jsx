@@ -98,18 +98,34 @@ export default function BatchDetailSection({ selectedBatchId, batches = [] }) {
     }
   }, [selectedBatch])
 
+
+  if (!selectedBatchId) {
+    return (
+      <div className="rounded-3xl border border-[#E2E8F0] bg-white shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.03)] overflow-hidden p-8">
+        <div className="flex items-center justify-center h-48 text-center">
+          <div className="flex flex-col gap-2">
+            <span style={{ fontSize: 36 }}>🔬</span>
+            <p className="text-[#1E293B] text-sm font-bold">Pilih batch untuk melihat detail</p>
+            <p className="text-[#94A3B8] text-xs">Klik salah satu baris di tabel untuk menampilkan analisis lengkap</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (!batchData) {
     return (
       <div className="rounded-3xl border border-[#E2E8F0] bg-white shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.03)] overflow-hidden p-8">
         <div className="flex items-center justify-center h-64 text-center">
           <div className="flex flex-col gap-2">
             <p className="text-[#64748B] text-sm">Belum ada hasil lab untuk batch ini</p>
-            <p className="text-[#94A3B8] text-xs">Klik tombol "Input Hasil Lab" untuk menambahkan data</p>
+            <p className="text-[#94A3B8] text-xs">Klik tombol &ldquo;Input Hasil Lab&rdquo; untuk menambahkan data</p>
           </div>
         </div>
       </div>
     )
   }
+
 
   const isCritical = batchData.ffa.status === 'CRITICAL'
 

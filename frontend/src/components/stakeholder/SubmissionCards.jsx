@@ -1,4 +1,8 @@
+import { useNavigate } from 'react-router-dom'
+
 export default function SubmissionCards({ summary, isLoading }) {
+  const navigate = useNavigate()
+
   return (
     <div className="flex flex-col gap-4 p-5 rounded-2xl border border-white/30 bg-white/70 backdrop-blur-[10px] shadow-sm">
       <div className="flex justify-between items-center">
@@ -8,7 +12,10 @@ export default function SubmissionCards({ summary, isLoading }) {
           </h3>
           <p className="text-[#3F4945] text-sm leading-6 mt-1">Ringkasan batch dan validasi</p>
         </div>
-        <button className="text-[#004536] text-sm font-semibold hover:underline transition-all duration-200">
+        <button
+          onClick={() => navigate('/stakeholder/approve')}
+          className="text-[#004536] text-sm font-semibold hover:underline transition-all duration-200"
+        >
           Lihat Semua
         </button>
       </div>
@@ -35,7 +42,10 @@ export default function SubmissionCards({ summary, isLoading }) {
               <p className="text-[#3F4945] text-xs leading-5">Batch</p>
               <p className="text-[#051C37] text-base font-bold leading-6">{isLoading ? '...' : (summary?.pendingBatchCount || 0)} items</p>
             </div>
-            <button className="px-4 py-2 rounded-lg bg-[#004536] text-white text-sm font-normal leading-6 transition-all duration-200 hover:bg-[#0B5E4B] hover:shadow-md active:scale-95">
+            <button
+              onClick={() => navigate('/stakeholder/approve?status=SUBMITTED_TO_STAKEHOLDER')}
+              className="px-4 py-2 rounded-lg bg-[#004536] text-white text-sm font-normal leading-6 transition-all duration-200 hover:bg-[#0B5E4B] hover:shadow-md active:scale-95"
+            >
               Lihat Detail
             </button>
           </div>
@@ -62,7 +72,10 @@ export default function SubmissionCards({ summary, isLoading }) {
               <p className="text-[#3F4945] text-xs leading-5">Batch</p>
               <p className="text-[#051C37] text-base font-bold leading-6">{isLoading ? '...' : (summary?.acceptedBatchCount || 0)} items</p>
             </div>
-            <button className="px-4 py-2 rounded-lg bg-[#047857] text-white text-sm font-normal leading-6 transition-all duration-200 hover:bg-[#065f46] hover:shadow-md active:scale-95">
+            <button
+              onClick={() => navigate('/stakeholder/approve?status=ACCEPTED_BY_STAKEHOLDER')}
+              className="px-4 py-2 rounded-lg bg-[#047857] text-white text-sm font-normal leading-6 transition-all duration-200 hover:bg-[#065f46] hover:shadow-md active:scale-95"
+            >
               Lihat Detail
             </button>
           </div>
@@ -71,3 +84,4 @@ export default function SubmissionCards({ summary, isLoading }) {
     </div>
   )
 }
+

@@ -87,12 +87,10 @@ export default function LabPage() {
             />
           </section>
 
-          {/* Batch detail + spectrometry */}
-          {selectedBatchId && (
-            <section className="animate-fade-slide-up" style={{ animationDelay: '180ms' }}>
-              <BatchDetailSection selectedBatchId={selectedBatchId} batches={batches} />
-            </section>
-          )}
+          {/* Batch detail + spectrometry – always rendered so row-click scroll target exists */}
+          <section className="animate-fade-slide-up" style={{ animationDelay: '180ms' }}>
+            <BatchDetailSection selectedBatchId={selectedBatchId} batches={batches} />
+          </section>
         </main>
 
         <DashboardFooter />
