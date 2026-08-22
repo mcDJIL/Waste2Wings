@@ -155,30 +155,23 @@ export default function BatchTableSection({ batches = [], selectedBatchId, onSel
   const handleActionClick = (e, batch) => {
     e.stopPropagation()
     setSelectedBatchForModal(batch)
-    if (batch.labResult) {
-      setResultsModalOpen(true)
-    } else {
-      setInputModalOpen(true)
-    }
+    setResultsModalOpen(true)
   }
 
   const handleSuccess = () => {
-    setInputModalOpen(false)
     setResultsModalOpen(false)
     onRefresh?.()
   }
 
   const handleModalClose = () => {
-    setInputModalOpen(false)
     setResultsModalOpen(false)
     onRefresh?.()
   }
 
-  const handleRowClick = (batchId) => {
-    onSelectBatch(batchId)
-    setTimeout(() => {
-      detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 80)
+  const handleRowClick = (batch) => {
+    onSelectBatch(batch.id)
+    setSelectedBatchForModal(batch)
+    setResultsModalOpen(true)
   }
 
   const filtered = useMemo(() => {
@@ -278,7 +271,7 @@ export default function BatchTableSection({ batches = [], selectedBatchId, onSel
                   return (
                     <tr
                       key={batch.id}
-                      onClick={() => handleRowClick(batch.id)}
+                      onClick={() => handleRowClick(batch)}
                       className={[
                         'border-t border-[#F1F5F9] transition-colors duration-200 cursor-pointer group',
                         isSelected ? 'bg-[rgba(0,75,60,0.04)]' : 'hover:bg-[#F8FAFC]',
@@ -372,7 +365,7 @@ export default function BatchTableSection({ batches = [], selectedBatchId, onSel
               return (
                 <div
                   key={batch.id}
-                  onClick={() => handleRowClick(batch.id)}
+                  onClick={() => handleRowClick(batch)}
                   className={['flex flex-col gap-3 p-4 cursor-pointer transition-colors duration-200', isSelected ? 'bg-[rgba(0,75,60,0.04)]' : 'hover:bg-[#F8FAFC]'].join(' ')}
                   style={isSelected ? { boxShadow: 'inset 3px 0 0 #004B3C' } : {}}
                 >

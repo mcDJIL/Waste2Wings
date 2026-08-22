@@ -1,13 +1,25 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import api from '../../services/api'
 import { useToast } from '../../contexts/ToastContext'
+import {
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  ResponsiveContainer,
+} from 'recharts'
 
 const CloseIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
     <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor" />
   </svg>
 )
+
+const computeRadarScore = (value, limit, maxValue = 100) => {
+  if (!value || !limit) return 0
+  return Math.max(0, Math.min(maxValue, (1 - value / limit) * maxValue))
+}
 
 export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuccess }) {
   const { showToast } = useToast()
@@ -44,10 +56,6 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
       } else if (batchDataResponse?.stakeholderNote) {
         setNote(batchDataResponse.stakeholderNote)
       }
-
-      if (!resultsRes.data?.labResult) {
-        setError('Belum ada hasil lab untuk batch ini')
-      }
     } catch (err) {
       console.error('Failed to load lab results:', err)
       setError('Gagal memuat hasil lab')
@@ -69,7 +77,7 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
         finalLiter: cleanLiterValue,
         stakeholderNote: note,
       })
-      showToast('Hasil lab berhasil diterima', 'success', 3000, 'Sukses')
+      showToast('Batch berhasil diverifikasi & diterima', 'success', 3000, 'Sukses')
       await loadLabResults()
       onSuccess?.()
     } catch (err) {
@@ -93,7 +101,7 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
         status: 'REJECTED_BY_STAKEHOLDER',
         stakeholderNote: note,
       })
-      showToast('Hasil lab berhasil ditolak', 'success', 3000, 'Sukses')
+      showToast('Batch berhasil ditolak', 'success', 3000, 'Sukses')
       await loadLabResults()
       onSuccess?.()
     } catch (err) {
@@ -105,142 +113,177 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
     }
   }
 
+  const radarData = useMemo(() => {
+    if (!labResult) return []
+    const ffaLimit = 4.0
+    const moistureLimit = 2.0
+    const impurityLimit = 1.0
+
+    return [
+      { subject: 'MOISTURE', A: computeRadarScore(labResult.waterContentPercent, moistureLimit) },
+      { subject: 'FFA', A: computeRadarScore(labResult.ffaPercent, ffaLimit) },
+      { subject: 'IMPURITIES', A: computeRadarScore(labResult.impurityPercent, impurityLimit) },
+    ]
+  }, [labResult])
+
   const getStatusDisplay = () => {
     if (!batchData) return null
     const status = batchData.status
     if (status === 'ACCEPTED_BY_STAKEHOLDER') {
-      return { label: 'Sudah Diterima', color: 'bg-[#D1FAE5] text-[#065F46]' }
+      return { label: '✓ DITERIMA (VERIFIED)', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' }
     }
     if (status === 'REJECTED_BY_STAKEHOLDER') {
-      return { label: 'Sudah Ditolak', color: 'bg-[#FEE2E2] text-[#991B1B]' }
+      return { label: '✕ DITOLAK', color: 'bg-rose-100 text-rose-800 border-rose-300' }
     }
-    return null
+    return { label: '⌛ MENUNGGU VERIFIKASI STAKEHOLDER', color: 'bg-amber-100 text-amber-800 border-amber-300' }
   }
 
   if (!isOpen) return null
 
   const modalContent = (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-2 xs:p-4 animate-fade-in">
-      <div className="bg-white rounded-3xl w-full max-w-2xl min-w-0 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.35)] animate-fade-slide-up max-h-[85vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 animate-fade-in">
+      <div className="bg-white rounded-3xl w-full max-w-4xl min-w-0 shadow-2xl animate-fade-slide-up max-h-[90vh] overflow-hidden flex flex-col border border-[#E2E8F0]">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-[#004536] to-[#006C49] px-4 sm:px-8 py-4 sm:py-5 flex items-start justify-between gap-3 shrink-0 rounded-t-3xl">
-          <div className="min-w-0 flex flex-wrap items-center gap-2 sm:gap-3">
-            <h2 className="break-words text-lg sm:text-xl font-bold text-white">Hasil Uji Lab</h2>
-            {getStatusDisplay() && (
-              <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusDisplay().color}`}>
-                {getStatusDisplay().label}
+        <div className="sticky top-0 bg-[#051C37] text-white px-6 py-5 flex items-center justify-between gap-4 shrink-0 rounded-t-3xl border-b border-white/10">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[#81F9C1] text-xs font-mono font-bold">
+                BATCH #{batchData?.batchCode || batch?.batchCode || batchId}
               </span>
-            )}
+              {getStatusDisplay() && (
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${getStatusDisplay().color}`}>
+                  {getStatusDisplay().label}
+                </span>
+              )}
+            </div>
+            <h2 className="text-xl font-extrabold text-white">Detail Analisis & Verifikasi Hasil Lab</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-white hover:bg-white/20 rounded-lg transition-all duration-200 shrink-0"
+            className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 shrink-0"
           >
             <CloseIcon />
           </button>
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto flex-1 p-4 sm:p-8">
+        <div className="overflow-y-auto flex-1 p-6 sm:p-8 space-y-6">
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
               <div className="flex flex-col items-center gap-3">
-                <div className="w-6 h-6 border-2 border-[#006C49] border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm text-[#3F4945]">Memuat hasil lab...</p>
+                <div className="w-8 h-8 border-3 border-[#004B3C] border-t-transparent rounded-full animate-spin" />
+                <p className="text-sm font-bold text-[#004B3C]">Memuat analisis hasil lab...</p>
               </div>
             </div>
-          ) : error ? (
-            <div className="p-4 rounded-xl bg-yellow-50 text-yellow-700 text-sm border border-yellow-200">
-              {error}
+          ) : !labResult ? (
+            <div className="p-8 text-center bg-amber-50 rounded-2xl border border-amber-200">
+              <span className="text-3xl block mb-2">⌛</span>
+              <h3 className="text-base font-bold text-amber-900">Belum Ada Hasil Uji Lab</h3>
+              <p className="text-xs text-amber-700 mt-1">
+                Batch ini belum diuji oleh Petugas Laboratorium (Lab Technician). Verifikasi hanya dapat dilakukan setelah Petugas Lab menginput data hasil uji mutu.
+              </p>
             </div>
-          ) : labResult ? (
+          ) : (
             <div className="space-y-6">
-              {/* Lab Test Results Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {labResult.waterContentPercent !== undefined && (
-                  <div className="p-4 rounded-lg bg-gradient-to-br from-[#F0F3FF]/70 to-[#E8F1FF]/70 border border-[#BEC9C3]/15">
-                    <p className="text-[10px] font-bold uppercase text-[#3F4945] mb-2 tracking-wide">Kadar Air</p>
-                    <p className="text-lg font-bold text-[#004536]">{labResult.waterContentPercent}%</p>
+              {/* Main Analysis Section: Metrics Grid + Spectrometry Radar */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column: Metrics & Grade */}
+                <div className="space-y-4">
+                  <div className="p-4 rounded-2xl bg-[#004B3C] text-white flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-white/70 uppercase tracking-wider block">QUALITY GRADE</span>
+                      <span className="text-2xl font-extrabold text-[#81F9C1]">GRADE {labResult.grade}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] font-bold text-white/70 uppercase tracking-wider block">VOLUME BERSIH</span>
+                      <span className="text-lg font-bold text-white">{cleanLiterValue} Liter</span>
+                    </div>
                   </div>
-                )}
-                {labResult.ffaPercent !== undefined && (
-                  <div className="p-4 rounded-lg bg-gradient-to-br from-[#F0F3FF]/70 to-[#E8F1FF]/70 border border-[#BEC9C3]/15">
-                    <p className="text-[10px] font-bold uppercase text-[#3F4945] mb-2 tracking-wide">FFA</p>
-                    <p className="text-lg font-bold text-[#006C49]">{labResult.ffaPercent}%</p>
-                  </div>
-                )}
-                {labResult.impurityPercent !== undefined && (
-                  <div className="p-4 rounded-lg bg-gradient-to-br from-[#F0F3FF]/70 to-[#E8F1FF]/70 border border-[#BEC9C3]/15">
-                    <p className="text-[10px] font-bold uppercase text-[#3F4945] mb-2 tracking-wide">Kotoran</p>
-                    <p className="text-lg font-bold text-[#004536]">{labResult.impurityPercent}%</p>
-                  </div>
-                )}
-                {labResult.grade && (
-                  <div className="p-4 rounded-lg bg-gradient-to-br from-[#D1FAE5]/70 to-[#A7F3D0]/70 border border-[#6EE7B7]/30">
-                    <p className="text-[10px] font-bold uppercase text-[#065F46] mb-2 tracking-wide">Grade</p>
-                    <p className="text-2xl font-bold text-[#065F46]">{labResult.grade}</p>
-                  </div>
-                )}
-              </div>
 
-              {/* Notes */}
-              {labResult.notes && (
-                <div className="border-t border-[#BEC9C3]/20 pt-6">
-                  <h3 className="text-sm font-bold uppercase text-[#3F4945] tracking-wide mb-3">Catatan Input Uji Lab</h3>
-                  <p className="text-sm text-[#3F4945] bg-[#FEF3C7]/50 p-4 rounded-lg border border-[#E4C285]/30 leading-relaxed">
-                    {labResult.notes}
-                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
+                      <span className="text-[10px] font-bold text-[#64748B] uppercase block">FREE FATTY ACID</span>
+                      <span className="text-base font-extrabold text-[#004B3C] mt-1 block">{labResult.ffaPercent}%</span>
+                      <span className="text-[10px] text-gray-400">Limit: 4.0%</span>
+                    </div>
+
+                    <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
+                      <span className="text-[10px] font-bold text-[#64748B] uppercase block">MOISTURE CONTENT</span>
+                      <span className="text-base font-extrabold text-[#004B3C] mt-1 block">{labResult.waterContentPercent}%</span>
+                      <span className="text-[10px] text-gray-400">Limit: 2.0%</span>
+                    </div>
+
+                    <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
+                      <span className="text-[10px] font-bold text-[#64748B] uppercase block">IMPURITIES</span>
+                      <span className="text-base font-extrabold text-[#004B3C] mt-1 block">{labResult.impurityPercent}%</span>
+                      <span className="text-[10px] text-gray-400">Limit: 1.0%</span>
+                    </div>
+                  </div>
+
+                  {labResult.notes && (
+                    <div className="p-4 rounded-xl bg-amber-50/60 border border-amber-200 text-xs">
+                      <span className="font-bold text-amber-800 uppercase block mb-1">💬 Catatan Petugas Uji Lab:</span>
+                      <p className="text-gray-700 font-medium">{labResult.notes}</p>
+                      {labResult.testedBy?.name && (
+                        <p className="text-[10px] text-gray-500 mt-2">Dianalisis oleh: {labResult.testedBy.name}</p>
+                      )}
+                    </div>
+                  )}
                 </div>
-              )}
 
-              {/* Stakeholder Note */}
-              <div className="border-t border-[#BEC9C3]/20 pt-6">
-                <label className="block text-sm font-bold text-[#051C37] mb-2">
-                  Catatan/Alasan *
-                </label>
-                <textarea
-                  value={note}
-                  onChange={(e) => {
-                    const newNote = e.target.value
-                    setNote(newNote)
-                    if (error && newNote.trim()) setError('')
-                  }}
-                  placeholder="Jelaskan alasan penerimaan atau penolakan hasil lab ini..."
-                  rows="3"
-                  disabled={actionLoading !== null}
-                  className="w-full px-4 py-2.5 rounded-lg border border-[rgba(190,201,195,0.30)] bg-white text-[#051C37] outline-none focus:border-[#004536] focus:ring-2 focus:ring-[#004536]/20 transition-all duration-200 resize-none disabled:opacity-60 disabled:cursor-not-allowed"
-                />
-              </div>
-
-              {/* Action Buttons */}
-              <div className="border-t border-[#BEC9C3]/20 pt-6 flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={handleReject}
-                  disabled={actionLoading === 'reject' || !note.trim()}
-                  className="w-full sm:flex-1 px-4 py-2.5 rounded-lg bg-[#FEE2E2] text-[#991B1B] font-bold text-sm transition-all duration-200 hover:bg-[#FECACA] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
-                >
-                  {actionLoading === 'reject' ? 'Menolak...' : batchData?.status === 'REJECTED_BY_STAKEHOLDER' ? 'Ubah Alasan Tolak' : 'Tolak'}
-                </button>
-                <button
-                  onClick={handleAccept}
-                  disabled={actionLoading === 'accept' || !note.trim()}
-                  className="w-full sm:flex-1 px-4 py-2.5 rounded-lg bg-[#D1FAE5] text-[#065F46] font-bold text-sm transition-all duration-200 hover:bg-[#A7F3D0] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
-                >
-                  {actionLoading === 'accept' ? 'Menerima...' : batchData?.status === 'ACCEPTED_BY_STAKEHOLDER' ? 'Ubah Alasan Terima' : 'Terima'}
-                </button>
-              </div>
-
-              {/* Saved Note Display */}
-              {batchData?.status && ['ACCEPTED_BY_STAKEHOLDER', 'REJECTED_BY_STAKEHOLDER'].includes(batchData.status) && (
-                <div className="border-t border-[#BEC9C3]/20 pt-4 mt-4">
-                  <p className="text-[#3F4945] text-xs font-bold uppercase tracking-wide mb-2">Alasan Diterima atau Ditolak</p>
-                  <p className="text-sm text-[#051C37] bg-[#F0F3FF]/50 p-3 rounded-lg leading-5">
-                    {note || '—'}
-                  </p>
+                {/* Right Column: Spectrometry Radar Chart */}
+                <div className="p-4 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] flex flex-col justify-center items-center">
+                  <span className="text-xs font-bold text-[#64748B] uppercase tracking-wider mb-2">SPECTROMETRY RADAR GRAPH</span>
+                  <div className="w-full h-56">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart data={radarData}>
+                        <PolarGrid stroke="#CBD5E1" />
+                        <PolarAngleAxis dataKey="subject" stroke="#64748B" tick={{ fontSize: 11, fontWeight: 700 }} />
+                        <Radar name="Quality Score" dataKey="A" stroke="#004B3C" fill="#004B3C" fillOpacity={0.3} />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
-              )}
+              </div>
+
+              {/* Stakeholder Verification Controls */}
+              <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-4">
+                <div>
+                  <label className="block text-xs font-extrabold uppercase text-[#004B3C] mb-1">
+                    📝 Catatan Keputusan Stakeholder *
+                  </label>
+                  <textarea
+                    value={note}
+                    onChange={(e) => {
+                      setNote(e.target.value)
+                      if (error) setError('')
+                    }}
+                    placeholder="Tuliskan catatan alasan penerimaan/penolakan batch ini..."
+                    rows="3"
+                    className="w-full px-4 py-2.5 rounded-xl border border-[#E2E8F0] bg-white text-sm outline-none focus:border-[#004B3C] focus:ring-2 focus:ring-[#004B3C]/10 transition-all"
+                  />
+                  {error && <p className="text-xs font-bold text-red-600 mt-1">{error}</p>}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <button
+                    onClick={handleReject}
+                    disabled={actionLoading === 'reject' || !note.trim()}
+                    className="flex-1 py-3 px-4 rounded-xl bg-rose-100 text-rose-800 font-extrabold text-xs hover:bg-rose-200 transition-colors disabled:opacity-50"
+                  >
+                    {actionLoading === 'reject' ? 'Menolak...' : '❌ Tolak Batch Ini'}
+                  </button>
+                  <button
+                    onClick={handleAccept}
+                    disabled={actionLoading === 'accept' || !note.trim()}
+                    className="flex-1 py-3 px-4 rounded-xl bg-[#004B3C] text-white font-extrabold text-xs hover:bg-[#00382D] transition-colors disabled:opacity-50 shadow-md"
+                  >
+                    {actionLoading === 'accept' ? 'Memproses...' : '✅ Verifikasi & Terima Batch'}
+                  </button>
+                </div>
+              </div>
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     </div>

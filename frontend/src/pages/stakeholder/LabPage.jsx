@@ -6,7 +6,6 @@ import DashboardFooter from '../../components/stakeholder/DashboardFooter'
 import LabHeader from '../../components/stakeholder/lab/LabHeader'
 import LabKpiCards from '../../components/stakeholder/lab/LabKpiCards'
 import BatchTableSection from '../../sections/stakeholder/lab/BatchTableSection'
-import BatchDetailSection from '../../sections/stakeholder/lab/BatchDetailSection'
 import { exportLabReportToPDF } from '../../utils/labPdfExport'
 
 export default function LabPage() {
@@ -85,11 +84,6 @@ export default function LabPage() {
               isLoading={isLoading}
               onRefresh={handleRefreshBatches}
             />
-          </section>
-
-          {/* Batch detail + spectrometry – always rendered so row-click scroll target exists */}
-          <section className="animate-fade-slide-up" style={{ animationDelay: '180ms' }}>
-            <BatchDetailSection selectedBatchId={selectedBatchId} batches={batches} />
           </section>
         </main>
 
