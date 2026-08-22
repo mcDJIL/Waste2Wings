@@ -100,6 +100,13 @@ export default function Navbar() {
             >
               Dashboard
             </a>
+          ) : role === 'LAB_TECHNICIAN' ? (
+            <a
+              href={'/lab/dashboard'}
+              className={`flex flex-col text-base leading-6 transition-colors cursor-pointer`}
+            >
+              Dashboard
+            </a>
           ) : null}
       </div>
 

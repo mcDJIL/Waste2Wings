@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import api from '../../services/api'
 import { useAuth } from '../../contexts/AuthContext'
 import { useLogout } from '../../hooks/useLogout'
@@ -105,11 +105,6 @@ export default function LabTechnicianDashboardPage() {
               Anda bertugas melakukan pengujian mutu minyak jelantah (Kadar Air, FFA, Kotoran & Grade). Pengujian Anda akan dicatat ke dalam audit trail dan selanjutnya diverifikasi oleh Stakeholder.
             </p>
           </div>
-
-          <button
-            onClick={fetchAuditLogs}
-            className="hidden"
-          />
         </section>
 
         {/* KPI Stats */}
