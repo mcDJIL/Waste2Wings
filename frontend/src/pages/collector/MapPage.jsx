@@ -196,7 +196,13 @@ export default function MapPage() {
 
     mapInstance.invalidateSize()
     const targetZoom = Math.max(mapInstance.getZoom(), 15)
-    mapInstance.flyTo([lat, lng], targetZoom, {
+
+    // Project coordinates and apply offset so marker + popup card sit in vertical center
+    const point = mapInstance.project([lat, lng], targetZoom)
+    const targetPoint = L.point(point.x, point.y + 150)
+    const targetLatLng = mapInstance.unproject(targetPoint, targetZoom)
+
+    mapInstance.flyTo(targetLatLng, targetZoom, {
       animate: true,
       duration: 0.8,
     })

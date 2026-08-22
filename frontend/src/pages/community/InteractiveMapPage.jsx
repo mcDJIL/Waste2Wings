@@ -362,7 +362,12 @@ export default function InteractiveMapPage() {
 
     mapInstance.invalidateSize()
     const targetZoom = Math.max(mapInstance.getZoom(), 15)
-    mapInstance.flyTo([lat, lng], targetZoom, {
+
+    const point = mapInstance.project([lat, lng], targetZoom)
+    const targetPoint = L.point(point.x, point.y + 60)
+    const targetLatLng = mapInstance.unproject(targetPoint, targetZoom)
+
+    mapInstance.flyTo(targetLatLng, targetZoom, {
       animate: true,
       duration: 0.8,
     })
