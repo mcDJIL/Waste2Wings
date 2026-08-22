@@ -197,12 +197,7 @@ export default function MapPage() {
     mapInstance.invalidateSize()
     const targetZoom = Math.max(mapInstance.getZoom(), 15)
 
-    // Project coordinates and apply offset so marker + popup card sit in vertical center
-    const point = mapInstance.project([lat, lng], targetZoom)
-    const targetPoint = L.point(point.x, point.y + 150)
-    const targetLatLng = mapInstance.unproject(targetPoint, targetZoom)
-
-    mapInstance.flyTo(targetLatLng, targetZoom, {
+    mapInstance.flyTo([lat, lng], targetZoom, {
       animate: true,
       duration: 0.8,
     })
@@ -239,7 +234,7 @@ export default function MapPage() {
         <main className="flex-1 flex flex-col lg:flex-row overflow-hidden relative" style={{ minHeight: 0 }}>
 
           {/* Map area */}
-          <div className="relative flex-1 min-h-[60vw] sm:min-h-[50vh] lg:min-h-0">
+          <div className="relative flex-1 h-[60vh] lg:h-auto lg:min-h-0">
             {mapReady && !isLoading && (
               <MapContainer
                 center={centerCoords}

@@ -362,12 +362,7 @@ export default function InteractiveMapPage() {
 
     mapInstance.invalidateSize()
     const targetZoom = Math.max(mapInstance.getZoom(), 15)
-
-    const point = mapInstance.project([lat, lng], targetZoom)
-    const targetPoint = L.point(point.x, point.y + 60)
-    const targetLatLng = mapInstance.unproject(targetPoint, targetZoom)
-
-    mapInstance.flyTo(targetLatLng, targetZoom, {
+    mapInstance.flyTo([lat, lng], targetZoom, {
       animate: true,
       duration: 0.8,
     })
@@ -454,7 +449,7 @@ export default function InteractiveMapPage() {
         <div className="flex-1 flex flex-col lg:block relative min-h-0">
 
           {/* Leaflet Map */}
-          <div className="relative min-h-[60vw] sm:min-h-[50vh] lg:absolute lg:inset-0">
+          <div className="relative h-[60vh] lg:h-auto lg:absolute lg:inset-0">
             <MapContainer
               center={[userLat, userLng]}
               zoom={13}
