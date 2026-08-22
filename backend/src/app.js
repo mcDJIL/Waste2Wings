@@ -1,11 +1,4 @@
-const cors = require('cors');
-const express = require('express');
-const helmet = require('helmet');
-
-const { notFoundHandler, errorHandler } = require('./middleware/error');
-const auditRoutes = require('./routes/audit.routes');
-const authRoutes = require('./routes/auth.routes');
-const cors = require('cors');
+﻿const cors = require('cors');
 const express = require('express');
 const helmet = require('helmet');
 
@@ -25,8 +18,41 @@ const { setupSwagger } = require('./swagger');
 
 const app = express();
 
-app.use(helmet());
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
+// Configure Helmet for Cross-Origin Resource Sharing
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginOpenerPolicy: false,
+  })
+);
+
+// Robust CORS Middleware configuration (handles preflight OPTIONS & eepis domains)
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
+      : ['*'];
+
+    if (
+      allowedOrigins.includes('*') ||
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.eepis.web.id')
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
 app.use(express.json());
 
 setupSwagger(app);
