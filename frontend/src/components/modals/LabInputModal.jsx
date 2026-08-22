@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import api from '../../services/api'
+import { useAuth } from '../../contexts/AuthContext'
 
 const CloseIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -9,6 +10,8 @@ const CloseIcon = () => (
 )
 
 export default function LabInputModal({ isOpen, batchId, onClose, onSuccess }) {
+  const { user } = useAuth()
+  const isLabTech = user?.role === 'LAB_TECHNICIAN'
   const [formData, setFormData] = useState({
     waterContentPercent: '',
     ffaPercent: '',
@@ -164,9 +167,9 @@ export default function LabInputModal({ isOpen, batchId, onClose, onSuccess }) {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full px-4 py-2.5 rounded-lg bg-[#004536] text-white font-bold text-sm transition-all duration-200 hover:bg-[#006C49] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+              className="w-full px-4 py-3 rounded-xl bg-[#004536] text-white font-bold text-sm transition-all duration-200 hover:bg-[#006C49] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 shadow-md flex items-center justify-center gap-2"
             >
-              {isLoading ? 'Mengirim...' : 'Kirim Hasil Lab'}
+              {isLoading ? 'Mengirim...' : isLabTech ? '💾 Simpan Data Uji' : 'Kirim Hasil Lab'}
             </button>
           </form>
         </div>

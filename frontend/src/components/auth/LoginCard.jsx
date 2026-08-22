@@ -93,6 +93,8 @@ export default function LoginCard() {
         navigate('/collector/dashboard')
       } else if (role === 'STAKEHOLDER') {
         navigate('/stakeholder/dashboard')
+      } else if (role === 'LAB_TECHNICIAN') {
+        navigate('/lab/dashboard')
       } else {
         navigate('/')
       }

@@ -24,6 +24,7 @@ import StakeholderSettingsPage from '../pages/stakeholder/SettingsPage'
 import PriceReferencePage from '../pages/stakeholder/PriceReferencePage'
 import AuditLogPage from '../pages/stakeholder/AuditLogPage'
 import TraceabilityPage from '../pages/public/TraceabilityPage'
+import LabTechnicianDashboardPage from '../pages/lab/LabTechnicianDashboardPage'
 
 export default function Router() {
   return (
@@ -36,6 +37,9 @@ export default function Router() {
       {/* Public Traceability Passport Routes (No Auth Required) */}
       <Route path="/trace/:code" element={<TraceabilityPage />} />
       <Route path="/traceability" element={<TraceabilityPage />} />
+
+      {/* Lab Technician Routes */}
+      <Route path="/lab/dashboard" element={<RoleBasedRoute element={<LabTechnicianDashboardPage />} allowedRoles={['LAB_TECHNICIAN']} />} />
 
       {/* Community Routes */}
       <Route path="/community/dashboard" element={<RoleBasedRoute element={<CommunityDashboardPage />} allowedRoles={['COMMUNITY']} />} />

@@ -111,7 +111,7 @@ const labParamsSchema = z.object({
 router.post(
   '/batches/:batchId/lab-results',
   authenticate,
-  authorize(ROLES.STAKEHOLDER),
+  authorize(ROLES.STAKEHOLDER, ROLES.LAB_TECHNICIAN),
   validate(createLabSchema),
   createLabResult,
 );
@@ -153,7 +153,7 @@ router.get('/batches/:batchId/lab-results', authenticate, validate(batchParamsSc
 router.patch(
   '/lab-results/:id',
   authenticate,
-  authorize(ROLES.STAKEHOLDER),
+  authorize(ROLES.STAKEHOLDER, ROLES.LAB_TECHNICIAN),
   validate(updateLabSchema),
   updateLabResult,
 );
