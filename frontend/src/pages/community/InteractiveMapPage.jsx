@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -93,7 +93,12 @@ const PinNavIcon = () => (
 
 function ZoomController({ onReady }) {
   const map = useMap()
-  useEffect(() => { onReady(map) }, [map, onReady])
+  useEffect(() => {
+    onReady(map)
+    setTimeout(() => {
+      map.invalidateSize()
+    }, 200)
+  }, [map, onReady])
   return null
 }
 
@@ -330,6 +335,8 @@ export default function InteractiveMapPage() {
   const [userLng, setUserLng] = useState(106.8106)
   const [userName, setUserName] = useState('')
 
+  const markerRefs = useRef({})
+
   const handleMapReady = useCallback((map) => setMapInstance(map), [])
 
   const focusCollectorOnMap = useCallback((collector) => {
@@ -340,6 +347,7 @@ export default function InteractiveMapPage() {
 
     if (Number.isNaN(lat) || Number.isNaN(lng)) return
 
+    mapInstance.invalidateSize()
     const targetZoom = Math.max(mapInstance.getZoom(), 15)
     mapInstance.flyTo([lat, lng], targetZoom, {
       animate: true,
@@ -353,6 +361,13 @@ export default function InteractiveMapPage() {
     if (selectedCollector) {
       focusCollectorOnMap(selectedCollector)
     }
+
+    setTimeout(() => {
+      const markerInstance = markerRefs.current[collectorId]
+      if (markerInstance) {
+        markerInstance.openPopup()
+      }
+    }, 150)
   }, [collectors, focusCollectorOnMap])
 
   // Fetch user profile to get latest lat/lng from API
@@ -471,6 +486,13 @@ export default function InteractiveMapPage() {
               {filteredCollectors.map((collector) => (
                 <Marker
                   key={collector.id}
+                  ref={(ref) => {
+                    if (ref) {
+                      markerRefs.current[collector.id] = ref
+                    } else {
+                      delete markerRefs.current[collector.id]
+                    }
+                  }}
                   position={[collector.latitude, collector.longitude]}
                   icon={createMapPin(selectedCollectorId === collector.id ? 'green' : 'blue', collector.companyName.substring(0, 3))}
                   eventHandlers={{
@@ -480,7 +502,7 @@ export default function InteractiveMapPage() {
                     },
                   }}
                 >
-                  <Popup>
+                  <Popup autoPan={false}>
                     <div className="min-w-[260px] p-3 bg-white rounded-lg">
                       <div className="flex items-start gap-2.5 mb-3">
                         <div className="w-9 h-9 rounded-full bg-[#DBEAFE] flex items-center justify-center flex-shrink-0">

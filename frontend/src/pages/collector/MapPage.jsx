@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -67,6 +67,9 @@ function MapReadyHandler({ onReady }) {
 
   useEffect(() => {
     onReady?.(map)
+    setTimeout(() => {
+      map.invalidateSize()
+    }, 200)
   }, [map, onReady])
 
   return null
@@ -81,6 +84,8 @@ export default function MapPage() {
   const [centerCoords, setCenterCoords] = useState([-7.257, 112.739])
   const [mapInstance, setMapInstance] = useState(null)
   const [selectedCommunityId, setSelectedCommunityId] = useState(null)
+
+  const markerRefs = useRef({})
 
   useEffect(() => {
     const t = setTimeout(() => setMapReady(true), 100)
@@ -122,6 +127,7 @@ export default function MapPage() {
     // Collector location
     if (mapData?.collector) {
       points.push({
+        id: 'collector-self',
         type: 'collector',
         icon: () => createPin('#004536'),
         pos: [mapData.collector.latitude, mapData.collector.longitude],
@@ -131,6 +137,7 @@ export default function MapPage() {
 
     if (mapData?.henReceptionLocation) {
       points.push({
+        id: 'hen-location',
         type: 'hen',
         icon: () => createPin('#BA1A1A'),
         pos: [mapData.henReceptionLocation.latitude, mapData.henReceptionLocation.longitude],
@@ -174,6 +181,7 @@ export default function MapPage() {
     const lng = Number(community.longitude)
     if (Number.isNaN(lat) || Number.isNaN(lng)) return
 
+    mapInstance.invalidateSize()
     const targetZoom = Math.max(mapInstance.getZoom(), 15)
     mapInstance.flyTo([lat, lng], targetZoom, {
       animate: true,
@@ -185,6 +193,13 @@ export default function MapPage() {
     if (!community?.id) return
     setSelectedCommunityId(community.id)
     focusCommunityOnMap(community)
+
+    setTimeout(() => {
+      const markerInstance = markerRefs.current[community.id]
+      if (markerInstance) {
+        markerInstance.openPopup()
+      }
+    }, 150)
   }
 
   return (
@@ -218,7 +233,14 @@ export default function MapPage() {
 
                 {mapPoints.map((point, i) => (
                   <Marker
-                    key={i}
+                    key={point.id || i}
+                    ref={(ref) => {
+                      if (point.id && ref) {
+                        markerRefs.current[point.id] = ref
+                      } else if (point.id) {
+                        delete markerRefs.current[point.id]
+                      }
+                    }}
                     position={point.pos}
                     icon={point.icon()}
                     eventHandlers={point.type === 'community'
@@ -235,7 +257,7 @@ export default function MapPage() {
                         }
                       : undefined}
                   >
-                    <Popup>
+                    <Popup autoPan={false}>
                       <div className="min-w-[200px] p-3 bg-white rounded-lg">
                         <div className="flex items-start gap-2">
                           {point.type === 'community' && (
