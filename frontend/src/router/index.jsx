@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+﻿import { Routes, Route } from 'react-router-dom'
 import { ProtectedRoute, RoleBasedRoute } from './ProtectedRoute'
 
 import LandingPage from '../pages/landing/LandingPage'
@@ -23,6 +23,7 @@ import CollectorSettingsPage from '../pages/collector/SettingsPage'
 import StakeholderSettingsPage from '../pages/stakeholder/SettingsPage'
 import PriceReferencePage from '../pages/stakeholder/PriceReferencePage'
 import AuditLogPage from '../pages/stakeholder/AuditLogPage'
+import TraceabilityPage from '../pages/public/TraceabilityPage'
 
 export default function Router() {
   return (
@@ -31,6 +32,10 @@ export default function Router() {
       <Route path="/login" element={<AuthPage />} />
       <Route path="/register" element={<AuthPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+      {/* Public Traceability Passport Routes (No Auth Required) */}
+      <Route path="/trace/:code" element={<TraceabilityPage />} />
+      <Route path="/traceability" element={<TraceabilityPage />} />
 
       {/* Community Routes */}
       <Route path="/community/dashboard" element={<RoleBasedRoute element={<CommunityDashboardPage />} allowedRoles={['COMMUNITY']} />} />

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import api from '../../services/api'
+import QRCodeModal from './QRCodeModal'
 
 const CloseIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -35,6 +36,7 @@ export default function SubmissionDetailModal({ isOpen, submissionId, onClose })
   const [submission, setSubmission] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showQrModal, setShowQrModal] = useState(false)
 
   useEffect(() => {
     if (isOpen && submissionId) {
@@ -207,19 +209,28 @@ export default function SubmissionDetailModal({ isOpen, submissionId, onClose })
                 </div>
               )}
 
-              {/* Notes */}
-              {submission.collectorNote && (
-                <div>
-                  <h3 className="text-xs font-bold uppercase text-[#3F4945] tracking-wide mb-2">Catatan</h3>
-                  <p className="text-sm text-[#3F4945] bg-[#FEF3C7]/50 p-3 rounded-lg border border-[#E4C285]/30">
-                    {submission.collectorNote}
-                  </p>
-                </div>
-              )}
+              {/* QR Code Button */}
+              <div className="pt-2">
+                <button
+                  onClick={() => setShowQrModal(true)}
+                  className="w-full py-3 px-4 rounded-xl bg-[#004536] text-white text-xs font-bold hover:bg-[#00382D] transition-colors flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <span>📱</span>
+                  <span>Tampilkan QR Code Traceability</span>
+                </button>
+              </div>
             </div>
           ) : null}
         </div>
       </div>
+
+      <QRCodeModal
+        isOpen={showQrModal}
+        code={submission?.id}
+        title="QR Code Setoran Murni"
+        subtitle={`Setoran Minyak Jelantah #${submission?.id}`}
+        onClose={() => setShowQrModal(false)}
+      />
     </div>
   )
 

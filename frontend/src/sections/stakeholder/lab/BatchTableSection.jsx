@@ -1,6 +1,7 @@
-﻿import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import LabInputModal from '../../../components/modals/LabInputModal'
 import LabResultsModal from '../../../components/modals/LabResultsModal'
+import QRCodeModal from '../../../components/modals/QRCodeModal'
 
 const PAGE_SIZE = 10
 const FILTER_TABS = ['All', 'LAB_REVIEW', 'ACCEPTED_BY_STAKEHOLDER']
@@ -141,7 +142,15 @@ export default function BatchTableSection({ batches = [], selectedBatchId, onSel
   const [inputModalOpen, setInputModalOpen] = useState(false)
   const [resultsModalOpen, setResultsModalOpen] = useState(false)
   const [selectedBatchForModal, setSelectedBatchForModal] = useState(null)
+  const [qrModalOpen, setQrModalOpen] = useState(false)
+  const [qrCodeValue, setQrCodeValue] = useState('')
   const detailRef = useRef(null)
+
+  const handleQrClick = (e, code) => {
+    e.stopPropagation()
+    setQrCodeValue(code)
+    setQrModalOpen(true)
+  }
 
   const handleActionClick = (e, batch) => {
     e.stopPropagation()
@@ -313,13 +322,22 @@ export default function BatchTableSection({ batches = [], selectedBatchId, onSel
                         </span>
                       </td>
                       <td className="px-6 py-5 text-right">
-                        <button
-                          onClick={(e) => handleActionClick(e, batch)}
-                          className="inline-flex items-center justify-center p-2 rounded-xl hover:bg-[#F1F5F9] transition-all duration-200 hover:scale-110 active:scale-95"
-                          title={hasLabResult ? 'Lihat Detail' : 'Input Hasil Lab'}
-                        >
-                          {!hasLabResult ? <BarChartIcon /> : <ChevronIcon expanded={isSelected} />}
-                        </button>
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={(e) => handleQrClick(e, batch.batchCode)}
+                            className="inline-flex items-center justify-center p-2 rounded-xl border border-[#E2E8F0] hover:bg-[#004B3C]/10 text-[#004B3C] text-xs font-bold transition-all duration-200"
+                            title="Tampilkan QR Code Traceability"
+                          >
+                            📱 QR
+                          </button>
+                          <button
+                            onClick={(e) => handleActionClick(e, batch)}
+                            className="inline-flex items-center justify-center p-2 rounded-xl hover:bg-[#F1F5F9] transition-all duration-200 hover:scale-110 active:scale-95"
+                            title={hasLabResult ? 'Lihat Detail' : 'Input Hasil Lab'}
+                          >
+                            {!hasLabResult ? <BarChartIcon /> : <ChevronIcon expanded={isSelected} />}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
@@ -428,6 +446,13 @@ export default function BatchTableSection({ batches = [], selectedBatchId, onSel
         batch={selectedBatchForModal}
         onClose={handleModalClose}
         onSuccess={handleSuccess}
+      />
+      <QRCodeModal
+        isOpen={qrModalOpen}
+        code={qrCodeValue}
+        title="Batch Traceability QR Tag"
+        subtitle={`Batch Pengiriman Pengepul #${qrCodeValue}`}
+        onClose={() => setQrModalOpen(false)}
       />
     </>
   )
