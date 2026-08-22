@@ -49,7 +49,7 @@ function TankGauge({ percent, capacity, current }) {
 
 
 
-export default function MapRightPanel({ mapData, className = '' }) {
+export default function MapRightPanel({ mapData, className = '', selectedCommunityId = null, onCommunitySelect }) {
   const stats = useMemo(() => {
     if (!mapData?.collector) return { percent: 0, current: 0, capacity: 0 }
 
@@ -91,9 +91,14 @@ export default function MapRightPanel({ mapData, className = '' }) {
             {communityList.map((community, i) => (
               <div
                 key={community.id}
-                className="flex flex-col px-3 py-3 rounded-xl
-                  border border-[rgba(190,201,195,0.30)] bg-[#FAF9F6]
+                onClick={() => onCommunitySelect?.(community)}
+                className={`flex flex-col px-3 py-3 rounded-xl
+                  border bg-[#FAF9F6]
                   animate-fade-in"
+                  ${selectedCommunityId === community.id
+                    ? 'border-[#006C49] bg-[#EAF7F1] shadow-sm'
+                    : 'border-[rgba(190,201,195,0.30)] hover:bg-[#F4F8F6]'}
+                  ${onCommunitySelect ? 'cursor-pointer transition-colors duration-200' : ''}`}
                 style={{ animationDelay: `${i * 60}ms` }}
               >
                 <span className="text-[#051C37] text-sm font-semibold leading-5 truncate">

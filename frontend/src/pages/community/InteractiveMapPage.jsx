@@ -332,6 +332,29 @@ export default function InteractiveMapPage() {
 
   const handleMapReady = useCallback((map) => setMapInstance(map), [])
 
+  const focusCollectorOnMap = useCallback((collector) => {
+    if (!collector || !mapInstance) return
+
+    const lat = Number(collector.latitude)
+    const lng = Number(collector.longitude)
+
+    if (Number.isNaN(lat) || Number.isNaN(lng)) return
+
+    const targetZoom = Math.max(mapInstance.getZoom(), 15)
+    mapInstance.flyTo([lat, lng], targetZoom, {
+      animate: true,
+      duration: 0.8,
+    })
+  }, [mapInstance])
+
+  const handleCollectorSelect = useCallback((collectorId) => {
+    setSelectedCollectorId(collectorId)
+    const selectedCollector = collectors.find((collector) => collector.id === collectorId)
+    if (selectedCollector) {
+      focusCollectorOnMap(selectedCollector)
+    }
+  }, [collectors, focusCollectorOnMap])
+
   // Fetch user profile to get latest lat/lng from API
   useEffect(() => {
     const fetchUserLocation = async () => {
@@ -451,7 +474,10 @@ export default function InteractiveMapPage() {
                   position={[collector.latitude, collector.longitude]}
                   icon={createMapPin(selectedCollectorId === collector.id ? 'green' : 'blue', collector.companyName.substring(0, 3))}
                   eventHandlers={{
-                    click: () => setSelectedCollectorId(collector.id),
+                    click: () => {
+                      setSelectedCollectorId(collector.id)
+                      focusCollectorOnMap(collector)
+                    },
                   }}
                 >
                   <Popup>
@@ -511,7 +537,7 @@ export default function InteractiveMapPage() {
               collectors={filteredCollectors}
               isLoading={isLoading}
               selectedCollectorId={selectedCollectorId}
-              onCollectorSelect={setSelectedCollectorId}
+              onCollectorSelect={handleCollectorSelect}
               searchQuery={searchQuery}
             />
           </div>

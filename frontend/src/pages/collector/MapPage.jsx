@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { useState, useEffect, useMemo } from 'react'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import api from '../../services/api'
@@ -62,6 +62,16 @@ const createUserDot = () => L.divIcon({
   </div>`,
 })
 
+function MapReadyHandler({ onReady }) {
+  const map = useMap()
+
+  useEffect(() => {
+    onReady?.(map)
+  }, [map, onReady])
+
+  return null
+}
+
 export default function MapPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [panelOpen, setPanelOpen] = useState(false)
@@ -69,6 +79,8 @@ export default function MapPage() {
   const [mapData, setMapData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [centerCoords, setCenterCoords] = useState([-7.257, 112.739])
+  const [mapInstance, setMapInstance] = useState(null)
+  const [selectedCommunityId, setSelectedCommunityId] = useState(null)
 
   useEffect(() => {
     const t = setTimeout(() => setMapReady(true), 100)
@@ -130,6 +142,7 @@ export default function MapPage() {
     if (mapData?.communityMarkers && Array.isArray(mapData.communityMarkers)) {
       mapData.communityMarkers.forEach((marker) => {
         points.push({
+          id: marker.id,
           type: 'community',
           icon: createUserDot,
           pos: [marker.latitude, marker.longitude],
@@ -142,6 +155,37 @@ export default function MapPage() {
   }
 
   const mapPoints = buildMapPoints()
+
+  const communityLookup = useMemo(() => {
+    const map = new Map()
+    const markers = mapData?.communityMarkers || []
+
+    markers.forEach((community) => {
+      map.set(community.id, community)
+    })
+
+    return map
+  }, [mapData])
+
+  const focusCommunityOnMap = (community) => {
+    if (!community || !mapInstance) return
+
+    const lat = Number(community.latitude)
+    const lng = Number(community.longitude)
+    if (Number.isNaN(lat) || Number.isNaN(lng)) return
+
+    const targetZoom = Math.max(mapInstance.getZoom(), 15)
+    mapInstance.flyTo([lat, lng], targetZoom, {
+      animate: true,
+      duration: 0.8,
+    })
+  }
+
+  const handleCommunitySelect = (community) => {
+    if (!community?.id) return
+    setSelectedCommunityId(community.id)
+    focusCommunityOnMap(community)
+  }
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] flex">
@@ -166,6 +210,7 @@ export default function MapPage() {
                 style={{ minHeight: '100%' }}
                 zoomControl={true}
               >
+                <MapReadyHandler onReady={setMapInstance} />
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -176,6 +221,19 @@ export default function MapPage() {
                     key={i}
                     position={point.pos}
                     icon={point.icon()}
+                    eventHandlers={point.type === 'community'
+                      ? {
+                          click: () => {
+                            const matched = point.id ? communityLookup.get(point.id) : null
+                            if (matched?.id) {
+                              setSelectedCommunityId(matched.id)
+                            }
+                            if (matched) {
+                              focusCommunityOnMap(matched)
+                            }
+                          },
+                        }
+                      : undefined}
                   >
                     <Popup>
                       <div className="min-w-[200px] p-3 bg-white rounded-lg">
@@ -243,7 +301,11 @@ export default function MapPage() {
             transition-all duration-300 ease-in-out
             ${panelOpen ? 'flex' : 'hidden'}
           `}>
-            <MapRightPanel mapData={mapData} />
+            <MapRightPanel
+              mapData={mapData}
+              selectedCommunityId={selectedCommunityId}
+              onCommunitySelect={handleCommunitySelect}
+            />
           </div>
         </main>
 
