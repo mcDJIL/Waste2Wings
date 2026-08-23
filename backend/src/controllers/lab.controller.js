@@ -116,6 +116,11 @@ async function updateLabResult(req, res, next) {
         },
       });
 
+      await tx.collectorBatch.update({
+        where: { id: labResult.batchId },
+        data: { status: BATCH_STATUS.LAB_REVIEW },
+      });
+
       await writeAuditLog(tx, {
         req,
         actorId: req.user.id,
