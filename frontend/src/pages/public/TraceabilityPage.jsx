@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import QRCodeModal from '../../components/modals/QRCodeModal'
@@ -192,22 +192,40 @@ export default function TraceabilityPage() {
                       </span>
                     )}
                   </div>
-                  <div className="p-4 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    <div>
-                      <p className="text-gray-400 font-semibold uppercase text-[10px]">Penyetor</p>
-                      <p className="font-bold text-[#1E293B] text-sm">{data.step1_community?.communityName || 'Masyarakat'}</p>
-                      <p className="text-gray-500">{data.step1_community?.address}</p>
+                  {data.step1_communitySubmissions && data.step1_communitySubmissions.length > 0 ? (
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {data.step1_communitySubmissions.map((sub, idx) => (
+                        <div key={sub.submissionId || idx} className="p-3 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                          <div>
+                            <span className="font-mono font-bold text-[#004B3C] text-xs block">{sub.trxCode}</span>
+                            <p className="font-bold text-[#1E293B] text-xs">{sub.communityName || 'Masyarakat'}</p>
+                            {sub.address && <p className="text-gray-500 text-[11px]">{sub.address}</p>}
+                          </div>
+                          <div className="sm:text-right">
+                            <p className="text-gray-400 font-semibold uppercase text-[10px]">Volume Setoran</p>
+                            <p className="font-extrabold text-[#004B3C] text-sm">{sub.cleanLiter || sub.estimatedLiter || 0} Liter</p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div>
-                      <p className="text-gray-400 font-semibold uppercase text-[10px]">Volume Estimasi</p>
-                      <p className="font-extrabold text-[#004B3C] text-sm">{data.step1_community?.estimatedLiter} Liter</p>
-                      {data.step1_community?.latitude && (
-                        <p className="text-gray-500 font-mono text-[11px] mt-1">
-                          📍 GPS: {data.step1_community.latitude.toFixed(4)}, {data.step1_community.longitude.toFixed(4)}
-                        </p>
-                      )}
+                  ) : (
+                    <div className="p-4 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      <div>
+                        <p className="text-gray-400 font-semibold uppercase text-[10px]">Penyetor</p>
+                        <p className="font-bold text-[#1E293B] text-sm">{data.step1_community?.communityName || 'Masyarakat'}</p>
+                        <p className="text-gray-500">{data.step1_community?.address}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400 font-semibold uppercase text-[10px]">Volume Estimasi</p>
+                        <p className="font-extrabold text-[#004B3C] text-sm">{data.step1_community?.estimatedLiter || data.totalVolumeLiter || 0} Liter</p>
+                        {data.step1_community?.latitude && (
+                          <p className="text-gray-500 font-mono text-[11px] mt-1">
+                            📍 GPS: {data.step1_community.latitude.toFixed(4)}, {data.step1_community.longitude.toFixed(4)}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
@@ -315,7 +333,7 @@ export default function TraceabilityPage() {
                       Step 4: Produksi Avtur (Sustainable Aviation Fuel)
                     </span>
                   </div>
-                  {data.step4_safProduction ? (
+                  {data.status === 'ACCEPTED_BY_STAKEHOLDER' && data.step4_safProduction ? (
                     <div className="p-5 rounded-2xl bg-gradient-to-br from-[#004B3C] to-[#051C37] text-white shadow-lg flex flex-col gap-3">
                       <div className="flex justify-between items-start">
                         <div>
@@ -323,12 +341,12 @@ export default function TraceabilityPage() {
                           <h4 className="text-lg font-extrabold text-white">{data.step4_safProduction.product}</h4>
                         </div>
                         <span className="px-3 py-1 rounded-full bg-[#81F9C1] text-[#004B3C] font-extrabold text-xs">
-                          READY / LULUS SAF
+                          ✅ READY / LULUS SAF
                         </span>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-white/10 text-xs text-white/80">
                         <div>
-                          <span>Estimasi Output Bio-Avtur:</span>
+                          <span>Output Bio-Avtur Terverifikasi:</span>
                           <p className="text-base font-extrabold text-[#81F9C1]">
                             {data.step4_safProduction.avturOutputLiter || data.step4_safProduction.estAvturOutputLiter} Liter
                           </p>
@@ -341,9 +359,19 @@ export default function TraceabilityPage() {
                         </div>
                       </div>
                     </div>
+                  ) : data.status === 'REJECTED_BY_STAKEHOLDER' || data.step3_labResult?.grade === 'REJECT' ? (
+                    <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center justify-between">
+                      <div>
+                        <span className="font-extrabold block text-sm">❌ DITOLAK / TIDAK MEMENUHI STANDAR SAF</span>
+                        <p className="text-[11px] text-rose-700 mt-0.5">Batch minyak ini ditolak karena tidak memenuhi kriteria mutu pengolahan Avtur.</p>
+                      </div>
+                    </div>
                   ) : (
-                    <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 text-gray-600 text-xs font-semibold">
-                      ⌛ Menunggu Penyelesaian Uji Lab & Pengolahan Refinery
+                    <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold flex items-center justify-between">
+                      <div>
+                        <span className="font-extrabold block text-sm">⏳ BELUM BERSERTIFIKAT SAF</span>
+                        <p className="text-[11px] text-amber-700 mt-0.5">Minyak jelantah masih dalam tahap pengujian lab / verifikasi stakeholder. Bio-Avtur baru diproduksi setelah verifikasi disetujui.</p>
+                      </div>
                     </div>
                   )}
                 </div>

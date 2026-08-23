@@ -178,7 +178,7 @@ export default function LabInputModal({ isOpen, batchId, onClose, onSuccess }) {
               </span>
             </div>
             <h2 className="text-xl font-extrabold text-white">
-              {hasLabResult && !isEditMode ? 'Detail Hasil Uji Lab' : hasLabResult ? 'Edit Data Uji Lab (Audit Trail)' : 'Input Hasil Uji Lab'}
+              {hasLabResult && !isEditMode ? 'Detail Hasil Uji Lab' : hasLabResult ? 'Edit Data Uji Lab' : 'Input Hasil Uji Lab'}
             </h2>
           </div>
           <button
@@ -431,7 +431,7 @@ export default function LabInputModal({ isOpen, batchId, onClose, onSuccess }) {
                   {isLoading
                     ? 'Menyimpan Data...'
                     : hasLabResult
-                    ? '💾 Simpan Perubahan (Audit Logged)'
+                    ? '💾 Simpan Perubahan'
                     : '🧪 Simpan Hasil Uji Lab'}
                 </button>
               </div>

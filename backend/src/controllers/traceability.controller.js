@@ -1,4 +1,4 @@
-﻿const prisma = require("../prismaClient");
+const prisma = require("../prismaClient");
 
 /**
  * Public Traceability Lookup
@@ -161,13 +161,15 @@ async function getTraceabilityByCode(req, res, next) {
 
     const submissionsList = batch.items.map((item) => ({
       submissionId: item.submission.id,
-      communityName: item.submission.communityProfile?.user?.name || "Komunitas",
-      category: item.submission.communityProfile?.category,
-      address: item.submission.communityProfile?.address,
+      trxCode: item.submission.trxCode || `TRX-${item.submission.id.slice(-8)}`,
+      communityName: item.submission.communityProfile?.user?.name || "Masyarakat",
+      category: item.submission.communityProfile?.category || "HOUSEHOLD",
+      address: item.submission.communityProfile?.address || "-",
       latitude: item.submission.communityProfile?.latitude,
       longitude: item.submission.communityProfile?.longitude,
-      estimatedLiter: item.submission.estimatedLiter,
-      cleanLiter: item.submission.cleanLiter,
+      estimatedLiter: item.cleanLiterAllocated || item.submission.cleanLiter || item.submission.actualLiter || item.submission.estimatedLiter || 0,
+      cleanLiter: item.cleanLiterAllocated || item.submission.cleanLiter || item.submission.actualLiter || 0,
+      sedimentLiter: item.submission.sedimentLiter || 0,
       createdAt: item.submission.createdAt,
     }));
 
@@ -205,10 +207,7 @@ async function getTraceabilityByCode(req, res, next) {
         co2OffsetKg: co2SavedKg,
         receptionFacility: batch.stakeholderSetting?.receptionLocationName || "Refinery Terminal",
         complianceStandard: "ISCC CORSIA Certified",
-      } : {
-        status: "IN_TESTING_OR_REVIEW",
-        product: "Raw Used Cooking Oil (UCO)",
-      },
+      } : null,
     });
 
   } catch (error) {
