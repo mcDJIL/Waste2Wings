@@ -1,7 +1,35 @@
 const prisma = require('../prismaClient');
 const { BATCH_STATUS, ROLES, SUBMISSION_STATUS } = require('../utils/status');
 
-const CO2_SAVED_KG_PER_LITER = 1.52;
+const SAF_LCA = {
+    ucoDensityKgPerLiter: 0.92, //TEMPORARY
+    hefaYield: 0.4883,
+    hefaLhvMjPerKg: 43.74,
+    fossilJetCiGPerMj: 91.2,
+    hefaCiGPerMj: 12.6,
+};
+
+function calculateCo2Saved(cleanLiter) {
+    const ucoMassKg =
+        cleanLiter * SAF_LCA.ucoDensityKgPerLiter;
+
+    const hefaMassKg =
+        ucoMassKg * SAF_LCA.hefaYield;
+
+    const hefaEnergyMj =
+        hefaMassKg * SAF_LCA.hefaLhvMjPerKg;
+
+    const avoidedEmissionG =
+        hefaEnergyMj *
+        (
+            SAF_LCA.fossilJetCiGPerMj -
+            SAF_LCA.hefaCiGPerMj
+        );
+
+    return Number(
+        (avoidedEmissionG / 1000).toFixed(2)
+    );
+}
 
 function getMonthKey(date) {
   return date.toISOString().slice(0, 7);
@@ -300,7 +328,7 @@ async function getCommunityDashboard(req, res, next) {
       summary: {
         totalSubmissions,
         totalCleanLiter: aggregate._sum.cleanLiter || 0,
-        co2SavedKg: (aggregate._sum.cleanLiter || 0) * CO2_SAVED_KG_PER_LITER,
+        co2SavedKg: calculateCo2Saved(aggregate._sum.cleanLiter || 0),
         totalEstimatedLiter: aggregate._sum.estimatedLiter || 0,
         totalPaid: aggregate._sum.totalPaid || 0,
         latestSubmission,

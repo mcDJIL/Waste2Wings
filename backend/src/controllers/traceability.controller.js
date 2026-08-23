@@ -1,4 +1,33 @@
 ﻿const prisma = require("../prismaClient");
+const SAF_LCA = {
+    ucoDensityKgPerLiter: 0.92, //TEMPORARY
+    hefaYield: 0.4883,
+    hefaLhvMjPerKg: 43.74,
+    fossilJetCiGPerMj: 91.2,
+    hefaCiGPerMj: 12.6,
+};
+
+function calculateCo2Saved(cleanLiter) {
+    const ucoMassKg =
+        cleanLiter * SAF_LCA.ucoDensityKgPerLiter;
+
+    const hefaMassKg =
+        ucoMassKg * SAF_LCA.hefaYield;
+
+    const hefaEnergyMj =
+        hefaMassKg * SAF_LCA.hefaLhvMjPerKg;
+
+    const avoidedEmissionG =
+        hefaEnergyMj *
+        (
+            SAF_LCA.fossilJetCiGPerMj -
+            SAF_LCA.hefaCiGPerMj
+        );
+
+    return Number(
+        (avoidedEmissionG / 1000).toFixed(2)
+    );
+}
 
 /**
  * Public Traceability Lookup
@@ -107,7 +136,7 @@ async function getTraceabilityByCode(req, res, next) {
       // If submission exists, construct response centered around this submission
       const parentBatch = submission.batchItems[0]?.batch || null;
       const cleanLiter = submission.cleanLiter || submission.actualLiter || submission.estimatedLiter;
-      const co2SavedKg = Number((cleanLiter * 2.85).toFixed(2)); // Standard SAF carbon reduction multiplier
+        const co2SavedKg = calculateCo2Saved(cleanLiter);
 
       return res.json({
         traceabilityType: "SUBMISSION",
@@ -156,7 +185,7 @@ async function getTraceabilityByCode(req, res, next) {
 
     // Calculate aggregate metrics for the batch
     const totalVolume = batch.finalLiter || batch.totalCleanLiter;
-    const co2SavedKg = Number((totalVolume * 2.85).toFixed(2));
+    const co2SavedKg = calculateCo2Saved(totalVolume);
     const safOutputLiter = Number((totalVolume * 0.88).toFixed(2));
 
     const submissionsList = batch.items.map((item) => ({
