@@ -183,7 +183,11 @@ export default function LabTechnicianDashboardPage() {
                   ))
                 ) : filteredBatches.length > 0 ? (
                   filteredBatches.map((batch) => (
-                    <tr key={batch.id} className="border-t border-[#F1F5F9] hover:bg-[#F8FAFC] transition-colors">
+                    <tr
+                      key={batch.id}
+                      onClick={() => handleOpenInputModal(batch.id)}
+                      className="border-t border-[#F1F5F9] hover:bg-[#F8FAFC] transition-colors cursor-pointer"
+                    >
                       <td className="px-6 py-4">
                         <span className="font-mono text-sm font-extrabold text-[#004B3C] block">{batch.batchCode}</span>
                         <span className="text-[11px] text-gray-400">
@@ -198,11 +202,11 @@ export default function LabTechnicianDashboardPage() {
                       </td>
                       <td className="px-6 py-4">
                         {batch.labResult ? (
-                          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap inline-flex items-center gap-1">
                             ✅ Selesai Diuji
                           </span>
                         ) : (
-                          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap inline-flex items-center gap-1">
                             ⏳ Menunggu Uji
                           </span>
                         )}
@@ -211,7 +215,9 @@ export default function LabTechnicianDashboardPage() {
                         {batch.labResult ? (
                           <div className="text-xs space-y-0.5">
                             <p className="font-extrabold text-[#004B3C]">GRADE {batch.labResult.grade}</p>
-                            <p className="text-gray-500">Air: {batch.labResult.waterContentPercent}% | FFA: {batch.labResult.ffaPercent}%</p>
+                            <p className="text-gray-500">
+                              Air: {Number(batch.labResult.waterContentPercent).toFixed(1)}% | FFA: {Number(batch.labResult.ffaPercent).toFixed(1)}%
+                            </p>
                           </div>
                         ) : (
                           <span className="text-xs text-gray-400 italic">Belum diinput</span>
@@ -220,17 +226,23 @@ export default function LabTechnicianDashboardPage() {
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={() => handleOpenQrModal(batch.batchCode)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleOpenQrModal(batch.batchCode)
+                            }}
                             className="px-3 py-1.5 rounded-xl border border-[#E2E8F0] text-xs font-bold hover:bg-[#F1F5F9] transition-colors"
                             title="QR Code Tag"
                           >
                             📱 QR
                           </button>
                           <button
-                            onClick={() => handleOpenInputModal(batch.id)}
-                            className="px-4 py-2 rounded-xl bg-[#004B3C] text-white text-xs font-bold hover:bg-[#00382D] transition-colors shadow-sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleOpenInputModal(batch.id)
+                            }}
+                            className="px-4 py-2 rounded-xl bg-[#004B3C] text-white text-xs font-bold hover:bg-[#00382D] transition-colors shadow-sm whitespace-nowrap"
                           >
-                            {batch.labResult ? '📝 Edit Data Uji' : '🧪 Simpan Data Uji'}
+                            {batch.labResult ? '👁️ Detail' : '🧪 Input Data Lab'}
                           </button>
                         </div>
                       </td>

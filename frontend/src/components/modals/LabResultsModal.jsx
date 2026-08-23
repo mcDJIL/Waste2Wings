@@ -29,6 +29,7 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
   const [actionLoading, setActionLoading] = useState(null)
   const [error, setError] = useState('')
   const [note, setNote] = useState('')
+  const [isEditMode, setIsEditMode] = useState(false)
 
   const cleanLiterValue = batchData?.totalCleanLiter ?? batch?.totalCleanLiter ?? 0
 
@@ -51,11 +52,11 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
       setLabResult(labResultData)
       setBatchData(batchDataResponse)
 
-      if (labResultData?.stakeholderNote) {
-        setNote(labResultData.stakeholderNote)
-      } else if (batchDataResponse?.stakeholderNote) {
-        setNote(batchDataResponse.stakeholderNote)
-      }
+      const savedNote = labResultData?.stakeholderNote || batchDataResponse?.stakeholderNote || ''
+      setNote(savedNote)
+
+      const isVerified = ['ACCEPTED_BY_STAKEHOLDER', 'REJECTED_BY_STAKEHOLDER'].includes(batchDataResponse?.status)
+      setIsEditMode(!isVerified) // View mode if already verified, Edit mode if pending
     } catch (err) {
       console.error('Failed to load lab results:', err)
       setError('Gagal memuat hasil lab')
@@ -66,7 +67,7 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
 
   const handleAccept = async () => {
     if (!note.trim()) {
-      setError('Catatan penerimaan harus diisi')
+      setError('Alasan keputusan/perubahan verifikasi wajib diisi untuk audit trail')
       return
     }
 
@@ -91,7 +92,7 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
 
   const handleReject = async () => {
     if (!note.trim()) {
-      setError('Alasan penolakan harus diisi')
+      setError('Alasan keputusan/perubahan verifikasi wajib diisi untuk audit trail')
       return
     }
 
@@ -115,8 +116,8 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
 
   const radarData = useMemo(() => {
     if (!labResult) return []
-    const ffaLimit = 4.0
-    const moistureLimit = 2.0
+    const ffaLimit = 2.0
+    const moistureLimit = 0.5
     const impurityLimit = 1.0
 
     return [
@@ -139,6 +140,8 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
   }
 
   if (!isOpen) return null
+
+  const isVerified = ['ACCEPTED_BY_STAKEHOLDER', 'REJECTED_BY_STAKEHOLDER'].includes(batchData?.status)
 
   const modalContent = (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 animate-fade-in">
@@ -204,19 +207,19 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
                     <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
                       <span className="text-[10px] font-bold text-[#64748B] uppercase block">FREE FATTY ACID</span>
                       <span className="text-base font-extrabold text-[#004B3C] mt-1 block">{labResult.ffaPercent}%</span>
-                      <span className="text-[10px] text-gray-400">Limit: 4.0%</span>
+                      <span className="text-[10px] text-gray-400">A: &lt; 1% | B: 1-2% | C: &gt; 2%</span>
                     </div>
 
                     <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
                       <span className="text-[10px] font-bold text-[#64748B] uppercase block">MOISTURE CONTENT</span>
                       <span className="text-base font-extrabold text-[#004B3C] mt-1 block">{labResult.waterContentPercent}%</span>
-                      <span className="text-[10px] text-gray-400">Limit: 2.0%</span>
+                      <span className="text-[10px] text-gray-400">A: &lt; 0.2% | B: 0.2-0.5% | C: &gt; 0.5%</span>
                     </div>
 
                     <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
                       <span className="text-[10px] font-bold text-[#64748B] uppercase block">IMPURITIES</span>
                       <span className="text-base font-extrabold text-[#004B3C] mt-1 block">{labResult.impurityPercent}%</span>
-                      <span className="text-[10px] text-gray-400">Limit: 1.0%</span>
+                      <span className="text-[10px] text-gray-400">Standard: &le; 1.0%</span>
                     </div>
                   </div>
 
@@ -247,41 +250,80 @@ export default function LabResultsModal({ isOpen, batchId, batch, onClose, onSuc
               </div>
 
               {/* Stakeholder Verification Controls */}
-              <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-4">
-                <div>
-                  <label className="block text-xs font-extrabold uppercase text-[#004B3C] mb-1">
-                    📝 Catatan Keputusan Stakeholder *
-                  </label>
+              {isVerified && !isEditMode ? (
+                /* VERIFIED READ-ONLY VIEW MODE */
+                <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-extrabold uppercase text-[#004B3C]">
+                        📝 Status Keputusan Stakeholder
+                      </span>
+                      <p className="text-xs text-gray-500 mt-0.5">Batch ini telah memiliki keputusan verifikasi resmi.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditMode(true)}
+                      className="px-4 py-2 rounded-xl bg-amber-500 text-white font-extrabold text-xs hover:bg-amber-600 transition-colors shadow-sm flex items-center gap-1.5"
+                    >
+                      ✏️ Ubah Status Verifikasi
+                    </button>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-white border border-[#E2E8F0] text-xs space-y-2">
+                    <span className="font-bold text-gray-500 uppercase block">Catatan Keputusan Tercatat:</span>
+                    <p className="text-gray-800 font-semibold bg-[#F8FAFC] p-3 rounded-lg border border-[#E2E8F0] leading-relaxed">
+                      {note || '— Tidak ada catatan —'}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                /* EDIT / INPUT VERIFICATION MODE */
+                <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-extrabold uppercase text-[#004B3C]">
+                      📝 {isVerified ? 'Alasan Perubahan Status Verifikasi' : 'Catatan Keputusan Stakeholder'}
+                    </label>
+                    {isVerified && (
+                      <button
+                        type="button"
+                        onClick={() => setIsEditMode(false)}
+                        className="text-xs text-gray-500 font-bold hover:underline"
+                      >
+                        Batal
+                      </button>
+                    )}
+                  </div>
+
                   <textarea
                     value={note}
                     onChange={(e) => {
                       setNote(e.target.value)
                       if (error) setError('')
                     }}
-                    placeholder="Tuliskan catatan alasan penerimaan/penolakan batch ini..."
+                    placeholder={isVerified ? 'Wajib masukkan alasan mengapa status verifikasi batch ini diubah (dicatat di Audit Log)...' : 'Tuliskan catatan alasan penerimaan atau penolakan batch ini...'}
                     rows="3"
                     className="w-full px-4 py-2.5 rounded-xl border border-[#E2E8F0] bg-white text-sm outline-none focus:border-[#004B3C] focus:ring-2 focus:ring-[#004B3C]/10 transition-all"
                   />
-                  {error && <p className="text-xs font-bold text-red-600 mt-1">{error}</p>}
-                </div>
+                  {error && <p className="text-xs font-bold text-red-600">{error}</p>}
 
-                <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                  <button
-                    onClick={handleReject}
-                    disabled={actionLoading === 'reject' || !note.trim()}
-                    className="flex-1 py-3 px-4 rounded-xl bg-rose-100 text-rose-800 font-extrabold text-xs hover:bg-rose-200 transition-colors disabled:opacity-50"
-                  >
-                    {actionLoading === 'reject' ? 'Menolak...' : '❌ Tolak Batch Ini'}
-                  </button>
-                  <button
-                    onClick={handleAccept}
-                    disabled={actionLoading === 'accept' || !note.trim()}
-                    className="flex-1 py-3 px-4 rounded-xl bg-[#004B3C] text-white font-extrabold text-xs hover:bg-[#00382D] transition-colors disabled:opacity-50 shadow-md"
-                  >
-                    {actionLoading === 'accept' ? 'Memproses...' : '✅ Verifikasi & Terima Batch'}
-                  </button>
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                    <button
+                      onClick={handleReject}
+                      disabled={actionLoading === 'reject' || !note.trim()}
+                      className="flex-1 py-3 px-4 rounded-xl bg-rose-100 text-rose-800 font-extrabold text-xs hover:bg-rose-200 transition-colors disabled:opacity-50"
+                    >
+                      {actionLoading === 'reject' ? 'Menolak...' : '❌ Tolak Batch Ini'}
+                    </button>
+                    <button
+                      onClick={handleAccept}
+                      disabled={actionLoading === 'accept' || !note.trim()}
+                      className="flex-1 py-3 px-4 rounded-xl bg-[#004B3C] text-white font-extrabold text-xs hover:bg-[#00382D] transition-colors disabled:opacity-50 shadow-md"
+                    >
+                      {actionLoading === 'accept' ? 'Memproses...' : '✅ Verifikasi & Terima Batch'}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>

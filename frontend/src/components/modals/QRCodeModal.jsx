@@ -1,4 +1,5 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
+import { createPortal } from 'react-dom'
 
 /**
  * Reusable QR Code Modal Component
@@ -59,7 +60,7 @@ export default function QRCodeModal({ isOpen, code, title, subtitle, onClose }) 
     printWindow.document.close()
   }
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
       <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-[#E2E8F0] flex flex-col items-center text-center relative animate-fade-slide-up">
         {/* Close Button */}
@@ -116,4 +117,6 @@ export default function QRCodeModal({ isOpen, code, title, subtitle, onClose }) 
       </div>
     </div>
   )
+
+  return createPortal(modalContent, document.body)
 }
